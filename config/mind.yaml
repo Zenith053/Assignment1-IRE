@@ -1,0 +1,30 @@
+# MIND-small pipeline configuration.
+# Paths under `raw:` are relative to the raw data root (data/raw).
+dataset: mind
+language: en
+
+raw:
+  train_news: mind/MINDsmall_train/news.tsv
+  train_behaviors: mind/MINDsmall_train/behaviors.tsv
+  dev_news: mind/MINDsmall_dev/news.tsv
+  dev_behaviors: mind/MINDsmall_dev/behaviors.tsv
+
+# Declared capabilities: downstream code checks these instead of the dataset name,
+# so a missing field is reported as N/A rather than silently faked.
+capabilities:
+  has_body: false                # MIND-small ships a url, not article text
+  has_published_time: false      # no publication timestamp -> no freshness ablation
+  has_history_timestamps: false  # history is an ordered list only; use `position`
+  has_provided_embeddings: false # article vectors must be computed locally
+  has_session_id: false
+  has_multi_click: true          # ~27% of impressions have 2+ clicks
+
+text:
+  index_fields: [title, abstract]  # the text BM25 indexes; body is unavailable
+
+# Temporal split. The train file spans 11/09-11/14 and the dev file is 11/15,
+# so the dev file becomes the held-out test split (it still carries labels).
+split:
+  train: ["2019-11-09", "2019-11-12"]
+  val: ["2019-11-13", "2019-11-14"]
+  test_source: dev_file

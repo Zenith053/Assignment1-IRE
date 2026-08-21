@@ -1,0 +1,43 @@
+# EB-NeRD pipeline configuration.
+# Paths under `raw:` are relative to the raw data root (data/raw).
+# `{scale}` is substituted with the `scale:` value below, so demo -> small is a one-line change.
+dataset: ebnerd
+language: da
+scale: demo   # demo | small
+
+raw:
+  articles: ebnerd/ebnerd_{scale}/articles.parquet
+  train_behaviors: ebnerd/ebnerd_{scale}/train/behaviors.parquet
+  train_history: ebnerd/ebnerd_{scale}/train/history.parquet
+  val_behaviors: ebnerd/ebnerd_{scale}/validation/behaviors.parquet
+  val_history: ebnerd/ebnerd_{scale}/validation/history.parquet
+  document_vectors: ebnerd/Ekstra_Bladet_word2vec/Ekstra_Bladet_word2vec/document_vector.parquet
+
+# Declared capabilities: downstream code checks these instead of the dataset name.
+capabilities:
+  has_body: true
+  has_published_time: true       # enables the freshness-restricted retrieval ablation
+  has_history_timestamps: true
+  has_provided_embeddings: true  # word2vec document vectors, no local encoding needed
+  has_session_id: true
+  has_multi_click: true
+
+text:
+  index_fields: [title, abstract]  # body excluded so BM25 is comparable with MIND
+
+# Temporal split. Dates are read from the data at build time rather than hardcoded;
+# the last `val_days` of train/ become validation and validation/ becomes test.
+split:
+  val_days: 2
+  test_source: validation_dir
+
+# Columns that only exist after the click happened, or that aggregate the future.
+# Used by the Q9 anti-gaming ablation; never fed to a scorer by default.
+serving_time_unavailable:
+  - read_time
+  - scroll_percentage
+  - next_read_time
+  - next_scroll_percentage
+  - total_inviews
+  - total_pageviews
+  - total_read_time
