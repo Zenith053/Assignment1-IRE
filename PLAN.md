@@ -133,7 +133,7 @@ and must never branch on dataset name.
 | Entities | JSON with `Label` | `ner_clusters` | Both → `entities: list[str]` |
 | Body | **absent** in MIND-small | full `body` | Index `title + abstract` only, so BM25 is comparable across datasets |
 | `published_time` | **absent** | present | Capability flag (below) |
-| Clicks per impression | usually exactly 1 | often multiple | Metrics must handle multi-positive: MRR = first relevant, nDCG accumulates all gains |
+| Clicks per impression | **27.9% have 2+** | 0.5% have 2+ | Metrics must handle multi-positive: MRR = first relevant, nDCG accumulates all gains |
 | Provided embeddings | none | word2vec / BERT | Per-dataset embedding source in config |
 
 Two differences do not reduce to renaming, and they drive real design decisions:

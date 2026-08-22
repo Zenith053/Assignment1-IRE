@@ -34,11 +34,15 @@ ARTICLE_COLUMNS = [
 ]
 
 IMPRESSION_COLUMNS = [
-    "impression_id",   # int64, numeric in both datasets
-    "user_id",         # str
-    "timestamp",       # datetime64[ns]
-    "inview_ids",      # list[str], the candidate set shown
-    "clicked_ids",     # list[str], may hold several ids
+    # MIND numbers impressions from 1 in *both* the train and dev files, so all
+    # 73,152 dev ids collide with train ids. clean.py assigns a unique id here and
+    # preserves the raw one below, which the Codabench submission must echo back.
+    "impression_id",         # int64, unique within the dataset
+    "source_impression_id",  # int64, the id as it appears in the raw file
+    "user_id",               # str
+    "timestamp",             # datetime64[ns]
+    "inview_ids",            # list[str], the candidate set shown
+    "clicked_ids",           # list[str], may hold several ids
 ]
 
 HISTORY_COLUMNS = [

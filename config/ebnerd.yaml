@@ -20,7 +20,7 @@ capabilities:
   has_history_timestamps: true
   has_provided_embeddings: true  # word2vec document vectors, no local encoding needed
   has_session_id: true
-  has_multi_click: true
+  has_multi_click: true          # measured: only 0.5% of impressions, vs 27.9% on MIND
 
 text:
   index_fields: [title, abstract]  # body excluded so BM25 is comparable with MIND

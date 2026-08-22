@@ -3,4 +3,7 @@
 *.ckpt
 __pycache__/
 .venv/
-data/
+
+# Leading slash anchors this to the repo root. Unanchored `data/` also matched
+# `src/data/`, silently excluding download.py and clean.py from the repo.
+/data/
