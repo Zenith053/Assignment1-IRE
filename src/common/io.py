@@ -43,6 +43,10 @@ IMPRESSION_COLUMNS = [
     "timestamp",             # datetime64[ns]
     "inview_ids",            # list[str], the candidate set shown
     "clicked_ids",           # list[str], may hold several ids
+    # Which raw file/directory the row came from. Only the adapter knows this,
+    # and split.py needs it to carve off the held-out file without hardcoding
+    # dataset names or re-reading raw inputs.
+    "source_split",          # str: 'train' | 'dev' (MIND) | 'val' (EB-NeRD)
 ]
 
 HISTORY_COLUMNS = [
@@ -50,6 +54,11 @@ HISTORY_COLUMNS = [
     "article_id",      # str
     "timestamp",       # datetime64[ns], NaT for MIND
     "position",        # int32, 0-based order within the user's history
+    # EB-NeRD ships one history snapshot per split directory, each covering the
+    # 21 days *before* that split. The validation snapshot therefore spans the
+    # entire train impression window, so collapsing the two would let train
+    # impressions see future clicks. Keep both; split.py picks one per split.
+    "snapshot",        # str: 'all' (MIND) | 'train' | 'val' (EB-NeRD)
 ]
 
 TABLE_COLUMNS = {

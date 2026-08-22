@@ -28,8 +28,8 @@ text:
 # Temporal split. Dates are read from the data at build time rather than hardcoded;
 # the last `val_days` of train/ become validation and validation/ becomes test.
 split:
-  val_days: 2
-  test_source: validation_dir
+  held_out_source: val   # source_split value carved off as the test split
+  val_days: 2            # last N days of the train directory become validation
 
 # Columns that only exist after the click happened, or that aggregate the future.
 # Used by the Q9 anti-gaming ablation; never fed to a scorer by default.

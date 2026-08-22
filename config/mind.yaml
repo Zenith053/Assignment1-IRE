@@ -25,6 +25,6 @@ text:
 # Temporal split. The train file spans 11/09-11/14 and the dev file is 11/15,
 # so the dev file becomes the held-out test split (it still carries labels).
 split:
-  train: ["2019-11-09", "2019-11-12"]
+  held_out_source: dev            # source_split value carved off as the test split
+  train: ["2019-11-09", "2019-11-12"]   # inclusive day bounds
   val: ["2019-11-13", "2019-11-14"]
-  test_source: dev_file

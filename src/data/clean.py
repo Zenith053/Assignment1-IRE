@@ -137,6 +137,10 @@ def load_mind(cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         ignore_index=True,
     )
 
+    # Row provenance, assigned before concatenation order is lost.
+    n_train = sum(1 for _ in open(cfg.raw["train_behaviors"], encoding="utf-8"))
+    source_split = np.where(np.arange(len(behaviors)) < n_train, "train", "dev")
+
     parsed = behaviors["impressions"].map(_parse_mind_impressions)
     impressions = pd.DataFrame({
         # Positional index, because the raw ids collide between the two files.
@@ -146,6 +150,7 @@ def load_mind(cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         "timestamp": pd.to_datetime(behaviors["time"], format=MIND_TIME_FORMAT),
         "inview_ids": parsed.map(lambda pair: pair[0]),
         "clicked_ids": parsed.map(lambda pair: pair[1]),
+        "source_split": source_split,
     })
 
     # --- history: one fixed snapshot per user, verified identical across rows ---
@@ -159,6 +164,7 @@ def load_mind(cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         # 3,238 impressions belong to users with no history at all.
         id_lists=per_user["history"].map(lambda s: s.split() if s else []),
         timestamps=None,  # MIND records order only, never click times
+        snapshot="all",   # one snapshot, verified identical across train and dev
     )
     return articles, impressions, history
 
@@ -192,11 +198,19 @@ def load_ebnerd(cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     behaviour_frames = []
     history_frames = []
     for split in ("train", "val"):
-        behaviour_frames.append(
-            pd.read_parquet(cfg.raw[f"{split}_behaviors"], engine="pyarrow")
-        )
+        beh = pd.read_parquet(cfg.raw[f"{split}_behaviors"], engine="pyarrow")
+        beh["__source_split"] = split  # provenance, consumed by split.py
+        behaviour_frames.append(beh)
+        hist = pd.read_parquet(cfg.raw[f"{split}_history"], engine="pyarrow")
+        # Tag the snapshot rather than merging: the val snapshot covers the whole
+        # train impression window, so collapsing them leaks future clicks.
         history_frames.append(
-            pd.read_parquet(cfg.raw[f"{split}_history"], engine="pyarrow")
+            _explode_ordered_history(
+                user_ids=hist["user_id"].astype(str),
+                id_lists=hist["article_id_fixed"].map(to_str_list),
+                timestamps=hist["impression_time_fixed"],  # parallel list, same length
+                snapshot=split,
+            )
         )
     behaviors = pd.concat(behaviour_frames, ignore_index=True)
 
@@ -207,18 +221,12 @@ def load_ebnerd(cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         "timestamp": pd.to_datetime(behaviors["impression_time"]),
         "inview_ids": behaviors["article_ids_inview"].map(to_str_list),
         "clicked_ids": behaviors["article_ids_clicked"].map(to_str_list),
+        "source_split": behaviors["__source_split"].to_numpy(),
     })
 
-    # The validation history is a *different* snapshot; keeping the later one for a
-    # user that appears in both avoids pairing test impressions with stale history.
-    hist = pd.concat(history_frames, ignore_index=True).drop_duplicates(
-        subset="user_id", keep="last"
-    )
-    history = _explode_ordered_history(
-        user_ids=hist["user_id"].astype(str),
-        id_lists=hist["article_id_fixed"].map(to_str_list),
-        timestamps=hist["impression_time_fixed"],  # parallel list, same length
-    )
+    # Both snapshots are kept, tagged by origin; split.py pairs each split with
+    # the snapshot that predates it.
+    history = pd.concat(history_frames, ignore_index=True)
     return articles, impressions, history
 
 
@@ -226,19 +234,23 @@ def load_ebnerd(cfg: Config) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 # shared history construction
 # --------------------------------------------------------------------------- #
 
-def _explode_ordered_history(user_ids, id_lists, timestamps=None) -> pd.DataFrame:
+def _explode_ordered_history(user_ids, id_lists, timestamps=None,
+                             snapshot: str = "all") -> pd.DataFrame:
     """Flatten per-user click lists into the long history table.
 
     Both datasets store history as a per-user list; MIND has order only while
     EB-NeRD carries a parallel list of timestamps. Producing `position` for both
     means recency features work even where timestamps are absent.
+
+    `snapshot` labels which per-split history file the rows came from, so a
+    later stage can pair each split with a history that predates it.
     """
     id_lists = list(id_lists)
     counts = np.fromiter((len(v) for v in id_lists), dtype="int64", count=len(id_lists))
 
     if counts.sum() == 0:
         return pd.DataFrame({c: [] for c in HISTORY_COLUMNS}).astype(
-            {"user_id": str, "article_id": str, "position": "int32"}
+            {"user_id": str, "article_id": str, "position": "int32", "snapshot": str}
         )
 
     flat_ids = np.concatenate([np.asarray(v, dtype=object) for v in id_lists if len(v)])
@@ -264,6 +276,7 @@ def _explode_ordered_history(user_ids, id_lists, timestamps=None) -> pd.DataFram
         "article_id": flat_ids.astype(str),
         "timestamp": stamp_col.to_numpy(),
         "position": positions.astype("int32"),
+        "snapshot": snapshot,
     })
 
 
