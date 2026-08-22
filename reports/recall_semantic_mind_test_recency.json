@@ -1,0 +1,27 @@
+{
+  "dataset": "mind",
+  "split": "test",
+  "method": "semantic",
+  "embedding_source": "sentence-transformers/all-MiniLM-L6-v2",
+  "params": {
+    "last_n": 20,
+    "pooling": "recency",
+    "half_life": 5.0
+  },
+  "n_impressions_evaluated": 20000,
+  "embedding_dim": 384,
+  "articles_with_embedding": 65238,
+  "pools": {
+    "circulating": {
+      "available": true,
+      "pool_size": 4174,
+      "exact_search_ms": 503.2,
+      "recall@50": 0.07099687627325818,
+      "recall@100": 0.11958440852913214,
+      "recall@200": 0.1975757164199375,
+      "random@50": 0.011978917105893628,
+      "random@100": 0.023957834211787255,
+      "random@200": 0.04791566842357451
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "dataset": "mind",
+  "split": "test",
+  "method": "bm25",
+  "params": {
+    "k1": 1.2,
+    "b": 0.75,
+    "last_n": 20
+  },
+  "n_impressions_evaluated": 20000,
+  "n_articles": 65238,
+  "vocabulary_size": 58289,
+  "pools": {
+    "all": {
+      "available": true,
+      "pool_size": 65238,
+      "recall@50": 0.006213499932092897,
+      "recall@100": 0.011680021730272987,
+      "recall@200": 0.020915387749558603,
+      "random@50": 0.0007664244765320825,
+      "random@100": 0.001532848953064165,
+      "random@200": 0.00306569790612833
+    },
+    "circulating": {
+      "available": true,
+      "pool_size": 4174,
+      "recall@50": 0.048315903843542035,
+      "recall@100": 0.07374711394811898,
+      "recall@200": 0.11761510253972565,
+      "random@50": 0.011978917105893628,
+      "random@100": 0.023957834211787255,
+      "random@200": 0.04791566842357451
+    },
+    "fresh": {
+      "available": false,
+      "reason": "dataset has no published_time"
+    }
+  }
+}

@@ -7,3 +7,7 @@ __pycache__/
 # Leading slash anchors this to the repo root. Unanchored `data/` also matched
 # `src/data/`, silently excluding download.py and clean.py from the repo.
 /data/
+
+# The zip is the Codabench deliverable; the loose .txt inside it is redundant
+# and 8 MB, so keep only the archive (Q8: no large files in git).
+reports/submissions/*.txt

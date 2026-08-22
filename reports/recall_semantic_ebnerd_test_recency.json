@@ -1,0 +1,27 @@
+{
+  "dataset": "ebnerd",
+  "split": "test",
+  "method": "semantic",
+  "embedding_source": "provided",
+  "params": {
+    "last_n": 20,
+    "pooling": "recency",
+    "half_life": 5.0
+  },
+  "n_impressions_evaluated": 20000,
+  "embedding_dim": 300,
+  "articles_with_embedding": 11777,
+  "pools": {
+    "circulating": {
+      "available": true,
+      "pool_size": 2634,
+      "exact_search_ms": 42.8,
+      "recall@50": 0.022616562282533056,
+      "recall@100": 0.046177552440600456,
+      "recall@200": 0.08922358087285018,
+      "random@50": 0.018982536066818528,
+      "random@100": 0.037965072133637055,
+      "random@200": 0.07593014426727411
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "dataset": "mind",
+  "split": "test",
+  "method": "semantic",
+  "embedding_source": "sentence-transformers/all-MiniLM-L6-v2",
+  "params": {
+    "last_n": 20,
+    "pooling": "mean",
+    "half_life": 5.0
+  },
+  "n_impressions_evaluated": 20000,
+  "embedding_dim": 384,
+  "articles_with_embedding": 65238,
+  "pools": {
+    "all": {
+      "available": true,
+      "pool_size": 65238,
+      "exact_search_ms": 5415.8,
+      "recall@50": 0.007571641993752547,
+      "recall@100": 0.014837702023631672,
+      "recall@200": 0.028181447779437728,
+      "random@50": 0.0007664244765320825,
+      "random@100": 0.001532848953064165,
+      "random@200": 0.00306569790612833,
+      "ann_search_ms": 2726.6,
+      "ann_recall_vs_exact": 0.7686052953869481
+    },
+    "circulating": {
+      "available": true,
+      "pool_size": 4174,
+      "exact_search_ms": 533.5,
+      "recall@50": 0.07513920956132011,
+      "recall@100": 0.127936982208339,
+      "recall@200": 0.20684503599076465,
+      "random@50": 0.011978917105893628,
+      "random@100": 0.023957834211787255,
+      "random@200": 0.04791566842357451,
+      "ann_search_ms": 626.8,
+      "ann_recall_vs_exact": 0.9260491631189129
+    },
+    "fresh": {
+      "available": false,
+      "reason": "dataset has no published_time"
+    }
+  }
+}
