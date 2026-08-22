@@ -37,9 +37,17 @@ def test_auc_ties_give_half():
     assert M.auc(np.array([1, 0]), np.array([5.0, 5.0])) == pytest.approx(0.5)
 
 
-def test_mrr_uses_first_relevant():
+def test_mrr_averages_over_all_positives():
+    """Must match Microsoft evaluate.py: mean of 1/rank over every positive."""
     labels = np.array([0, 1, 1])
-    scores = np.array([0.9, 0.5, 0.4])  # first positive lands at rank 2
+    scores = np.array([0.9, 0.5, 0.4])  # positives land at ranks 2 and 3
+    assert M.mrr(labels, scores) == pytest.approx((1 / 2 + 1 / 3) / 2)
+
+
+def test_mrr_matches_first_hit_when_single_positive():
+    """With one positive the official formula reduces to the first-hit rank."""
+    labels = np.array([0, 1, 0])
+    scores = np.array([0.9, 0.5, 0.4])
     assert M.mrr(labels, scores) == pytest.approx(0.5)
 
 

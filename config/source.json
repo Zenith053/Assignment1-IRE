@@ -4,20 +4,25 @@
   "raw_dir": "data/raw",
   "archive_dir": "_archives",
   "manifest_file": "manifest.json",
-
   "auth": {
     "huggingface": {
       "description": "The yjw1029/MIND dataset is gated ('gated: auto' - any logged-in HF account is approved automatically, but you must accept the terms once on the dataset page). Requests need a bearer token.",
       "accept_terms_url": "https://huggingface.co/datasets/yjw1029/MIND",
       "header": "Authorization",
       "value_template": "Bearer {token}",
-      "token_env": ["HF_TOKEN", "HUGGINGFACE_HUB_TOKEN", "HUGGING_FACE_HUB_TOKEN"],
-      "token_files": ["~/.cache/huggingface/token", "~/.huggingface/token"],
+      "token_env": [
+        "HF_TOKEN",
+        "HUGGINGFACE_HUB_TOKEN",
+        "HUGGING_FACE_HUB_TOKEN"
+      ],
+      "token_files": [
+        "~/.cache/huggingface/token",
+        "~/.huggingface/token"
+      ],
       "strip_on_cross_host_redirect": true,
       "help": "Get a read token at https://huggingface.co/settings/tokens, then either run 'huggingface-cli login' or export HF_TOKEN=hf_..."
     }
   },
-
   "sources": [
     {
       "id": "mind_small_train",
@@ -134,7 +139,6 @@
       "citation": "Kruse et al., RecSys Challenge 2024",
       "license": "EB-NeRD terms of use (research use only)"
     },
-
     {
       "id": "ebnerd_testset",
       "name": "EB-NeRD test set (RecSys 2024 leaderboard)",
@@ -216,7 +220,7 @@
       "name": "MIND-large test",
       "dataset": "mind",
       "group": "optional",
-      "description": "Unlabelled MIND-large test split. Only needed if Codabench competition 13967 scores on MIND-large rather than MINDsmall_dev - confirm on the competition page before downloading 576 MB.",
+      "description": "Unlabelled MIND-large test split: 2,370,727 impressions over 120,961 articles. This is the split the official MIND leaderboard scores on. The archive wraps its files in a MINDlarge_test/ folder, unlike the MIND-small zips which are flat.",
       "provider": "huggingface",
       "auth": "huggingface",
       "url": "https://huggingface.co/datasets/yjw1029/MIND/resolve/main/MINDlarge_test.zip",
@@ -224,8 +228,11 @@
       "size_bytes": 604624665,
       "sha256": null,
       "extract_dir": "mind/MINDlarge_test",
-      "strip_top_level": false,
-      "markers": [],
+      "strip_top_level": true,
+      "markers": [
+        "mind/MINDlarge_test/behaviors.tsv",
+        "mind/MINDlarge_test/news.tsv"
+      ],
       "homepage": "https://msnews.github.io/",
       "citation": "Wu et al., ACL 2020",
       "license": "Microsoft Research License Terms (research use only)"
@@ -269,7 +276,6 @@
       "license": "Microsoft Research License Terms (research use only)"
     }
   ],
-
   "key_files": {
     "mind_train_behaviors": "mind/MINDsmall_train/behaviors.tsv",
     "mind_train_news": "mind/MINDsmall_train/news.tsv",
@@ -287,7 +293,6 @@
     "ebnerd_small_val_history": "ebnerd/ebnerd_small/validation/history.parquet",
     "ebnerd_document_vectors": "ebnerd/Ekstra_Bladet_word2vec/Ekstra_Bladet_word2vec/document_vector.parquet"
   },
-
   "competitions": {
     "mind": "https://www.codabench.org/competitions/13967/",
     "ebnerd": "https://www.codabench.org/competitions/2469/"

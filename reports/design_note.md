@@ -145,10 +145,43 @@ The HNSW row is the one that already bites: ANN recall against the exact index f
 from 0.926 to 0.769 purely by growing the pool 16×, at fixed parameters. Anyone
 scaling this must re-tune `efSearch` rather than trusting the default.
 
-## 6. Codabench
+## 6. Validation against the official scorer
 
-- **MIND** (comp. 13967): `reports/submissions/submission_mind_test.zip`, 73,152 rows,
-  semantic scorer, locally validated as rank permutations.
+Microsoft's `evaluate.py` (msnews/MIND) was run locally against my MIND submission,
+using `MINDsmall_dev` labels as `ref/truth.txt`. This is an independent check of my
+metric implementations, not just my file format:
+
+| metric | official evaluate.py | my harness | |
+|---|---|---|---|
+| AUC | 0.6299 | 0.6301 | agree |
+| nDCG@5 | 0.3311 | 0.3317 | agree |
+| nDCG@10 | 0.3907 | 0.3918 | agree |
+| MRR | **0.3041** | **0.3491** | **disagreed** |
+
+Residual differences on the three agreeing metrics are the 20,000-impression harness
+sample versus the full 73,152.
+
+**The MRR gap was a real bug in my code.** Microsoft's `mrr_score` sums `1/rank` over
+*every* relevant item and divides by the number of positives; mine returned the
+reciprocal rank of the *first* hit only. The two are identical on single-click
+impressions and diverge on the 27.9% of MIND that is multi-click, which inflated my
+MRR by 0.045. `src/eval/metrics.py` now implements the official definition, and
+`tests/test_metrics.py` pins both the multi-positive case and the single-positive
+case where the formulas must coincide.
+
+This is the clearest argument in this project for validating against a reference
+implementation rather than trusting one's own reading of a metric definition: the
+three metrics I got right gave no hint that the fourth was wrong.
+
+## 7. Codabench
+
+- **MIND** (comp. 13967): the competition scores the **Official Test** phase, so the
+  submission is built on `MINDlarge_test` (2,370,727 impressions, 120,961 articles,
+  unlabelled) via `src/submission/predict_raw_mind.py`, semantic scorer.
+  `submission_mind_test.zip` (MINDsmall_dev, 73,152 rows) is retained as the
+  locally-scoreable version, since MINDlarge_test has no public labels.
+  Submissions are limited to one per day, so both were format-validated locally
+  first.
 - **EB-NeRD** (comp. 2469): **validation-split dry run only**
   (`submission_ebnerd_val.zip`, 4,223 rows). The scored leaderboard requires
   `ebnerd_testset` (1.5 GB), deliberately not downloaded; `make ebnerd-testset`
