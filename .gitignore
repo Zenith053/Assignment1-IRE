@@ -14,5 +14,5 @@ reports/submissions/*.txt
 
 # MINDlarge_test predictions are 291 MB raw / 106 MB zipped - far past what
 # belongs in git. Regenerate with:
-#   python src/submission/predict_raw_mind.py --dir data/raw/mind/MINDlarge_test/MINDlarge_test
+#   python src/submission/predict_raw_mind.py --dir data/raw/mind/MINDlarge_test
 reports/submissions/*mind_large_test*
