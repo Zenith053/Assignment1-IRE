@@ -19,6 +19,17 @@ Usage
 
 from __future__ import annotations
 
+import os
+
+# Cap BLAS threading before numpy is imported. The top-k scorer issues millions
+# of tiny matmuls, where OpenBLAS spends more time starting and synchronising
+# threads than doing arithmetic - it saturated 8 of 12 cores and showed 12m of
+# system time against 4m of user time. Single-threaded is both faster here and
+# leaves the machine usable.
+for _var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+             "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
+    os.environ.setdefault(_var, "1")
+
 import argparse
 import sys
 import time
