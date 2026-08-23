@@ -193,6 +193,11 @@ MRR by 0.045. `src/eval/metrics.py` now implements the official definition, and
 `tests/test_metrics.py` pins both the multi-positive case and the single-positive
 case where the formulas must coincide.
 
+After the fix, the harness reports semantic MRR **0.3043** against the official
+**0.3041** - agreement within sampling noise. Correcting it moved every MIND MRR
+down by 0.025-0.045, since the inflation scaled with how often a scorer put a
+second positive high in the list.
+
 This is the clearest argument in this project for validating against a reference
 implementation rather than trusting one's own reading of a metric definition: the
 three metrics I got right gave no hint that the fourth was wrong.
