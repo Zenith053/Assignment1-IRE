@@ -27,6 +27,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pyarrow.parquet as pq
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
@@ -116,43 +117,54 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  {len(article_ids) - missing:,} vectors matched (dim {dim}), "
           f"{missing:,} missing")
 
-    # History is one row per user; build the pooled user vector once.
-    history = pd.read_parquet(test_dir / "history.parquet", engine="pyarrow")
-    print(f"  {len(history):,} user histories")
-    user_vectors: dict[str, np.ndarray] = {}
-    for user_id, clicked in zip(history["user_id"].astype(str),
-                                history["article_id_fixed"]):
-        rows = [row_of[a] for a in to_str_list(clicked)[-args.last_n:] if a in row_of]
-        if rows:
-            user_vectors[user_id] = embeddings[rows].mean(axis=0)
-    print(f"  {len(user_vectors):,} users with a usable profile")
+    # History is one row per user. 807k users x 300 dims is ~970 MB, so hold it
+    # as one contiguous array with an index rather than a dict of small arrays.
+    hist_file = pq.ParquetFile(test_dir / "history.parquet")
+    n_users = hist_file.metadata.num_rows
+    user_index: dict[str, int] = {}
+    user_vectors = np.zeros((n_users, dim), dtype=np.float32)
+    filled = 0
+    for batch in hist_file.iter_batches(batch_size=50_000,
+                                        columns=["user_id", "article_id_fixed"]):
+        block = batch.to_pandas()
+        for user_id, clicked in zip(block["user_id"].astype(str),
+                                    block["article_id_fixed"]):
+            rows = [row_of[a] for a in to_str_list(clicked)[-args.last_n:] if a in row_of]
+            if rows:
+                user_vectors[filled] = embeddings[rows].mean(axis=0)
+            user_index[user_id] = filled
+            filled += 1
+    user_vectors = l2_normalize(user_vectors)
+    print(f"  {filled:,} user histories indexed")
 
-    behaviors = pd.read_parquet(
-        test_dir / "behaviors.parquet",
-        columns=["impression_id", "user_id", "article_ids_inview"],
-        engine="pyarrow",
-    )
-    print(f"  {len(behaviors):,} impressions")
+    beh_file = pq.ParquetFile(test_dir / "behaviors.parquet")
+    n_impressions = beh_file.metadata.num_rows
+    print(f"  {n_impressions:,} impressions ({beh_file.metadata.num_row_groups} row groups)")
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     txt = args.out_dir / f"predictions_{args.name}.txt"
-    zero_dim = np.zeros(dim, dtype=np.float32)
+    zero = np.zeros(dim, dtype=np.float32)
     n_rows = 0
     n_no_profile = 0
     started = time.time()
 
     with open(txt, "w", encoding="utf-8") as out:
-        for start in range(0, len(behaviors), args.chunk_size):
-            block = behaviors.iloc[start:start + args.chunk_size]
+        # Stream row groups: 13.5M impressions x ~11.7 candidates is ~158M rows,
+        # which cannot be materialised as pandas object columns.
+        for batch in beh_file.iter_batches(
+            batch_size=args.chunk_size,
+            columns=["impression_id", "user_id", "article_ids_inview"],
+        ):
+            block = batch.to_pandas()
             for impression_id, user_id, inview in zip(
                 block["impression_id"], block["user_id"].astype(str),
                 block["article_ids_inview"]
             ):
                 candidates = to_str_list(inview)
-                profile = user_vectors.get(user_id)
-                if profile is None:
+                slot = user_index.get(user_id)
+                profile = zero if slot is None else user_vectors[slot]
+                if slot is None:
                     n_no_profile += 1
-                    profile = zero_dim
                 rows = np.fromiter((row_of.get(a, -1) for a in candidates),
                                    dtype=np.int64, count=len(candidates))
                 scores = np.zeros(len(candidates), dtype=np.float32)
@@ -163,15 +175,15 @@ def main(argv: list[str] | None = None) -> int:
                 out.write(f"{int(impression_id)} [{','.join(map(str, ranks))}]\n")
                 n_rows += 1
 
-            done = min(start + args.chunk_size, len(behaviors))
-            rate = done / max(time.time() - started, 1e-6)
-            print(f"\r  scored {done:,}/{len(behaviors):,} ({rate:,.0f}/s)   ",
-                  end="", flush=True)
+            rate = n_rows / max(time.time() - started, 1e-6)
+            eta = (n_impressions - n_rows) / max(rate, 1e-6)
+            print(f"\r  scored {n_rows:,}/{n_impressions:,} "
+                  f"({rate:,.0f}/s, eta {eta / 60:.1f}m)   ", end="", flush=True)
     print()
 
-    if n_rows != len(behaviors):
-        raise SystemExit(f"wrote {n_rows} rows, expected {len(behaviors)}")
-    print(f"  {n_no_profile:,} impressions had no usable user profile "
+    if n_rows != n_impressions:
+        raise SystemExit(f"wrote {n_rows} rows, expected {n_impressions}")
+    print(f"  {n_no_profile:,} impressions had no user profile "
           f"({100 * n_no_profile / max(1, n_rows):.1f}%)")
 
     archive = args.out_dir / f"submission_{args.name}.zip"
