@@ -120,6 +120,15 @@ optimistic bound, not a deployable filter. Both are reported. Even at best, cont
 similarity to click history is a weak signal for news: recency and editorial
 placement, which this pipeline does not model, carry most of the signal.
 
+**Almost nothing carries over between train and test.** Only **3.9%** (MIND) and
+**1.3%** (EB-NeRD) of test-window clicks land on an article that was clicked during
+training. This is the structural fact behind several results above: any signal fitted
+to train-window *items* is near-useless at test time, which is why popularity scores
+below random rather than merely weakly. It also bounds what this pipeline can achieve
+at all - both retrievers rank article *content*, and the content that matters is
+mostly content the training window never saw. A production system closes this gap with
+recency and editorial placement, neither of which is modelled here.
+
 **Recency-weighted pooling did not help** (EB-NeRD 0.0216 → 0.0226, MIND 0.0751 →
 0.0710). A negative result: exponential decay over the last 20 clicks discards
 topical breadth that mean pooling keeps.
@@ -145,7 +154,22 @@ The HNSW row is the one that already bites: ANN recall against the exact index f
 from 0.926 to 0.769 purely by growing the pool 16×, at fixed parameters. Anyone
 scaling this must re-tune `efSearch` rather than trusting the default.
 
-## 6. Validation against the official scorer
+## 6. What I would do next, in priority order
+
+1. **Re-encode EB-NeRD with a real multilingual model.** The provided word2vec
+   document vectors give +0.0005 AUC over random; MiniLM gives MIND +0.1312 through
+   the identical code path. The encoder, not the language, is the bottleneck, and
+   `has_provided_embeddings: false` already routes to a local encoder.
+2. **Model recency explicitly.** Given 1-3% item carryover, publication age plausibly
+   dominates content similarity. `published_time` and its capability flag are already
+   plumbed through.
+3. **Learn the hybrid weight.** At a fixed α=0.5 the blend *loses* to semantic alone on
+   MIND (0.6209 vs 0.6301), so the current setting actively destroys signal. Sweep α on
+   val, per dataset.
+4. **Evaluate on the full split** rather than the 20,000-impression sample, and raise
+   HNSW `efSearch` to recover the recall lost at full corpus size.
+
+## 7. Validation against the official scorer
 
 Microsoft's `evaluate.py` (msnews/MIND) was run locally against my MIND submission,
 using `MINDsmall_dev` labels as `ref/truth.txt`. This is an independent check of my
@@ -173,7 +197,7 @@ This is the clearest argument in this project for validating against a reference
 implementation rather than trusting one's own reading of a metric definition: the
 three metrics I got right gave no hint that the fourth was wrong.
 
-## 7. Codabench
+## 8. Codabench
 
 - **MIND** (comp. 13967): the competition scores the **Official Test** phase, so the
   submission is built on `MINDlarge_test` (2,370,727 impressions, 120,961 articles,
