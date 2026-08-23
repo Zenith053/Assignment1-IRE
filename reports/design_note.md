@@ -156,6 +156,25 @@ scaling this must re-tune `efSearch` rather than trusting the default.
 
 ## 6. What I would do next, in priority order
 
+0. **Done: top-k similarity aggregation instead of mean-pooling.** Scoring a
+   candidate by the mean of its 5 highest similarities to the user's history beats
+   pooling that history into one vector, because mean-pooling averages away the
+   niche interest that explains the click. Measured on MIND val (k swept 1..20,
+   peak at 5) and confirmed by the official scorer on MINDsmall_dev:
+
+   | metric | mean-pool | top-5 |
+   |---|---|---|
+   | AUC | 0.6299 | **0.6414** |
+   | MRR | 0.3041 | **0.3117** |
+   | nDCG@5 | 0.3311 | **0.3400** |
+   | nDCG@10 | 0.3907 | **0.3999** |
+
+   Two features that looked promising and are not: **candidate position** scores
+   0.4984/0.5016 alone, i.e. exactly random, so MIND randomises the inview order and
+   the usual position prior is unavailable; and **popularity** scores 0.5001. Blending
+   either into the top-5 score makes it worse, which is consistent with the 3.9%
+   train-to-test item carryover reported above.
+
 1. **Re-encode EB-NeRD with a real multilingual model.** The provided word2vec
    document vectors give +0.0005 AUC over random; MiniLM gives MIND +0.1312 through
    the identical code path. The encoder, not the language, is the bottleneck, and
