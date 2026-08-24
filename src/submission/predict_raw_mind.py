@@ -47,7 +47,7 @@ from src.data.clean import (  # noqa: E402
     MIND_BEHAVIOR_COLUMNS, MIND_NEWS_COLUMNS, _parse_mind_impressions, _read_mind_tsv,
 )
 from src.retrieval.bm25 import BM25Index  # noqa: E402
-from src.retrieval.semantic import MIND_ENCODER, l2_normalize  # noqa: E402
+from src.retrieval.semantic import MIND_ENCODER, l2_normalize, score_topk_similarity  # noqa: E402
 from src.submission.generate_predictions import ranks_from_scores, validate_submission  # noqa: E402
 
 
@@ -179,11 +179,10 @@ def main(argv: list[str] | None = None) -> int:
                     ok = cand >= 0
                     if not ok.any():
                         continue
-                    sims = embeddings[cand[ok]] @ embeddings[rows].T
-                    k = min(args.topk, sims.shape[1])
-                    block_scores = np.sort(sims, axis=1)[:, -k:].mean(1)
                     seg = scores[lo:hi]
-                    seg[ok] = block_scores
+                    seg[ok] = score_topk_similarity(
+                        embeddings, cand[ok], np.asarray(rows), args.topk
+                    )
                     scores[lo:hi] = seg
             elif args.method == "semantic":
                 dim = embeddings.shape[1]
