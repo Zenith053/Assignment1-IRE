@@ -56,22 +56,25 @@ silently faked.
 
 | | MIND | EB-NeRD demo |
 |---|---|---|
-| Best AUC | **semantic 0.630** [0.626, 0.634] | hybrid 0.510 [0.501, 0.519] |
-| BM25 AUC | 0.567 [0.563, 0.571] | 0.506 [0.497, 0.515] |
-| Popularity AUC | 0.496 | 0.469 |
+| Best AUC | **semantic 0.6375** [0.634, 0.642] | semantic 0.5195 [0.515, 0.524] |
+| Hybrid AUC (learned) | 0.6337 [0.630, 0.638] | 0.5169 [0.512, 0.521] |
+| BM25 AUC | 0.5671 [0.563, 0.571] | 0.5098 [0.505, 0.514] |
+| Popularity AUC | 0.4955 | 0.4685 |
 | Best recall@50 (circulating pool) | semantic 0.075 | bm25 0.026 |
+| Codabench leaderboard AUC | **0.6567** (MINDlarge_test) | **0.5149** (ebnerd_testset) |
 
-Full numbers, slices and confidence intervals are in `reports/`, and the
-analysis is in `reports/design_note.md`.
+Semantic uses top-5 similarity pooling; hybrid is a logistic regression over
+(bm25, semantic) fit on the val split, replacing an earlier fixed-α blend. Full
+numbers, slices and confidence intervals are in `reports/`, and the analysis is
+in `reports/design_note.md`.
 
 ## Known limitations
 
-- **EB-NeRD Codabench submission is a validation-split dry run.** The scored
-  RecSys 2024 leaderboard needs `ebnerd_testset` (1.5 GB); run
-  `make ebnerd-testset` to fetch it.
 - **Semantic recall is not comparable across datasets** — Danish and English
   force different encoders. Only BM25-vs-semantic *within* a dataset is a fair
   comparison.
 - The `circulating` candidate pool is derived from the evaluation split, so it
   is an optimistic bound rather than a deployable filter. Reported alongside
   the honest full-catalogue number.
+- `recall_at_k` (Q2.4/Q3.4) still measures mean-pooled semantic similarity;
+  top-5 pooling is only wired into the ranking harness and submissions so far.

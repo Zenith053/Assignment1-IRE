@@ -138,3 +138,38 @@ def test_no_impression_appears_in_two_splits(built):
         f"{cfg.dataset}: splits hold {total} impressions but the cleaned table "
         f"has {len(full)} - rows were lost or duplicated"
     )
+
+
+def test_serving_time_ablation_declared_not_faked(built):
+    """Q9: the leaky-popularity ablation must only run where the dataset says so.
+
+    `load_leaky_popularity` reads `serving_time_unavailable` from the config,
+    not the dataset name - MIND declares no such columns and must get an
+    honest "unavailable" rather than a fabricated feature.
+    """
+    from src.eval.harness import load_leaky_popularity
+
+    cfg, meta = built
+    features = cfg.features / "articles.parquet"
+    if not features.exists():
+        pytest.skip("feature store not built")
+    article_ids = pd.read_parquet(features, columns=["article_id"])["article_id"].tolist()
+
+    leaky = load_leaky_popularity(cfg, article_ids)
+    if not cfg.serving_time_unavailable:
+        assert leaky is None, (
+            f"{cfg.dataset}: no serving_time_unavailable columns declared, "
+            f"but load_leaky_popularity returned a feature anyway"
+        )
+    else:
+        assert leaky is not None, (
+            f"{cfg.dataset}: declares {cfg.serving_time_unavailable} but "
+            f"load_leaky_popularity returned nothing"
+        )
+        assert set(leaky) == set(article_ids)
+        # A real ablation needs the feature to actually vary, or it cannot
+        # inflate anything - guard against a silently-broken column read.
+        assert len(set(leaky.values())) > 1, (
+            f"{cfg.dataset}: total_pageviews is constant across articles - "
+            f"the ablation would be a no-op"
+        )

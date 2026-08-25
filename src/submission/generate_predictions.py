@@ -36,6 +36,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from src.common.config import load_config  # noqa: E402
 from src.common.io import read_table  # noqa: E402
 from src.retrieval.bm25 import BM25Index, build_queries  # noqa: E402
+from src.retrieval.hybrid import fit_hybrid_from_val, hybrid_scores, score_split  # noqa: E402
 from src.retrieval.semantic import (  # noqa: E402
     build_user_vectors, encode_articles, l2_normalize, load_provided_embeddings,
 )
@@ -74,23 +75,49 @@ def validate_submission(rows: list[tuple[int, list[int]]],
     return problems
 
 
-def score_impressions(cfg, impressions: pd.DataFrame, method: str,
-                      last_n: int) -> list[np.ndarray]:
+def score_impressions(cfg, impressions: pd.DataFrame, method: str, last_n: int,
+                      pooling: str = "topk", topk: int = 5,
+                      fit_sample: int = 5000) -> list[np.ndarray]:
     """Score each impression's inview list with the chosen retriever."""
     articles = pd.read_parquet(cfg.features / "articles.parquet")
     articles["tokens"] = articles["tokens"].map(list)
     article_ids = articles["article_id"].tolist()
     row_of = {a: i for i, a in enumerate(article_ids)}
 
-    profiles = pd.read_parquet(cfg.features / "user_profiles.parquet")
-    profiles = profiles[profiles["split"] == impressions.attrs["split"]].copy()
-    profiles["clicked_ids"] = profiles["clicked_ids"].map(list)
+    profiles_all = pd.read_parquet(cfg.features / "user_profiles.parquet")
+    profiles_all["clicked_ids"] = profiles_all["clicked_ids"].map(list)
+    profiles = profiles_all[profiles_all["split"] == impressions.attrs["split"]].copy()
     profiles = profiles[profiles["user_id"].isin(set(impressions["user_id"]))]
 
     lengths = impressions["inview_ids"].map(len).to_numpy()
     offsets = np.concatenate([[0], np.cumsum(lengths)])
     flat_ids = [a for row in impressions["inview_ids"] for a in row]
     flat_doc = np.array([row_of.get(a, -1) for a in flat_ids])
+
+    if method == "hybrid":
+        # A learned combination of BM25 and semantic, fit on val only and
+        # applied frozen here - the combiner must never see the split it is
+        # about to score, the same discipline as train-only popularity.
+        index = BM25Index(article_ids, articles["tokens"].tolist())
+        if cfg.can("has_provided_embeddings"):
+            raw = load_provided_embeddings(cfg, article_ids)
+        else:
+            raw = encode_articles(cfg, articles, batch_size=128)
+        embeddings = l2_normalize(raw)
+        popularity = dict(zip(articles["article_id"], articles["train_clicks"]))
+
+        print(f"  fitting hybrid combiner on val (pooling={pooling})")
+        combiner, _, n_fit = fit_hybrid_from_val(
+            cfg, index, embeddings, articles, row_of, popularity, profiles_all,
+            last_n, pooling, topk, fit_sample
+        )
+        coef_bm25, coef_semantic = combiner.coef_[0]
+        print(f"  hybrid = sigmoid({coef_bm25:.3f}*bm25 + {coef_semantic:.3f}*semantic "
+              f"+ {combiner.intercept_[0]:.3f}), fit on {n_fit:,} val impressions")
+
+        scored = score_split(index, embeddings, articles, row_of, popularity, profiles_all,
+                             impressions, impressions.attrs["split"], last_n, pooling, topk)
+        return hybrid_scores(combiner, scored["per_imp"])
 
     if method == "bm25":
         index = BM25Index(article_ids, articles["tokens"].tolist())
@@ -136,8 +163,14 @@ def main(argv: list[str] | None = None) -> int:
                         help="split to predict on (default: test for MIND, "
                              "val for EB-NeRD's validation-only dry run)")
     parser.add_argument("--method", default="semantic",
-                        choices=["semantic", "bm25", "popularity"])
+                        choices=["semantic", "bm25", "popularity", "hybrid"])
     parser.add_argument("--last-n", type=int, default=20)
+    parser.add_argument("--pooling", default="topk", choices=["mean", "topk"],
+                        help="semantic user representation used by --method hybrid")
+    parser.add_argument("--topk", type=int, default=5,
+                        help="k for --pooling topk; 5 was the peak of a 1..20 sweep on MIND val")
+    parser.add_argument("--fit-sample", type=int, default=5000,
+                        help="val impressions used to fit --method hybrid's combiner")
     parser.add_argument("--validate-only", action="store_true",
                         help="check the format without writing the zip")
     parser.add_argument("--out-dir", type=Path, default=REPO_ROOT / "reports" / "submissions")
@@ -153,7 +186,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[{cfg.dataset}/{split}] scoring {len(impressions):,} impressions "
           f"with {args.method}")
 
-    scores = score_impressions(cfg, impressions, args.method, args.last_n)
+    scores = score_impressions(cfg, impressions, args.method, args.last_n,
+                               args.pooling, args.topk, args.fit_sample)
     rows = [
         (int(source_id), ranks_from_scores(s))
         for source_id, s in zip(impressions["source_impression_id"], scores)

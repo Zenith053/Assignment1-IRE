@@ -30,7 +30,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
@@ -38,129 +37,12 @@ sys.path.insert(0, str(REPO_ROOT))
 from src.common.config import load_config  # noqa: E402
 from src.common.io import read_table  # noqa: E402
 from src.eval import metrics as M  # noqa: E402
-from src.retrieval.bm25 import BM25Index, build_queries  # noqa: E402
-from src.retrieval.semantic import (  # noqa: E402
-    build_user_history_rows, build_user_vectors, encode_articles, l2_normalize,
-    load_provided_embeddings, score_topk_similarity,
-)
+from src.retrieval.bm25 import BM25Index  # noqa: E402
+from src.retrieval.hybrid import fit_hybrid_from_val, hybrid_scores, score_split  # noqa: E402
+from src.retrieval.semantic import encode_articles, l2_normalize, load_provided_embeddings  # noqa: E402
 
 TOP_K_LIST = 10   # list length for the beyond-accuracy metrics
 SCORERS = ["random", "popularity", "bm25", "semantic", "hybrid"]
-BASE_SCORERS = ["random", "popularity", "bm25", "semantic"]
-
-
-def minmax(values: np.ndarray) -> np.ndarray:
-    """Scale to [0,1] within one impression so two scorers can be blended."""
-    lo, hi = values.min(), values.max()
-    return np.zeros_like(values) if hi - lo < 1e-12 else (values - lo) / (hi - lo)
-
-
-def flatten_candidates(impressions: pd.DataFrame, row_of: dict[str, int]):
-    """One flat array of every impression's candidates, plus offsets to regroup."""
-    lengths = impressions["inview_ids"].map(len).to_numpy()
-    offsets = np.concatenate([[0], np.cumsum(lengths)])
-    flat_ids = [a for row in impressions["inview_ids"] for a in row]
-    flat_doc_rows = np.array([row_of.get(a, -1) for a in flat_ids])
-    return offsets, flat_ids, flat_doc_rows
-
-
-def score_split(index: BM25Index, embeddings: np.ndarray, articles: pd.DataFrame,
-                row_of: dict[str, int], popularity: dict, profiles_all: pd.DataFrame,
-                impressions: pd.DataFrame, last_n: int, pooling: str, topk: int) -> dict:
-    """Score every candidate in `impressions` with each base scorer.
-
-    Shared by the val-split fit pass and whatever split is being reported, so
-    both use identical scoring code - the only thing that differs is which
-    impressions are passed in.
-    """
-    needed = set(impressions["user_id"])
-    profiles = profiles_all[profiles_all["user_id"].isin(needed)].reset_index(drop=True)
-
-    user_ids, token_lists = build_queries(profiles, articles, last_n)
-    user_row = {u: i for i, u in enumerate(user_ids)}
-    query_matrix = index.query_matrix(token_lists)
-
-    offsets, flat_ids, flat_doc_rows = flatten_candidates(impressions, row_of)
-    lengths = impressions["inview_ids"].map(len).to_numpy()
-    flat_user_rows = np.repeat([user_row.get(u, -1) for u in impressions["user_id"]], lengths)
-    valid = (flat_doc_rows >= 0) & (flat_user_rows >= 0)
-
-    flat_scores = {}
-    flat_scores["random"] = np.random.default_rng(13).random(len(flat_ids)).astype(np.float32)
-    flat_scores["popularity"] = np.array(
-        [popularity.get(a, 0) for a in flat_ids], dtype=np.float32
-    )
-
-    bm = np.zeros(len(flat_ids), dtype=np.float32)
-    bm[valid] = index.score_pairs(query_matrix, flat_user_rows[valid], flat_doc_rows[valid])
-    flat_scores["bm25"] = bm
-
-    sem = np.zeros(len(flat_ids), dtype=np.float32)
-    if pooling == "topk":
-        hist_user_ids, hist_rows_list = build_user_history_rows(profiles, row_of, last_n)
-        history_rows_by_user = dict(zip(hist_user_ids, hist_rows_list))
-        for i in range(len(impressions)):
-            lo, hi = offsets[i], offsets[i + 1]
-            hist_rows = history_rows_by_user.get(impressions["user_id"].iat[i])
-            if hist_rows is None or len(hist_rows) == 0:
-                continue
-            doc_rows = flat_doc_rows[lo:hi]
-            ok = doc_rows >= 0
-            if not ok.any():
-                continue
-            seg = sem[lo:hi]
-            seg[ok] = score_topk_similarity(embeddings, doc_rows[ok], hist_rows, topk)
-            sem[lo:hi] = seg
-    else:
-        _, user_vectors = build_user_vectors(profiles, row_of, embeddings, last_n, False, 5.0)
-        sem[valid] = np.einsum(
-            "ij,ij->i", user_vectors[flat_user_rows[valid]], embeddings[flat_doc_rows[valid]]
-        )
-    flat_scores["semantic"] = sem
-
-    ids_by_imp, labels_by_imp = [], []
-    per_imp: dict[str, list] = {name: [] for name in BASE_SCORERS}
-    clicked_sets = [set(c) for c in impressions["clicked_ids"]]
-    for i in range(len(impressions)):
-        lo, hi = offsets[i], offsets[i + 1]
-        ids = flat_ids[lo:hi]
-        ids_by_imp.append(ids)
-        labels_by_imp.append(
-            np.fromiter((1 if a in clicked_sets[i] else 0 for a in ids),
-                        dtype=np.int8, count=len(ids))
-        )
-        for name in BASE_SCORERS:
-            per_imp[name].append(flat_scores[name][lo:hi])
-
-    return {"ids_by_imp": ids_by_imp, "labels_by_imp": labels_by_imp, "per_imp": per_imp}
-
-
-def fit_hybrid_combiner(per_imp: dict, labels_by_imp: list) -> LogisticRegression:
-    """Learn how to combine (bm25, semantic) instead of a fixed alpha blend.
-
-    Both scores are min-max normalised per impression first, exactly as the
-    fixed blend did, so the combiner only has to learn the *weighting* - not
-    rediscover that raw BM25 and cosine live on different scales. Fit on the
-    val split only and applied frozen to whichever split is reported, the
-    same discipline as popularity being fit on train only: the combiner must
-    not see the impressions it is graded on.
-    """
-    X = np.concatenate([
-        np.column_stack([minmax(b), minmax(s)])
-        for b, s in zip(per_imp["bm25"], per_imp["semantic"])
-    ])
-    y = np.concatenate(labels_by_imp)
-    model = LogisticRegression(class_weight="balanced", max_iter=1000)
-    model.fit(X, y)
-    return model
-
-
-def hybrid_scores(model: LogisticRegression, per_imp: dict) -> list[np.ndarray]:
-    """Apply a fitted combiner to (bm25, semantic) scores, per impression."""
-    return [
-        model.predict_proba(np.column_stack([minmax(b), minmax(s)]))[:, 1].astype(np.float32)
-        for b, s in zip(per_imp["bm25"], per_imp["semantic"])
-    ]
 
 
 def evaluate(labels_by_imp, scores_by_imp, article_ids_by_imp, article_meta,
@@ -189,6 +71,25 @@ def evaluate(labels_by_imp, scores_by_imp, article_ids_by_imp, article_meta,
         out["novelty"].append(M.novelty(top_ids, popularity, total_clicks))
 
     return out, recommended
+
+
+def load_leaky_popularity(cfg, article_ids: list[str]) -> dict[str, float] | None:
+    """Article-level popularity that is NOT available at serving time (Q9).
+
+    EB-NeRD's raw `total_pageviews` accumulates over an article's entire
+    lifetime - including impressions from the future relative to any given
+    split - so ranking with it directly is a serving-time violation. Built
+    only to measure and report the inflation it would cause, and only for
+    datasets that declare unavailable columns via `serving_time_unavailable`
+    (config/ebnerd.yaml); absent that declaration this returns None so the
+    harness reports the ablation as unavailable rather than fabricating one.
+    """
+    if not cfg.serving_time_unavailable or "articles" not in cfg.raw:
+        return None
+    raw = pd.read_parquet(cfg.raw["articles"], columns=["article_id", "total_pageviews"])
+    raw["article_id"] = raw["article_id"].astype(str)
+    lookup = dict(zip(raw["article_id"], raw["total_pageviews"].fillna(0)))
+    return {a: float(lookup.get(a, 0.0)) for a in article_ids}
 
 
 def summarise(values, n_boot: int) -> dict:
@@ -244,23 +145,22 @@ def main(argv: list[str] | None = None) -> int:
     embeddings = l2_normalize(raw_vectors)
 
     # --- fit the hybrid combiner on val, applied frozen to whatever split is reported ---
-    fit_impressions = read_table(cfg.processed / "val" / "impressions.parquet", "impressions")
-    if args.fit_sample and args.fit_sample < len(fit_impressions):
-        fit_impressions = fit_impressions.sample(args.fit_sample, random_state=13)
-    fit_impressions = fit_impressions.reset_index(drop=True)
-    print(f"  fitting hybrid combiner on {len(fit_impressions):,} val impressions "
-          f"(pooling={args.pooling})")
-    fit_scores = score_split(index, embeddings, articles, row_of, popularity, profiles_all,
-                             fit_impressions, args.last_n, args.pooling, args.topk)
-    combiner = fit_hybrid_combiner(fit_scores["per_imp"], fit_scores["labels_by_imp"])
+    print(f"  fitting hybrid combiner on val (pooling={args.pooling})")
+    combiner, fit_scores, n_fit = fit_hybrid_from_val(
+        cfg, index, embeddings, articles, row_of, popularity, profiles_all,
+        args.last_n, args.pooling, args.topk, args.fit_sample
+    )
     coef_bm25, coef_semantic = combiner.coef_[0]
     intercept = float(combiner.intercept_[0])
     print(f"  hybrid = sigmoid({coef_bm25:.3f}*bm25 + {coef_semantic:.3f}*semantic "
-          f"+ {intercept:.3f})")
+          f"+ {intercept:.3f}), fit on {n_fit:,} val impressions")
 
     # --- score the reported split ---
     if args.split == "val":
-        impressions = fit_impressions
+        impressions = read_table(cfg.processed / "val" / "impressions.parquet", "impressions")
+        if args.fit_sample and args.fit_sample < len(impressions):
+            impressions = impressions.sample(args.fit_sample, random_state=13)
+        impressions = impressions.reset_index(drop=True)
         report = fit_scores
         print(f"[{cfg.dataset}/val] reporting on the {len(impressions):,} impressions the "
               f"combiner was fit on - hybrid's number here is optimistic; use --split test "
@@ -273,12 +173,25 @@ def main(argv: list[str] | None = None) -> int:
         impressions = impressions.reset_index(drop=True)
         print(f"[{cfg.dataset}/{args.split}] evaluating {len(impressions):,} impressions")
         report = score_split(index, embeddings, articles, row_of, popularity, profiles_all,
-                             impressions, args.last_n, args.pooling, args.topk)
+                             impressions, args.split, args.last_n, args.pooling, args.topk)
 
     ids_by_imp = report["ids_by_imp"]
     labels_by_imp = report["labels_by_imp"]
     per_imp: dict[str, list] = dict(report["per_imp"])
     per_imp["hybrid"] = hybrid_scores(combiner, report["per_imp"])
+
+    # --- Q9: serving-time ablation, only where the dataset declares unavailable columns ---
+    leaky_popularity = load_leaky_popularity(cfg, article_ids)
+    scorers_this_run = list(SCORERS)
+    if leaky_popularity is not None:
+        per_imp["popularity_leaky"] = [
+            np.fromiter((leaky_popularity.get(a, 0.0) for a in ids),
+                        dtype=np.float32, count=len(ids))
+            for ids in ids_by_imp
+        ]
+        scorers_this_run.append("popularity_leaky")
+        print(f"  Q9 ablation: added popularity_leaky (raw total_pageviews) "
+              f"alongside honest train-only popularity")
 
     # --- slices ---
     needed = set(impressions["user_id"])
@@ -298,7 +211,7 @@ def main(argv: list[str] | None = None) -> int:
     slices["tail_clicks"] = ~slices["head_clicks"]
 
     results: dict[str, dict] = {}
-    for scorer in SCORERS:
+    for scorer in scorers_this_run:
         raw, recommended = evaluate(
             labels_by_imp, per_imp[scorer], ids_by_imp, category_of,
             popularity, total_clicks, embeddings, row_of
@@ -319,6 +232,21 @@ def main(argv: list[str] | None = None) -> int:
             }
         results[scorer] = entry
 
+    q9_ablation = {"available": False, "reason": "no serving_time_unavailable columns declared"}
+    if leaky_popularity is not None:
+        honest_auc = results["popularity"]["slices"]["all"]["auc"]["value"]
+        leaky_auc = results["popularity_leaky"]["slices"]["all"]["auc"]["value"]
+        q9_ablation = {
+            "available": True,
+            "feature": "total_pageviews (lifetime-aggregated, future relative to any split)",
+            "honest_popularity_auc": honest_auc,
+            "leaky_popularity_auc": leaky_auc,
+            "inflation": leaky_auc - honest_auc,
+        }
+        print(f"\n  Q9 serving-time ablation: popularity AUC {honest_auc:.4f} (honest, "
+              f"train clicks only) vs {leaky_auc:.4f} (leaky, total_pageviews) "
+              f"-> inflation {leaky_auc - honest_auc:+.4f}")
+
     payload = {
         "dataset": cfg.dataset, "split": args.split, "scale": cfg.scale,
         "n_impressions": int(len(impressions)),
@@ -327,11 +255,12 @@ def main(argv: list[str] | None = None) -> int:
             "n_boot": args.n_boot, "top_k_list": TOP_K_LIST,
             "hybrid": {
                 "method": "logistic_regression", "fit_split": "val",
-                "n_fit_impressions": int(len(fit_impressions)),
+                "n_fit_impressions": int(n_fit),
                 "coef_bm25": float(coef_bm25), "coef_semantic": float(coef_semantic),
                 "intercept": intercept,
             },
         },
+        "q9_serving_time_ablation": q9_ablation,
         "scorers": results,
     }
     out = args.out or REPO_ROOT / "reports" / f"eval_{cfg.dataset}_{args.split}.json"
@@ -339,25 +268,25 @@ def main(argv: list[str] | None = None) -> int:
     out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
     # --- console table ---
-    print(f"\n  {'scorer':<11} {'AUC':>18} {'MRR':>18} {'nDCG@5':>18} "
+    print(f"\n  {'scorer':<15} {'AUC':>18} {'MRR':>18} {'nDCG@5':>18} "
           f"{'nDCG@10':>18} {'cov':>6}")
-    for scorer in SCORERS:
+    for scorer in scorers_this_run:
         row = results[scorer]["slices"]["all"]
         cells = []
         for metric in ("auc", "mrr", "ndcg@5", "ndcg@10"):
             m = row[metric]
             cells.append(f"{m['value']:.4f}[{m['ci_low']:.3f},{m['ci_high']:.3f}]")
-        print(f"  {scorer:<11} " + " ".join(f"{c:>18}" for c in cells)
+        print(f"  {scorer:<15} " + " ".join(f"{c:>18}" for c in cells)
               + f" {results[scorer]['coverage']:>6.3f}")
 
     print(f"\n  slices (nDCG@10):")
     for slice_name in slices:
         cells = []
-        for scorer in SCORERS:
+        for scorer in scorers_this_run:
             s = results[scorer]["slices"][slice_name]
             cells.append(f"{scorer}={s['ndcg@10']['value']:.4f}" if s.get("available")
                          else f"{scorer}=n/a")
-        n = results[SCORERS[0]]["slices"][slice_name].get("n_impressions", 0)
+        n = results[scorers_this_run[0]]["slices"][slice_name].get("n_impressions", 0)
         print(f"    {slice_name:<12} n={n:>6,}  " + "  ".join(cells))
     print(f"\n  -> {out}")
     return 0

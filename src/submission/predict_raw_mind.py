@@ -42,12 +42,16 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
+from src.common.config import load_config  # noqa: E402
 from src.common.text import tokenize  # noqa: E402
 from src.data.clean import (  # noqa: E402
     MIND_BEHAVIOR_COLUMNS, MIND_NEWS_COLUMNS, _parse_mind_impressions, _read_mind_tsv,
 )
 from src.retrieval.bm25 import BM25Index  # noqa: E402
-from src.retrieval.semantic import MIND_ENCODER, l2_normalize, score_topk_similarity  # noqa: E402
+from src.retrieval.hybrid import fit_hybrid_from_val, minmax  # noqa: E402
+from src.retrieval.semantic import (  # noqa: E402
+    MIND_ENCODER, encode_articles, l2_normalize, score_topk_similarity,
+)
 from src.submission.generate_predictions import ranks_from_scores, validate_submission  # noqa: E402
 
 
@@ -82,7 +86,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--dir", type=Path, required=True,
                         help="a MIND directory containing news.tsv and behaviors.tsv")
-    parser.add_argument("--method", default="semantic", choices=["semantic", "bm25"])
+    parser.add_argument("--method", default="semantic", choices=["semantic", "bm25", "hybrid"])
     parser.add_argument("--last-n", type=int, default=50,
                         help="history clicks used per user")
     parser.add_argument("--pooling", default="topk", choices=["mean", "topk"],
@@ -122,7 +126,11 @@ def main(argv: list[str] | None = None) -> int:
     # Article representations are built once; impressions are streamed, because
     # MINDlarge_test has 2.37M impressions x ~39.5 candidates = ~94M candidate
     # rows. Flattening those at once would need ~135 GB for the embedding gather.
-    if args.method == "semantic":
+    need_semantic = args.method in ("semantic", "hybrid")
+    need_bm25 = args.method in ("bm25", "hybrid")
+
+    embeddings = index = token_lookup = None
+    if need_semantic:
         text = (news["title"].fillna("") + ". " + news["abstract"].fillna("")).tolist()
         # Key the cache on the source directory, not --name: the vectors depend
         # only on which articles were encoded, so two runs over the same data
@@ -130,14 +138,39 @@ def main(argv: list[str] | None = None) -> int:
         cache = (REPO_ROOT / "data" / "feature_store"
                  / f"{args.dir.resolve().name}_embeddings.npy")
         embeddings = l2_normalize(encode(text, cache, article_ids, args.batch_size))
-        index = None
-        token_lookup = None
-    else:
+    if need_bm25:
         tokens = [tokenize(f"{t} {a}", "en")
                   for t, a in zip(news["title"], news["abstract"])]
         index = BM25Index(list(article_ids), tokens)
         token_lookup = dict(zip(article_ids, tokens))
-        embeddings = None
+
+    combiner = None
+    if args.method == "hybrid":
+        # Fit the combiner on MINDsmall's val split (a different, smaller
+        # corpus than MINDlarge_test) - fine, since both bm25 and semantic
+        # scores are min-max normalised per impression before combining, so
+        # the combiner learns a scale-free weighting rather than anything
+        # tied to this specific corpus's size. Must never see MINDlarge_test
+        # itself, which carries no labels to leak anyway.
+        print("  fitting hybrid combiner on MINDsmall val")
+        val_cfg = load_config(REPO_ROOT / "config" / "mind.yaml")
+        val_articles = pd.read_parquet(val_cfg.features / "articles.parquet")
+        val_articles["tokens"] = val_articles["tokens"].map(list)
+        val_article_ids = val_articles["article_id"].tolist()
+        val_row_of = {a: i for i, a in enumerate(val_article_ids)}
+        val_index = BM25Index(val_article_ids, val_articles["tokens"].tolist())
+        val_embeddings = l2_normalize(encode_articles(val_cfg, val_articles, args.batch_size))
+        val_popularity = dict(zip(val_articles["article_id"], val_articles["train_clicks"]))
+        val_profiles = pd.read_parquet(val_cfg.features / "user_profiles.parquet")
+        val_profiles["clicked_ids"] = val_profiles["clicked_ids"].map(list)
+
+        combiner, _, n_fit = fit_hybrid_from_val(
+            val_cfg, val_index, val_embeddings, val_articles, val_row_of, val_popularity,
+            val_profiles, args.last_n, args.pooling, args.topk, fit_sample=5000
+        )
+        coef_bm25, coef_semantic = combiner.coef_[0]
+        print(f"  hybrid = sigmoid({coef_bm25:.3f}*bm25 + {coef_semantic:.3f}*semantic "
+              f"+ {combiner.intercept_[0]:.3f}), fit on {n_fit:,} val impressions")
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     txt = args.out_dir / f"prediction_{name}.txt"
@@ -163,9 +196,11 @@ def main(argv: list[str] | None = None) -> int:
             flat_user = np.repeat(np.arange(len(block)), lengths)
             valid = flat_doc >= 0
             n_missing += int((~valid).sum())
-            scores = np.zeros(len(flat_ids), dtype=np.float32)
 
-            if args.method == "semantic" and args.pooling == "topk":
+            sem_scores = np.zeros(len(flat_ids), dtype=np.float32) if need_semantic else None
+            bm25_scores = np.zeros(len(flat_ids), dtype=np.float32) if need_bm25 else None
+
+            if need_semantic and args.pooling == "topk":
                 # Score each candidate against the user's whole history and keep
                 # the k best matches. Mean-pooling collapses a multi-interest
                 # history into one vector and washes out exactly the niche
@@ -179,12 +214,12 @@ def main(argv: list[str] | None = None) -> int:
                     ok = cand >= 0
                     if not ok.any():
                         continue
-                    seg = scores[lo:hi]
+                    seg = sem_scores[lo:hi]
                     seg[ok] = score_topk_similarity(
                         embeddings, cand[ok], np.asarray(rows), args.topk
                     )
-                    scores[lo:hi] = seg
-            elif args.method == "semantic":
+                    sem_scores[lo:hi] = seg
+            elif need_semantic:
                 dim = embeddings.shape[1]
                 user_vectors = np.zeros((len(block), dim), dtype=np.float32)
                 for i, clicked in enumerate(histories):
@@ -197,18 +232,32 @@ def main(argv: list[str] | None = None) -> int:
                 idx = np.flatnonzero(valid)
                 for start in range(0, len(idx), args.score_batch):
                     sel = idx[start:start + args.score_batch]
-                    scores[sel] = np.einsum(
+                    sem_scores[sel] = np.einsum(
                         "ij,ij->i",
                         user_vectors[flat_user[sel]], embeddings[flat_doc[sel]],
                     )
-            else:
+
+            if need_bm25:
                 queries = index.query_matrix([
                     [tok for a in clicked[-args.last_n:] for tok in token_lookup.get(a, ())]
                     for clicked in histories
                 ])
-                scores[valid] = index.score_pairs(
+                bm25_scores[valid] = index.score_pairs(
                     queries, flat_user[valid], flat_doc[valid]
                 )
+
+            if args.method == "bm25":
+                scores = bm25_scores
+            elif args.method == "semantic":
+                scores = sem_scores
+            else:  # hybrid: apply the frozen combiner, per impression (min-max is local to a list)
+                scores = np.zeros(len(flat_ids), dtype=np.float32)
+                intercept = float(combiner.intercept_[0])
+                for i in range(len(block)):
+                    lo, hi = offsets[i], offsets[i + 1]
+                    logits = (coef_bm25 * minmax(bm25_scores[lo:hi])
+                             + coef_semantic * minmax(sem_scores[lo:hi]) + intercept)
+                    scores[lo:hi] = 1.0 / (1.0 + np.exp(-logits))
 
             # Write immediately, preserving the raw file's row order.
             for i, impression_id in enumerate(block["impression_id"]):

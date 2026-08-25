@@ -18,6 +18,10 @@
       "intercept": -0.9466570019721985
     }
   },
+  "q9_serving_time_ablation": {
+    "available": false,
+    "reason": "no serving_time_unavailable columns declared"
+  },
   "scorers": {
     "random": {
       "slices": {
