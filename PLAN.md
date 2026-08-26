@@ -210,7 +210,7 @@ queries).
    `L ∈ {5, 20, 50}`). Cache per user — many impressions share a user.
 3. **Two scoring modes**, both needed downstream:
    - `retrieve()` — top-K over the whole corpus → feeds recall@K.
-   - `score_inview()` — score only the impression's inview list → feeds Q4 ranking metrics and Q5.
+   - `score_pairs()` — score only the (user, candidate) pairs the impression showed → feeds Q4 ranking metrics and Q5.
 4. **recall@K for K ∈ {50, 100, 200}**: fraction of ground-truth clicked articles that appear in
    the top-K. Report on val and test, and add a **freshness-restricted** variant (corpus limited
    to articles published before the impression, EB-NeRD only) as an ablation — the unrestricted

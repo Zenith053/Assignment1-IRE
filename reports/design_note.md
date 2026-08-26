@@ -3,7 +3,7 @@
 CS4.406 Assignment 1, Part I. All numbers are from `reports/*.json`, produced by
 `make all` and reproducible with `make data && make test`.
 
-## 1. What I built
+## 1. Architecture
 
 A five-stage pipeline (`download → clean → split → feature store → retrieval →
 evaluation`) that runs identically on both datasets. The load-bearing decision is
@@ -178,7 +178,7 @@ bottom-quartile band instead.
 The HNSW row already bites: ANN recall against the exact index falls from 0.926 to
 0.769 purely by growing the pool 16× at fixed parameters.
 
-## 6. What I would do next
+## 6. Future Work
 
 **Done: top-5 similarity pooling** instead of mean-pooling — score a candidate by
 the mean of its 5 highest similarities to individual history clicks, rather than

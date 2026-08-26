@@ -10,8 +10,9 @@ containing it - materialised as a sparse matrix so scoring a query is one
 sparse matrix-vector product instead of a Python loop over postings lists.
 
 Two scoring modes, both needed downstream:
-    retrieve()     top-K over the whole corpus  -> recall@K (Q2.4)
-    score_inview() score only an impression's candidates -> ranking metrics (Q4)
+    retrieve()    top-K over the whole corpus -> recall@K (Q2.4)
+    score_pairs() score only the (user, candidate) pairs an impression actually
+                  showed -> ranking metrics (Q4) and submissions (Q5)
 
 Usage
 -----
