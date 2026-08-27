@@ -108,12 +108,39 @@ is a logistic regression over (bm25, semantic) fit on val, replacing a fixed
 | semantic | **0.6375** | **0.5195** |
 | hybrid (learned) | 0.6337 | 0.5169 |
 
-**Semantic now leads on both datasets.** Under mean-pooling the two arms were
-indistinguishable on EB-NeRD with BM25 slightly ahead; top-5 pooling flipped that,
-though EB-NeRD's margin (0.520 vs 0.510) is far smaller than MIND's (0.638 vs
-0.567) — likely embedding quality, not language: MiniLM targets semantic
-similarity, while EB-NeRD's word2vec vectors are averaged statics that blur topic
-(the case for re-encoding Danish locally, §6).
+### Lexical vs. semantic, by slice (Q3.5)
+
+**AUC, test split. `*` = 95% bootstrap CIs do not overlap.**
+
+| slice | n (MIND) | BM25 | semantic | n (EB) | BM25 | semantic |
+|---|---|---|---|---|---|---|
+| all | 20,000 | 0.5671 | **0.6375** * | 20,000 | 0.5098 | **0.5195** * |
+| warm users | 16,304 | 0.5721 | **0.6457** * | 18,270 | 0.5088 | **0.5206** * |
+| cold users | 3,696 | 0.5449 | **0.6011** * | 1,730 | **0.5198** | 0.5081 |
+| head clicks | 572 | 0.5890 | **0.6156** | 102 | 0.5099 | **0.5990** |
+| tail clicks | 19,428 | 0.5664 | **0.6381** * | 19,898 | 0.5098 | **0.5191** * |
+
+**Semantic wins on 9 of 10 slices, and the exception is informative.** On EB-NeRD's
+**cold users BM25 leads (0.5198 vs 0.5081)** — the only reversal anywhere. With a
+short history there are too few vectors to pool into a meaningful centroid, so
+semantic degrades toward noise, while BM25 still matches literal tokens from the
+handful of titles available. The same slice on MIND does *not* reverse (0.601 vs
+0.545), which points at the embeddings rather than at cold-start itself: MiniLM
+stays useful on thin evidence where EB-NeRD's averaged word2vec statics do not.
+
+**Margin size separates the datasets.** MIND's gap is +0.070 AUC; EB-NeRD's is
++0.010 — seven times smaller. Both use identical code, so this is embedding
+quality, not language difficulty: MiniLM is trained for semantic similarity, while
+EB-NeRD's provided word2vec document vectors are averaged statics that blur topical
+distinctions. This is the single strongest argument for re-encoding Danish locally
+(§6). Under the earlier mean-pooling the two arms were statistically
+indistinguishable on EB-NeRD with BM25 slightly ahead; top-5 pooling flipped it.
+
+**On retrieval rather than ranking, the ordering reverses on EB-NeRD** (table
+below): BM25 takes the circulating pool at r@50 0.0261 vs semantic's 0.0216, while
+MIND stays semantic-first (0.0751 vs 0.0483). Retrieving from a 2,634-article pool
+and re-ranking ~12 shown candidates are different problems, and the weaker Danish
+embeddings lose the first while still edging the second.
 
 **Popularity scores at or below random within an impression** (0.4955 MIND, 0.4685
 EB-NeRD) because the inview list is **already popularity-curated by the production
