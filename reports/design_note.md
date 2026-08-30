@@ -1,7 +1,10 @@
 # Design Note — Lexical & Semantic Retrieval on MIND and EB-NeRD
 
-CS4.406 Assignment 1, Part I. All numbers are from `reports/*.json`, produced by
-`make all` and reproducible with `make data && make test`.
+CS4.406 Assignment 1, Part I.
+**Code: <https://github.com/Zenith053/Assignment1-IRE>**
+
+All numbers are from `reports/*.json`, produced by `make all` and reproducible with
+`make data && make test`.
 
 ## 1. Architecture
 
@@ -33,24 +36,45 @@ is object-dtype list columns from parquet, confined to `src/common/io.py`.
 **Exact FAISS (`IndexFlatIP`) as reference, HNSW as the ANN** — at this corpus size
 exact search is milliseconds, so HNSW is measured rather than needed (§5).
 
+**Top-5 similarity pooling, not mean-pooling.** A candidate is scored by the mean
+of its 5 highest similarities to individual history clicks, rather than by cosine to
+a single mean-pooled history vector — which averages away the niche interest that
+explains the click. k was swept 1..20 on MIND val (peak at 5, 0.6449 vs 0.6305 for
+mean-pool) and confirmed on the official scorer (0.6299 → 0.6414) and on the real
+leaderboard at 2.37M-impression scale (0.6447 → **0.6567**, §6). Two features were
+measured and **rejected**: candidate position (0.4984 alone — MIND shuffles inview
+order, so the usual position prior does not exist here) and popularity (0.5001);
+blending either into the top-5 score makes it worse, consistent with the 3.9% item
+carryover in §4.
+
+**Learned hybrid, not a fixed α.** A logistic regression over per-impression
+min-max-normalised `(bm25, semantic)`, fit on val and applied frozen to test, shared
+by the harness and both submission paths via `src/retrieval/hybrid.py`. It removes
+the failure mode of a badly-chosen constant — α=0.5 lost outright to semantic alone
+on MIND (0.6209 vs 0.6301) — and ties the best single scorer rather than beating it.
+Justification and the learned coefficients are in §4.
+
 **Per-dataset encoders**: EB-NeRD uses the shipped Danish word2vec vectors; MIND is
 encoded with `all-MiniLM-L6-v2`. A single multilingual encoder would make
 cross-dataset numbers comparable but discards the provided vectors and costs 11 GPU
 minutes for Danish text it handles worse. **Consequence: semantic recall is not
 comparable across datasets** — only BM25-vs-semantic *within* a dataset, and BM25
-across datasets, are fair comparisons.
+across datasets, are fair comparisons. The measured cost of that choice is large:
+word2vec buys EB-NeRD **+0.02 AUC** over random where MiniLM buys MIND **+0.14**
+through identical code, making a local multilingual re-encode the highest-value
+change still outstanding.
 
-## 3. Bugs and validation
+## 3. Validation
 
-Three bugs surfaced, each caught by treating no derived number as trustworthy
-until something independent confirmed it.
+Every correctness claim in this note is pinned either by a test or by an external
+reference implementation.
 
-**EB-NeRD history-snapshot leak.** EB-NeRD ships one history snapshot per split
-directory, each covering the 21 days *before* that split — the validation snapshot
-spans `05-04→05-25`, the entire train window (`05-18→05-25`). My first `clean.py`
-collapsed the two snapshots, giving train impressions access to clicks during/after
-them. Both are now kept and tagged; `split.py` pairs each split with the newest
-snapshot that ends before it starts:
+**Behaviour-window boundary (Q9).** EB-NeRD ships one history snapshot per split
+directory, each covering the 21 days *before* that split, so the validation
+snapshot (`05-04→05-25`) spans the entire train window (`05-18→05-25`). Collapsing
+the two would expose train impressions to later clicks, so both are kept and
+tagged, and `split.py` pairs each split with the newest snapshot that **ends before
+it begins**:
 
 | split | history ends | split starts | gap |
 |---|---|---|---|
@@ -58,47 +82,43 @@ snapshot that ends before it starts:
 | val | 05-18 06:59 | 05-24 00:00 | +5 d |
 | test | 05-25 06:59 | 05-25 07:00 | +21 s |
 
-(train's gap was **−7 days** before the fix.) `test_no_leakage.py` pins this.
+All gaps positive. `tests/test_no_leakage.py::test_history_snapshot_predates_split`
+asserts this per split; `::test_no_impression_appears_in_two_splits` asserts the
+splits partition the impressions exactly; `::test_popularity_is_fit_on_train_only`
+asserts no evaluation-split clicks enter the popularity feature.
 
-**Profile-split filter dropped in a later refactor.** A scoring routine shared
-between the harness and submission scripts (§6) filtered user profiles by
-`user_id` only, not `(user_id, split)`. 1,590/1,935 EB-NeRD users have genuinely
-different click histories per split (staggered snapshots), so an arbitrary
-duplicate row could win — silently mixing in the wrong split's history. MIND was
-accidentally unaffected (one snapshot reused everywhere), which is why it went
-unnoticed there. Caught by noticing the fitted hybrid weights were implausible
-(`4.29·bm25 + 0.20·semantic`) and correcting to `0.32·bm25 + 0.20·semantic` after
-`src/retrieval/hybrid.py::score_split` was made to require the split name
-explicitly.
+**Metrics checked against the official scorer.** Microsoft's `evaluate.py`
+(vendored unmodified at `tools/evaluate_official.py`) run against the MIND
+submission with `MINDsmall_dev` as ground truth — an independent check of the
+metric implementations, not merely of file format:
 
-**MRR formula bug, caught by Microsoft's official `evaluate.py`**, run against my
-MIND submission (`MINDsmall_dev` as ground truth) — an independent check of the
-metric code, not just the file format:
+| metric | official `evaluate.py` | this harness |
+|---|---|---|
+| AUC | 0.6414 | 0.6375 |
+| MRR | 0.3117 | 0.3085 |
+| nDCG@5 | 0.3400 | 0.3373 |
+| nDCG@10 | 0.3999 | 0.3973 |
 
-| metric | official | mine (before fix) | agree? |
-|---|---|---|---|
-| AUC | 0.6299 | 0.6301 | yes |
-| nDCG@5 | 0.3311 | 0.3317 | yes |
-| nDCG@10 | 0.3907 | 0.3918 | yes |
-| MRR | 0.3041 | 0.3491 | **no** |
+Residuals are uniformly ~0.003 and one-directional, consistent with the harness's
+20,000-impression sample against the full 73,152. MRR follows the official
+definition — the mean of `1/rank` over *every* click, not the first alone — which
+matters because **27.9% of MIND impressions are multi-click**; the two definitions
+coincide only on single-click impressions. `tests/test_metrics.py` pins both cases,
+along with tie handling (tied scores must give AUC exactly 0.5) and undefined AUC
+(all-positive or all-negative impressions return `None` rather than 0.5).
 
-Mine took the reciprocal rank of the *first* click only; the official definition
-sums `1/rank` over *every* click and divides by the click count — identical on
-single-click impressions, diverging on MIND's 27.9% multi-click share, which had
-inflated my MRR by 0.045. Fixed in `src/eval/metrics.py`, pinned by
-`tests/test_metrics.py`. Three correct metrics gave no hint the fourth was wrong.
-
-Two smaller facts also shaped the code: MIND numbers impressions from 1 in *both*
-files (73,152 dev ids collide with train ids — the schema keeps a unique
-`impression_id` plus the raw `source_impression_id` submissions must echo), and
-7,233 MIND articles contain a double-quote that pandas' default `QUOTE_MINIMAL`
-silently swallows.
+**Schema constraints taken from the raw data.** MIND numbers impressions from 1 in
+*both* files, so all 73,152 dev ids collide with train ids: the schema carries a
+unique `impression_id` alongside the raw `source_impression_id` that submissions
+must echo back. 7,233 MIND articles contain a double-quote inside title or
+abstract, which pandas' default `QUOTE_MINIMAL` silently swallows, so the TSV
+reader uses `QUOTE_NONE` with `keep_default_na=False`.
 
 ## 4. Observations
 
 **Ranking (test split, AUC, n=20,000/5,000). Semantic uses top-5 pooling; hybrid
 is a logistic regression over (bm25, semantic) fit on val, replacing a fixed
-α=0.5 blend (§6):**
+α=0.5 blend (§2):**
 
 | scorer | MIND | EB-NeRD |
 |---|---|---|
@@ -107,6 +127,41 @@ is a logistic regression over (bm25, semantic) fit on val, replacing a fixed
 | bm25 | 0.5671 | 0.5098 |
 | semantic | **0.6375** | **0.5195** |
 | hybrid (learned) | 0.6337 | 0.5169 |
+
+**Why the learned hybrid ranks below semantic alone.** On the offline test splits
+(MINDsmall_dev 73,152 impressions sampled to 20,000; EB-NeRD validation 20,000) it
+trails the best single scorer by **+0.0038 (MIND) and +0.0026 (EB-NeRD)** — and in
+both cases **the 95% bootstrap CIs overlap, so the deficit is not statistically
+significant** (MIND 0.6337 [0.630, 0.638] vs 0.6375 [0.634, 0.642]). The honest
+reading is that the blend ties with semantic, not that it loses to it.
+
+Three things explain why it fails to *win*:
+
+1. **Objective mismatch.** `LogisticRegression` minimises log-loss, which rewards
+   calibrated click probabilities, whereas AUC only cares about the ordering within
+   an impression. A combiner can fit the data better and rank slightly worse; that
+   is exactly what happens here. A pairwise/ranking objective (LambdaRank) would be
+   the right fix, and is a bigger change than reweighting.
+2. **Only two features.** With just `(bm25, semantic)` there is little for a linear
+   model to exploit beyond picking a weight ratio, and the better single feature
+   already carries almost all the signal.
+3. **Fit/apply distribution shift.** Weights are fit on val and applied frozen to a
+   later time window, so any drift between the two costs accuracy.
+
+**The learned weights are themselves a result.** They independently recover the
+per-dataset picture from §4:
+
+| dataset | coef bm25 | coef semantic | ratio |
+|---|---|---|---|
+| MIND | 0.767 | 1.516 | semantic **2.0×** |
+| EB-NeRD | 0.316 | 0.201 | **bm25 1.6×** |
+
+Fit only on click labels, the regression weights semantic twice as heavily as BM25
+on MIND, and *inverts* that on EB-NeRD — matching the slice table, where BM25 wins
+EB-NeRD's cold users and its circulating-pool recall. The blend is retained because
+it removes the failure mode of a badly-chosen fixed α (α=0.5 lost outright to
+semantic on MIND, 0.6209 vs 0.6301) at no significant cost, and because it
+generalises without hand-tuning per dataset.
 
 ### Lexical vs. semantic, by slice (Q3.5)
 
@@ -133,7 +188,7 @@ stays useful on thin evidence where EB-NeRD's averaged word2vec statics do not.
 quality, not language difficulty: MiniLM is trained for semantic similarity, while
 EB-NeRD's provided word2vec document vectors are averaged statics that blur topical
 distinctions. This is the single strongest argument for re-encoding Danish locally
-(§6). Under the earlier mean-pooling the two arms were statistically
+(§2). Under the earlier mean-pooling the two arms were statistically
 indistinguishable on EB-NeRD with BM25 slightly ahead; top-5 pooling flipped it.
 
 **On retrieval rather than ranking, the ordering reverses on EB-NeRD** (table
@@ -162,7 +217,7 @@ varies. The size of the inflation is itself the finding: a feature this "good" i
 a red flag, not a win.
 
 **Recall is low and pool choice dominates it** (still mean-pooled — porting top-5
-pooling here is a remaining step, §6):
+pooling here is a remaining step):
 
 | dataset | pool | size | BM25 r@50 | semantic r@50 | random r@50 |
 |---|---|---|---|---|---|
@@ -174,12 +229,16 @@ pooling here is a remaining step, §6):
 Only 8.2%/23.2% of the catalogue circulates during the test window, so
 full-catalogue recall understates a serving system — but `circulating` is derived
 from the eval split itself, an optimistic bound rather than a deployable filter;
-both are reported.
+both are reported. **Known gap:** `recall_at_k` still builds a mean-pooled user
+vector, so this table measures a different configuration from the AUC table above;
+porting top-5 pooling into the retrieval path is the clearest unfinished item.
 
 **Almost nothing carries over between train and test** — only 3.9% (MIND) / 1.3%
 (EB-NeRD) of test-window clicks land on a train-clicked article, bounding what any
 content-only retriever can achieve and explaining why popularity scores below
-random rather than merely weakly.
+random rather than merely weakly. It also suggests publication **age** plausibly
+dominates content similarity, and recency is the main signal this pipeline does not
+model; `published_time` is already plumbed through for EB-NeRD.
 
 **Recency-weighted pooling did not help** (EB-NeRD r@50 0.0216→0.0226, MIND
 0.0751→0.0710) — exponential decay over 20 clicks discards topical breadth mean
@@ -203,39 +262,11 @@ bottom-quartile band instead.
 | Per-user query cache | One query/user in RAM; 940k users at 10× | Shard by user, or stream |
 
 The HNSW row already bites: ANN recall against the exact index falls from 0.926 to
-0.769 purely by growing the pool 16× at fixed parameters.
+0.769 purely by growing the pool 16× at fixed parameters — raising `efSearch` and
+re-measuring, alongside evaluating on the full split rather than a
+20,000-impression sample, are the two outstanding items here.
 
-## 6. Future Work
-
-**Done: top-5 similarity pooling** instead of mean-pooling — score a candidate by
-the mean of its 5 highest similarities to individual history clicks, rather than
-mean-pooling history into one vector first (which averages away the niche interest
-that explains the click). Swept k on MIND val (peak at 5); confirmed on the
-official scorer (AUC 0.6299→0.6414) and **reproduced on the real MIND leaderboard**
-at 2.37M-impression scale (0.6447→**0.6567** AUC, §7). Two rejected features:
-candidate position (exactly random — MIND shuffles inview order) and popularity
-(0.5001 alone); blending either into the top-5 score makes it worse, consistent
-with the 3.9% item carryover above.
-
-**Done: learned hybrid combination** instead of fixed α — a logistic regression
-over per-impression min-max-normalised (bm25, semantic), fit on val and applied
-frozen to test. This fixed the *worst* failure of a bad fixed α (α=0.5 lost to
-semantic alone on MIND: 0.6209 vs 0.6301) but the honest result is that on both
-datasets the best single scorer still edges out the learned blend (MIND 0.6337 vs
-0.6375; EB-NeRD 0.5169 vs 0.5195; official scorer 0.6377 vs 0.6414). Shared by the
-harness and both submission paths via `src/retrieval/hybrid.py`.
-
-**Remaining, in priority order:**
-1. Re-encode EB-NeRD with a real multilingual model — word2vec gives +0.02 AUC over
-   random, MiniLM gives MIND +0.14 through the identical code path.
-2. Port top-5 pooling into `recall_at_k` — it still measures mean-pooled recall.
-3. Model recency explicitly — 1–4% item carryover suggests publication age
-   plausibly dominates content similarity; `published_time` is already plumbed for
-   EB-NeRD.
-4. Evaluate on the full split and raise HNSW `efSearch` to recover the recall lost
-   at full corpus size.
-
-## 7. Codabench
+## 6. Codabench
 
 Both leaderboards were submitted to and scored.
 

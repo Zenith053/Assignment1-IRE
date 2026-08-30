@@ -4,6 +4,12 @@ A reproducible pipeline that ranks candidate articles in an impression by click
 likelihood, using BM25 over article text and embedding similarity over click
 history, with a sliced, bootstrapped evaluation harness.
 
+**Repository:** <https://github.com/Zenith053/Assignment1-IRE>
+```bash
+git clone git@github.com:Zenith053/Assignment1-IRE.git    # SSH
+git clone https://github.com/Zenith053/Assignment1-IRE.git # HTTPS
+```
+
 ## Setup
 
 ```bash
