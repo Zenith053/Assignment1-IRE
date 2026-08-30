@@ -1,7 +1,7 @@
 PY := .venv/bin/python
 CONFIGS := config/mind.yaml config/ebnerd.yaml
 
-.PHONY: all data download clean split features retrieval eval submission test ebnerd-testset
+.PHONY: all data download clean split features retrieval eval submission sweep test ebnerd-testset
 
 # One-command rebuild from raw files (Q1.5).
 all: data retrieval eval submission
@@ -30,6 +30,15 @@ eval:
 
 submission:
 	@for cfg in $(CONFIGS); do $(PY) src/submission/generate_predictions.py --config $$cfg || exit 1; done
+
+# Pooling ablation: k for top-k similarity pooling. Not in `all` - it reproduces a
+# design decision rather than any reported result.
+sweep:
+	@for cfg in $(CONFIGS); do \
+	  ds=$$(basename $$cfg .yaml); \
+	  $(PY) tools/sweep_pooling_k.py --config $$cfg \
+	    --out reports/sweep_pooling_k_$${ds}_val.json || exit 1; \
+	done
 
 test:
 	.venv/bin/pytest tests/ -v

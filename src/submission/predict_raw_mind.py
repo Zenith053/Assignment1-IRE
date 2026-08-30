@@ -87,15 +87,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dir", type=Path, required=True,
                         help="a MIND directory containing news.tsv and behaviors.tsv")
     parser.add_argument("--method", default="semantic", choices=["semantic", "bm25", "hybrid"])
-    parser.add_argument("--last-n", type=int, default=50,
-                        help="history clicks used per user")
     parser.add_argument("--pooling", default="topk", choices=["mean", "topk"],
                         help="topk scores a candidate by its mean similarity to the "
                              "k most similar history articles; mean pools the history "
                              "into one vector first. Measured on MIND val: topk k=5 "
-                             "gives AUC 0.6449 vs 0.6305 for mean-pool.")
+                             "gives AUC 0.6508 vs 0.6408 for mean-pool, and +0.012 AUC "
+                             "on the MIND leaderboard.")
     parser.add_argument("--topk", type=int, default=5,
-                        help="k for --pooling topk; 5 was the peak of a 1..20 sweep")
+                        help="k for --pooling topk; peak of a 1..50 sweep on MIND val "
+                             "(tools/sweep_pooling_k.py)")
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--chunk-size", type=int, default=100_000,
                         help="impressions held in memory at once")
@@ -166,7 +166,7 @@ def main(argv: list[str] | None = None) -> int:
 
         combiner, _, n_fit = fit_hybrid_from_val(
             val_cfg, val_index, val_embeddings, val_articles, val_row_of, val_popularity,
-            val_profiles, args.last_n, args.pooling, args.topk, fit_sample=5000
+            val_profiles, args.pooling, args.topk, fit_sample=5000
         )
         coef_bm25, coef_semantic = combiner.coef_[0]
         print(f"  hybrid = sigmoid({coef_bm25:.3f}*bm25 + {coef_semantic:.3f}*semantic "
@@ -207,7 +207,7 @@ def main(argv: list[str] | None = None) -> int:
                 # interest that explains the click.
                 for i, clicked in enumerate(histories):
                     lo, hi = offsets[i], offsets[i + 1]
-                    rows = [row_of[a] for a in clicked[-args.last_n:] if a in row_of]
+                    rows = [row_of[a] for a in clicked if a in row_of]
                     if not rows:
                         continue
                     cand = flat_doc[lo:hi]
@@ -223,7 +223,7 @@ def main(argv: list[str] | None = None) -> int:
                 dim = embeddings.shape[1]
                 user_vectors = np.zeros((len(block), dim), dtype=np.float32)
                 for i, clicked in enumerate(histories):
-                    rows = [row_of[a] for a in clicked[-args.last_n:] if a in row_of]
+                    rows = [row_of[a] for a in clicked if a in row_of]
                     if rows:
                         user_vectors[i] = embeddings[rows].mean(axis=0)
                 user_vectors = l2_normalize(user_vectors)
@@ -239,7 +239,7 @@ def main(argv: list[str] | None = None) -> int:
 
             if need_bm25:
                 queries = index.query_matrix([
-                    [tok for a in clicked[-args.last_n:] for tok in token_lookup.get(a, ())]
+                    [tok for a in clicked for tok in token_lookup.get(a, ())]
                     for clicked in histories
                 ])
                 bm25_scores[valid] = index.score_pairs(

@@ -4,7 +4,7 @@
   "method": "semantic",
   "embedding_source": "provided",
   "params": {
-    "last_n": 20,
+    "history": "full",
     "pooling": "recency",
     "half_life": 5.0
   },
@@ -12,16 +12,38 @@
   "embedding_dim": 300,
   "articles_with_embedding": 11777,
   "pools": {
+    "all": {
+      "available": true,
+      "pool_size": 11777,
+      "exact_search_ms": 183.0,
+      "recall@50": 0.00586539417437121,
+      "recall@100": 0.011979322000198828,
+      "recall@200": 0.025151605527388408,
+      "random@50": 0.004245563386261357,
+      "random@100": 0.008491126772522714,
+      "random@200": 0.016982253545045428
+    },
     "circulating": {
       "available": true,
       "pool_size": 2634,
-      "exact_search_ms": 42.8,
-      "recall@50": 0.022616562282533056,
-      "recall@100": 0.046177552440600456,
-      "recall@200": 0.08922358087285018,
+      "exact_search_ms": 71.3,
+      "recall@50": 0.0227656824734069,
+      "recall@100": 0.045680485137687646,
+      "recall@200": 0.08902475395168506,
       "random@50": 0.018982536066818528,
       "random@100": 0.037965072133637055,
       "random@200": 0.07593014426727411
+    },
+    "fresh": {
+      "available": true,
+      "pool_size": 10932,
+      "exact_search_ms": 173.2,
+      "recall@50": 0.006362461477284025,
+      "recall@100": 0.012824336415150612,
+      "recall@200": 0.026742220896709416,
+      "random@50": 0.004573728503476033,
+      "random@100": 0.009147457006952067,
+      "random@200": 0.018294914013904134
     }
   }
 }

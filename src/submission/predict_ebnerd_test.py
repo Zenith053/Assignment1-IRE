@@ -92,7 +92,6 @@ def main(argv: list[str] | None = None) -> int:
                         default=REPO_ROOT / "data" / "raw" / "ebnerd" / "ebnerd_testset")
     parser.add_argument("--vectors", type=Path, default=DEFAULT_VECTORS,
                         help="provided document_vector.parquet")
-    parser.add_argument("--last-n", type=int, default=20)
     parser.add_argument("--chunk-size", type=int, default=200_000,
                         help="impressions held in memory at once")
     parser.add_argument("--subdir", default=None,
@@ -140,7 +139,7 @@ def main(argv: list[str] | None = None) -> int:
         block = batch.to_pandas()
         for user_id, clicked in zip(block["user_id"].astype(str),
                                     block["article_id_fixed"]):
-            rows = [row_of[a] for a in to_str_list(clicked)[-args.last_n:] if a in row_of]
+            rows = [row_of[a] for a in to_str_list(clicked) if a in row_of]
             if rows:
                 user_vectors[filled] = embeddings[rows].mean(axis=0)
             user_index[user_id] = filled

@@ -36,7 +36,7 @@ def flatten_candidates(impressions: pd.DataFrame, row_of: dict[str, int]):
 
 def score_split(index: BM25Index, embeddings: np.ndarray, articles: pd.DataFrame,
                 row_of: dict[str, int], popularity: dict, profiles_all: pd.DataFrame,
-                impressions: pd.DataFrame, split_name: str, last_n: int, pooling: str,
+                impressions: pd.DataFrame, split_name: str, pooling: str,
                 topk: int) -> dict:
     """Score every candidate in `impressions` with each base scorer.
 
@@ -51,7 +51,7 @@ def score_split(index: BM25Index, embeddings: np.ndarray, articles: pd.DataFrame
         (profiles_all["split"] == split_name) & (profiles_all["user_id"].isin(needed))
     ].reset_index(drop=True)
 
-    user_ids, token_lists = build_queries(profiles, articles, last_n)
+    user_ids, token_lists = build_queries(profiles, articles)
     user_row = {u: i for i, u in enumerate(user_ids)}
     query_matrix = index.query_matrix(token_lists)
 
@@ -72,7 +72,7 @@ def score_split(index: BM25Index, embeddings: np.ndarray, articles: pd.DataFrame
 
     sem = np.zeros(len(flat_ids), dtype=np.float32)
     if pooling == "topk":
-        hist_user_ids, hist_rows_list = build_user_history_rows(profiles, row_of, last_n)
+        hist_user_ids, hist_rows_list = build_user_history_rows(profiles, row_of)
         history_rows_by_user = dict(zip(hist_user_ids, hist_rows_list))
         for i in range(len(impressions)):
             lo, hi = offsets[i], offsets[i + 1]
@@ -87,7 +87,7 @@ def score_split(index: BM25Index, embeddings: np.ndarray, articles: pd.DataFrame
             seg[ok] = score_topk_similarity(embeddings, doc_rows[ok], hist_rows, topk)
             sem[lo:hi] = seg
     else:
-        _, user_vectors = build_user_vectors(profiles, row_of, embeddings, last_n, False, 5.0)
+        _, user_vectors = build_user_vectors(profiles, row_of, embeddings, False, 5.0)
         sem[valid] = np.einsum(
             "ij,ij->i", user_vectors[flat_user_rows[valid]], embeddings[flat_doc_rows[valid]]
         )
@@ -137,7 +137,7 @@ def hybrid_scores(model: LogisticRegression, per_imp: dict) -> list[np.ndarray]:
 
 def fit_hybrid_from_val(cfg, index: BM25Index, embeddings: np.ndarray, articles: pd.DataFrame,
                         row_of: dict[str, int], popularity: dict, profiles_all: pd.DataFrame,
-                        last_n: int = 20, pooling: str = "topk", topk: int = 5,
+                        pooling: str = "topk", topk: int = 5,
                         fit_sample: int = 5000):
     """Load the val split, score it, and fit the hybrid combiner on it.
 
@@ -153,6 +153,6 @@ def fit_hybrid_from_val(cfg, index: BM25Index, embeddings: np.ndarray, articles:
     fit_impressions = fit_impressions.reset_index(drop=True)
 
     fit_scored = score_split(index, embeddings, articles, row_of, popularity, profiles_all,
-                             fit_impressions, "val", last_n, pooling, topk)
+                             fit_impressions, "val", pooling, topk)
     model = fit_hybrid_combiner(fit_scored["per_imp"], fit_scored["labels_by_imp"])
     return model, fit_scored, len(fit_impressions)

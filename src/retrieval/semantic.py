@@ -105,13 +105,22 @@ def encode_articles(cfg: Config, articles: pd.DataFrame, batch_size: int) -> np.
 
 
 def build_user_vectors(profiles: pd.DataFrame, row_of: dict[str, int],
-                       embeddings: np.ndarray, last_n: int,
+                       embeddings: np.ndarray,
                        recency_weighted: bool, half_life: float) -> tuple[list[str], np.ndarray]:
-    """Pool each user's recent click embeddings into one query vector."""
+    """Pool a user's whole click history into one query vector.
+
+    Kept for the pooling ablation, and still what the retrieval path uses,
+    since this is the only form that yields one query vector FAISS can index.
+    `score_topk_similarity` is the default for ranking and beats it on val
+    (MIND 0.6508 vs 0.6408, EB-NeRD 0.5590 vs 0.5219); note this function is
+    that scorer's k >= len(history) limit, not a different method. Mean pooling
+    does still improve with the full history rather than washing out - measured
+    on circulating-pool r@50, MIND 0.0751 -> 0.0790 and EB-NeRD 0.0216 -> 0.0239.
+    """
     user_ids, vectors = [], []
     dim = embeddings.shape[1]
     for user_id, clicked in zip(profiles["user_id"], profiles["clicked_ids"]):
-        rows = [row_of[a] for a in list(clicked)[-last_n:] if a in row_of]
+        rows = [row_of[a] for a in clicked if a in row_of]
         if not rows:
             vectors.append(np.zeros(dim, dtype=np.float32))
             user_ids.append(user_id)
@@ -129,17 +138,19 @@ def build_user_vectors(profiles: pd.DataFrame, row_of: dict[str, int],
     return user_ids, l2_normalize(np.vstack(vectors).astype(np.float32))
 
 
-def build_user_history_rows(profiles: pd.DataFrame, row_of: dict[str, int],
-                            last_n: int) -> tuple[list[str], list[np.ndarray]]:
-    """Per-user embedding-row indices of their last `last_n` clicked articles.
+def build_user_history_rows(profiles: pd.DataFrame,
+                            row_of: dict[str, int]) -> tuple[list[str], list[np.ndarray]]:
+    """Per-user embedding-row indices of every article the user clicked.
 
     Feeds `score_topk_similarity`, which needs each click as its own row
-    rather than pooled into one vector first.
+    rather than pooled into one vector first. Carrying the full history is
+    safe here: a stale click that matches nothing never enters the top k, so
+    it costs accuracy nothing and only the k best matches are averaged.
     """
     user_ids, rows_list = [], []
     for user_id, clicked in zip(profiles["user_id"], profiles["clicked_ids"]):
         rows = np.array(
-            [row_of[a] for a in list(clicked)[-last_n:] if a in row_of], dtype=np.int64
+            [row_of[a] for a in clicked if a in row_of], dtype=np.int64
         )
         user_ids.append(user_id)
         rows_list.append(rows)
@@ -152,8 +163,11 @@ def score_topk_similarity(embeddings: np.ndarray, doc_rows: np.ndarray,
 
     Matching against individual clicks and keeping only the best few - rather
     than mean-pooling history into one vector first - avoids averaging away a
-    niche interest that explains the click. Measured on MIND val: AUC 0.6414
-    vs 0.6299 for mean pooling, confirmed against the official scorer.
+    niche interest that explains the click. k interpolates between max pooling
+    (k=1) and mean pooling (k >= len(hist_rows), which is an exact identity for
+    within-impression ranking, not an approximation); the optimum is interior.
+    Measured on val, k=5 vs mean pooling: MIND 0.6508 vs 0.6408, EB-NeRD 0.5590
+    vs 0.5219, both paired-bootstrap significant (tools/sweep_pooling_k.py).
     `doc_rows`/`hist_rows` must both be non-empty valid embedding rows; the
     caller is responsible for masking out missing candidates or empty history.
     """
@@ -185,7 +199,6 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--split", default="test", choices=["train", "val", "test"])
-    parser.add_argument("--last-n", type=int, default=20)
     parser.add_argument("--recency-weighted", action="store_true",
                         help="exponentially decay older clicks instead of mean pooling")
     parser.add_argument("--half-life", type=float, default=5.0,
@@ -230,7 +243,7 @@ def main(argv: list[str] | None = None) -> int:
     needed = set(impressions["user_id"])
     profiles = profiles[profiles["user_id"].isin(needed)]
     user_ids, user_vectors = build_user_vectors(
-        profiles, row_of, embeddings, args.last_n,
+        profiles, row_of, embeddings,
         args.recency_weighted, args.half_life
     )
     user_row = {u: i for i, u in enumerate(user_ids)}
@@ -291,7 +304,7 @@ def main(argv: list[str] | None = None) -> int:
     result = {
         "dataset": cfg.dataset, "split": args.split, "method": "semantic",
         "embedding_source": source,
-        "params": {"last_n": args.last_n,
+        "params": {"history": "full",
                    "pooling": "recency" if args.recency_weighted else "mean",
                    "half_life": args.half_life},
         "n_impressions_evaluated": int(len(impressions)),
