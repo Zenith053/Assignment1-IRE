@@ -1,6 +1,7 @@
 # Pinned to the versions this pipeline was built and measured against.
 # Note pandas 3.x: object-column and .astype("string") semantics differ from 2.x.
 faiss-cpu==1.15.0
+lightgbm==4.7.0
 matplotlib==3.11.1
 numpy==2.5.2
 pandas==3.0.5

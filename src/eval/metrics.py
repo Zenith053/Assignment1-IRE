@@ -140,3 +140,31 @@ def bootstrap_ci(values: np.ndarray, n_boot: int = 1000, alpha: float = 0.05,
     means = values[idx].mean(axis=1)
     lo, hi = np.percentile(means, [100 * alpha / 2, 100 * (1 - alpha / 2)])
     return point, float(lo), float(hi)
+
+
+def paired_bootstrap_ci(a: list, b: list, n_boot: int = 10_000, alpha: float = 0.05,
+                        seed: int = 13) -> dict:
+    """95% CI on the per-impression difference a - b (e.g. after - before re-ranking).
+
+    A claimed gain needs a *paired* CI, not two independent `bootstrap_ci` calls
+    compared by eye - the same impression's difficulty cancels out of the
+    difference, which is what makes "does a beat b" answerable at all. Only
+    impressions where BOTH a and b are defined enter the comparison, so an
+    AUC that is None for one scorer never silently drops out of only one side.
+    """
+    paired = [(x, y) for x, y in zip(a, b) if x is not None and y is not None]
+    n = len(paired)
+    if n == 0:
+        return {"mean_diff": float("nan"), "ci_low": float("nan"),
+               "ci_high": float("nan"), "n_paired": 0, "excludes_zero": False}
+    diff = np.array([x - y for x, y in paired], dtype=np.float64)
+    mean_diff = float(diff.mean())
+    if n == 1:
+        return {"mean_diff": mean_diff, "ci_low": mean_diff, "ci_high": mean_diff,
+               "n_paired": 1, "excludes_zero": mean_diff != 0.0}
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, n, size=(n_boot, n))
+    means = diff[idx].mean(axis=1)
+    lo, hi = np.percentile(means, [100 * alpha / 2, 100 * (1 - alpha / 2)])
+    return {"mean_diff": mean_diff, "ci_low": float(lo), "ci_high": float(hi),
+           "n_paired": n, "excludes_zero": bool(lo > 0 or hi < 0)}
