@@ -1,0 +1,347 @@
+{
+  "dataset": "ebnerd",
+  "candidates": "inview",
+  "n_impressions": {
+    "train": 3500,
+    "val": 3500,
+    "test": 3500
+  },
+  "best_before": "semantic",
+  "metrics": {
+    "semantic": {
+      "auc": {
+        "value": 0.540092980154871,
+        "ci_low": 0.528654479393392,
+        "ci_high": 0.5505836856682058,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "mrr": {
+        "value": 0.34335330174874296,
+        "ci_low": 0.33352193198766134,
+        "ci_high": 0.35202282205059865,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "ndcg@5": {
+        "value": 0.3769924271319079,
+        "ci_low": 0.3657956208097325,
+        "ci_high": 0.387645647033947,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "ndcg@10": {
+        "value": 0.45940668599730405,
+        "ci_low": 0.45048589176805126,
+        "ci_high": 0.46804255430911557,
+        "n": 3500,
+        "n_undefined": 0
+      }
+    },
+    "bm25": {
+      "auc": {
+        "value": 0.5185883457036684,
+        "ci_low": 0.5081046295355475,
+        "ci_high": 0.5300743516543535,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "mrr": {
+        "value": 0.32744919049609833,
+        "ci_low": 0.3182949744886271,
+        "ci_high": 0.3372795858496309,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "ndcg@5": {
+        "value": 0.3582281473228225,
+        "ci_low": 0.3470779604145937,
+        "ci_high": 0.37025622174429945,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "ndcg@10": {
+        "value": 0.44242531039044064,
+        "ci_low": 0.4336299575685878,
+        "ci_high": 0.45168044333925195,
+        "n": 3500,
+        "n_undefined": 0
+      }
+    },
+    "popularity": {
+      "auc": {
+        "value": 0.46872777111219954,
+        "ci_low": 0.4660835140367607,
+        "ci_high": 0.4711966896346487,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "mrr": {
+        "value": 0.28050186478514555,
+        "ci_low": 0.27265349774026426,
+        "ci_high": 0.28746600340134176,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "ndcg@5": {
+        "value": 0.313979256490253,
+        "ci_low": 0.3029028434868799,
+        "ci_high": 0.32407794836481263,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "ndcg@10": {
+        "value": 0.40404241153886367,
+        "ci_low": 0.39611764745115835,
+        "ci_high": 0.411106855235683,
+        "n": 3500,
+        "n_undefined": 0
+      }
+    },
+    "gbdt": {
+      "auc": {
+        "value": 0.7165245739005213,
+        "ci_low": 0.7075266148682959,
+        "ci_high": 0.7244567123928394,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "mrr": {
+        "value": 0.4766400471127645,
+        "ci_low": 0.4665979700671945,
+        "ci_high": 0.48627920950134546,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "ndcg@5": {
+        "value": 0.5392308307609172,
+        "ci_low": 0.5282210143821572,
+        "ci_high": 0.5503078152349354,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "ndcg@10": {
+        "value": 0.5828178733297467,
+        "ci_low": 0.574192756155141,
+        "ci_high": 0.5915237931096083,
+        "n": 3500,
+        "n_undefined": 0
+      }
+    },
+    "mlp": {
+      "auc": {
+        "value": 0.6180796322181528,
+        "ci_low": 0.6080824660450995,
+        "ci_high": 0.6285776044599621,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "mrr": {
+        "value": 0.37584545199849173,
+        "ci_low": 0.3679325405750406,
+        "ci_high": 0.38483737500556,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "ndcg@5": {
+        "value": 0.42999167536169014,
+        "ci_low": 0.4206876717297398,
+        "ci_high": 0.440279387136317,
+        "n": 3500,
+        "n_undefined": 0
+      },
+      "ndcg@10": {
+        "value": 0.5009825748516403,
+        "ci_low": 0.49347432222171067,
+        "ci_high": 0.5096644440358777,
+        "n": 3500,
+        "n_undefined": 0
+      }
+    }
+  },
+  "paired_vs_before": {
+    "gbdt": {
+      "auc": {
+        "mean_diff": 0.1764315937456504,
+        "ci_low": 0.16321964764847594,
+        "ci_high": 0.18953253121801902,
+        "n_paired": 3500,
+        "excludes_zero": true
+      },
+      "mrr": {
+        "mean_diff": 0.1332867453640215,
+        "ci_low": 0.1202569368820549,
+        "ci_high": 0.1462906409794145,
+        "n_paired": 3500,
+        "excludes_zero": true
+      },
+      "ndcg@5": {
+        "mean_diff": 0.16223840362900924,
+        "ci_low": 0.14838705600568414,
+        "ci_high": 0.17591383620223622,
+        "n_paired": 3500,
+        "excludes_zero": true
+      },
+      "ndcg@10": {
+        "mean_diff": 0.12341118733244259,
+        "ci_low": 0.11221972077754597,
+        "ci_high": 0.13439519094918218,
+        "n_paired": 3500,
+        "excludes_zero": true
+      }
+    },
+    "mlp": {
+      "auc": {
+        "mean_diff": 0.07798665206328191,
+        "ci_low": 0.06561334606701616,
+        "ci_high": 0.09009211458964653,
+        "n_paired": 3500,
+        "excludes_zero": true
+      },
+      "mrr": {
+        "mean_diff": 0.03249215024974881,
+        "ci_low": 0.02030973607091174,
+        "ci_high": 0.044607133818428645,
+        "n_paired": 3500,
+        "excludes_zero": true
+      },
+      "ndcg@5": {
+        "mean_diff": 0.05299924822978215,
+        "ci_low": 0.040002992769436335,
+        "ci_high": 0.06573480066763912,
+        "n_paired": 3500,
+        "excludes_zero": true
+      },
+      "ndcg@10": {
+        "mean_diff": 0.04157588885433623,
+        "ci_low": 0.031378783351347084,
+        "ci_high": 0.0517356683222201,
+        "n_paired": 3500,
+        "excludes_zero": true
+      }
+    }
+  },
+  "gbdt_feature_importance": [
+    {
+      "feature": "rolling_clicks_24h",
+      "gain": 0.1971022906335858
+    },
+    {
+      "feature": "hour_of_day",
+      "gain": 0.10791078142426969
+    },
+    {
+      "feature": "freshness_hours",
+      "gain": 0.10502768286669287
+    },
+    {
+      "feature": "rolling_clicks_168h",
+      "gain": 0.0686586545982022
+    },
+    {
+      "feature": "popularity_rank",
+      "gain": 0.06631064731014204
+    },
+    {
+      "feature": "category_match_rate",
+      "gain": 0.06380399525258447
+    },
+    {
+      "feature": "semantic",
+      "gain": 0.060278936384681084
+    },
+    {
+      "feature": "train_clicks_log1p",
+      "gain": 0.04235800300807151
+    },
+    {
+      "feature": "inview_size",
+      "gain": 0.03202419506154649
+    },
+    {
+      "feature": "n_tokens",
+      "gain": 0.031576047352186484
+    },
+    {
+      "feature": "bm25_rank_in_imp",
+      "gain": 0.031014658129580458
+    },
+    {
+      "feature": "semantic_rank_in_imp",
+      "gain": 0.0253619583187025
+    },
+    {
+      "feature": "candidate_position",
+      "gain": 0.023465630096633258
+    },
+    {
+      "feature": "popularity_rank_in_imp",
+      "gain": 0.019007329688237304
+    },
+    {
+      "feature": "bm25",
+      "gain": 0.017693268109003332
+    },
+    {
+      "feature": "candidate_position_norm",
+      "gain": 0.016623945309276075
+    },
+    {
+      "feature": "mean_hist_read_time",
+      "gain": 0.015825985361602173
+    },
+    {
+      "feature": "hours_since_last_click",
+      "gain": 0.014184454012633184
+    },
+    {
+      "feature": "hist_category_entropy",
+      "gain": 0.013174395077123069
+    },
+    {
+      "feature": "mean_hist_scroll_pct",
+      "gain": 0.012462248954188924
+    },
+    {
+      "feature": "day_of_week",
+      "gain": 0.008903581561181364
+    },
+    {
+      "feature": "hist_len",
+      "gain": 0.007659380770349268
+    },
+    {
+      "feature": "hist_n_distinct_categories",
+      "gain": 0.005579832457302398
+    },
+    {
+      "feature": "hist_len_log1p",
+      "gain": 0.004755788429303514
+    },
+    {
+      "feature": "seconds_since_session_start",
+      "gain": 0.004044651530922308
+    },
+    {
+      "feature": "hist_decay_mass",
+      "gain": 0.00250242322480262
+    },
+    {
+      "feature": "session_impression_index",
+      "gain": 0.002014476263286822
+    },
+    {
+      "feature": "session_clicks_so_far",
+      "gain": 0.0006747588139088083
+    },
+    {
+      "feature": "is_head",
+      "gain": 0.0
+    },
+    {
+      "feature": "category_match",
+      "gain": 0.0
+    }
+  ],
+  "mlp_best_val_auc": 0.6094066288875967
+}

@@ -1,0 +1,117 @@
+{
+  "note": "Two full benchmark runs (2,000 requests each) on the same machine, back to back. Percent change = run 2 vs run 1. Run 1 is reports/q4_latency_<dataset>.json.",
+  "runs": {
+    "mind": {
+      "as_is": {
+        "mean": {
+          "run1_ms": 26.2623,
+          "run2_ms": 24.2985,
+          "change_pct": -7.5
+        },
+        "p50": {
+          "run1_ms": 26.1328,
+          "run2_ms": 24.2095,
+          "change_pct": -7.4
+        },
+        "p95": {
+          "run1_ms": 28.5236,
+          "run2_ms": 25.5526,
+          "change_pct": -10.4
+        },
+        "p99": {
+          "run1_ms": 29.5507,
+          "run2_ms": 26.2804,
+          "change_pct": -11.1
+        },
+        "max": {
+          "run1_ms": 48.3096,
+          "run2_ms": 48.749,
+          "change_pct": 0.9
+        }
+      },
+      "serving": {
+        "mean": {
+          "run1_ms": 1.2011,
+          "run2_ms": 1.1684,
+          "change_pct": -2.7
+        },
+        "p50": {
+          "run1_ms": 1.1354,
+          "run2_ms": 1.0998,
+          "change_pct": -3.1
+        },
+        "p95": {
+          "run1_ms": 1.7655,
+          "run2_ms": 1.7111,
+          "change_pct": -3.1
+        },
+        "p99": {
+          "run1_ms": 2.239,
+          "run2_ms": 2.1886,
+          "change_pct": -2.3
+        },
+        "max": {
+          "run1_ms": 3.3023,
+          "run2_ms": 3.2274,
+          "change_pct": -2.3
+        }
+      }
+    },
+    "ebnerd": {
+      "as_is": {
+        "mean": {
+          "run1_ms": 9.7399,
+          "run2_ms": 9.7424,
+          "change_pct": 0.0
+        },
+        "p50": {
+          "run1_ms": 9.6066,
+          "run2_ms": 9.624,
+          "change_pct": 0.2
+        },
+        "p95": {
+          "run1_ms": 11.1191,
+          "run2_ms": 11.3467,
+          "change_pct": 2.0
+        },
+        "p99": {
+          "run1_ms": 11.7307,
+          "run2_ms": 12.0177,
+          "change_pct": 2.4
+        },
+        "max": {
+          "run1_ms": 15.2355,
+          "run2_ms": 17.9397,
+          "change_pct": 17.7
+        }
+      },
+      "serving": {
+        "mean": {
+          "run1_ms": 1.8855,
+          "run2_ms": 1.9364,
+          "change_pct": 2.7
+        },
+        "p50": {
+          "run1_ms": 1.7438,
+          "run2_ms": 1.7929,
+          "change_pct": 2.8
+        },
+        "p95": {
+          "run1_ms": 3.3351,
+          "run2_ms": 3.4163,
+          "change_pct": 2.4
+        },
+        "p99": {
+          "run1_ms": 3.8117,
+          "run2_ms": 3.9868,
+          "change_pct": 4.6
+        },
+        "max": {
+          "run1_ms": 4.3945,
+          "run2_ms": 6.4014,
+          "change_pct": 45.7
+        }
+      }
+    }
+  }
+}

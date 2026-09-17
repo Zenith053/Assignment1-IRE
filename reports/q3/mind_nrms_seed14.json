@@ -1,0 +1,86 @@
+{
+  "dataset": "mind",
+  "scale": null,
+  "run": "nrms_seed14",
+  "seed": 14,
+  "device": "mps",
+  "hparams": {
+    "tokenizer": "FacebookAI/xlm-roberta-base",
+    "title_len": 30,
+    "history_len": 20,
+    "npratio": 4,
+    "n_heads": 20,
+    "head_dim": 20,
+    "attention_hidden": 200,
+    "dropout": 0.2,
+    "batch_size": 32,
+    "lr": 0.0001,
+    "epochs_max": 3,
+    "patience": 1,
+    "max_steps": null
+  },
+  "variant": {
+    "popularity": false,
+    "freshness": false,
+    "gate": null,
+    "signals": [],
+    "popularity_windows_hours": null
+  },
+  "n_impressions": {
+    "train": 95071,
+    "val": 20000,
+    "test": 73152
+  },
+  "n_parameters": 17042208,
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.3873819786206867,
+      "steps": 4424,
+      "seconds": 639.3066778182983,
+      "val_auc": 0.5913243180238528
+    },
+    {
+      "epoch": 2,
+      "loss": 1.3118592700135128,
+      "steps": 4424,
+      "seconds": 638.4447717666626,
+      "val_auc": 0.6206217185230222
+    },
+    {
+      "epoch": 3,
+      "loss": 1.271993253959283,
+      "steps": 4424,
+      "seconds": 638.2700402736664,
+      "val_auc": 0.6247572156625458
+    }
+  ],
+  "best_epoch": 3,
+  "best_val_auc": 0.6247572156625458,
+  "test": {
+    "auc": {
+      "value": 0.621743965541886,
+      "ci_low": 0.6196475496435162,
+      "ci_high": 0.6238428829202968,
+      "n": 73152
+    },
+    "mrr": {
+      "value": 0.29593810537847953,
+      "ci_low": 0.2936627159117678,
+      "ci_high": 0.29809743889465884,
+      "n": 73152
+    },
+    "ndcg@5": {
+      "value": 0.3208811259906191,
+      "ci_low": 0.3182591975669998,
+      "ci_high": 0.3233372305086825,
+      "n": 73152
+    },
+    "ndcg@10": {
+      "value": 0.38222487788822257,
+      "ci_low": 0.3798658964956325,
+      "ci_high": 0.3845548853119004,
+      "n": 73152
+    }
+  }
+}

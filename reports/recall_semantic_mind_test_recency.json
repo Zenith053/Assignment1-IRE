@@ -4,7 +4,7 @@
   "method": "semantic",
   "embedding_source": "sentence-transformers/all-MiniLM-L6-v2",
   "params": {
-    "last_n": 20,
+    "history": "full",
     "pooling": "recency",
     "half_life": 5.0
   },
@@ -12,16 +12,31 @@
   "embedding_dim": 384,
   "articles_with_embedding": 65238,
   "pools": {
+    "all": {
+      "available": true,
+      "pool_size": 65238,
+      "exact_search_ms": 10130.8,
+      "recall@50": 0.007639549096835529,
+      "recall@100": 0.015380958848295531,
+      "recall@200": 0.02733260899090045,
+      "random@50": 0.0007664244765320825,
+      "random@100": 0.001532848953064165,
+      "random@200": 0.00306569790612833
+    },
     "circulating": {
       "available": true,
       "pool_size": 4174,
-      "exact_search_ms": 503.2,
-      "recall@50": 0.07099687627325818,
-      "recall@100": 0.11958440852913214,
-      "recall@200": 0.1975757164199375,
+      "exact_search_ms": 1186.7,
+      "recall@50": 0.07157408664946353,
+      "recall@100": 0.1209085970392503,
+      "recall@200": 0.19954502240934402,
       "random@50": 0.011978917105893628,
       "random@100": 0.023957834211787255,
       "random@200": 0.04791566842357451
+    },
+    "fresh": {
+      "available": false,
+      "reason": "dataset has no published_time"
     }
   }
 }

@@ -1,7 +1,7 @@
 PY := .venv/bin/python
 CONFIGS := config/mind.yaml config/ebnerd.yaml
 
-.PHONY: all data download clean split features retrieval eval submission test ebnerd-testset
+.PHONY: all data download clean split features retrieval eval submission sweep test ebnerd-testset q3 q3-train q3-tables q4 q4-check q4-memory q4-latency q4-cost q4-scale q4-report
 
 # One-command rebuild from raw files (Q1.5).
 all: data retrieval eval submission
@@ -30,6 +30,50 @@ eval:
 
 submission:
 	@for cfg in $(CONFIGS); do $(PY) src/submission/generate_predictions.py --config $$cfg || exit 1; done
+
+# Pooling ablation: k for top-k similarity pooling. Not in `all` - it reproduces a
+# design decision rather than any reported result.
+sweep:
+	@for cfg in $(CONFIGS); do \
+	  ds=$$(basename $$cfg .yaml); \
+	  $(PY) tools/sweep_pooling_k.py --config $$cfg \
+	    --out reports/sweep_pooling_k_$${ds}_val.json || exit 1; \
+	done
+
+# Q3: NRMS baseline, popularity/freshness-aware NRMS, ablation (A2).
+# q3-train is ~11 h on an M4 (resumable; skips finished runs); q3-tables ~3 min.
+q3: q3-train q3-tables
+
+q3-train:
+	@for cfg in $(CONFIGS); do $(PY) src/baseline/news_data.py --config $$cfg || exit 1; done
+	tools/run_q3.sh
+
+q3-tables:
+	$(PY) src/baseline/q3_tables.py
+
+# Q4: serving & scale analysis (A2). Needs the Q3 checkpoints named in config/serving.yaml.
+# Order matters: cost and scale read the memory and latency results. ~12 min on an M4;
+# run on AC power with other apps closed, since background load inflates p99.
+q4: q4-check q4-memory q4-latency q4-cost q4-scale q4-report
+
+q4-check:
+	$(PY) src/serving/check_setup.py
+	@for cfg in $(CONFIGS); do $(PY) src/serving/pipeline.py --config $$cfg --check || exit 1; done
+
+q4-memory:
+	@for cfg in $(CONFIGS); do $(PY) src/serving/measure_memory.py --config $$cfg || exit 1; done
+
+q4-latency:
+	@for cfg in $(CONFIGS); do $(PY) src/serving/benchmark_latency.py --config $$cfg || exit 1; done
+
+q4-cost:
+	$(PY) src/serving/cost_model.py
+
+q4-scale:
+	@for cfg in $(CONFIGS); do $(PY) src/serving/scale_10x.py --config $$cfg || exit 1; done
+
+q4-report:
+	$(PY) src/serving/q4_report.py
 
 test:
 	.venv/bin/pytest tests/ -v

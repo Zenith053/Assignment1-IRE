@@ -1,0 +1,88 @@
+{
+  "dataset": "ebnerd",
+  "scale": "small",
+  "run": "nrms_fresh_seed13",
+  "seed": 13,
+  "device": "cuda",
+  "hparams": {
+    "tokenizer": "FacebookAI/xlm-roberta-base",
+    "title_len": 30,
+    "history_len": 20,
+    "npratio": 4,
+    "n_heads": 20,
+    "head_dim": 20,
+    "attention_hidden": 200,
+    "dropout": 0.2,
+    "batch_size": 32,
+    "lr": 0.0001,
+    "epochs_max": 4,
+    "patience": 1,
+    "max_steps": null
+  },
+  "variant": {
+    "popularity": false,
+    "freshness": true,
+    "gate": "learned",
+    "signals": [
+      "log1p_age_hours"
+    ],
+    "popularity_windows_hours": null
+  },
+  "n_impressions": {
+    "train": 192884,
+    "val": 20000,
+    "test": 244647
+  },
+  "n_parameters": 10882674,
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.3707848574461494,
+      "steps": 6051,
+      "seconds": 249.28374242782593,
+      "val_auc": 0.6449647753365924
+    },
+    {
+      "epoch": 2,
+      "loss": 1.303398757166787,
+      "steps": 6051,
+      "seconds": 248.93933534622192,
+      "val_auc": 0.6559586424856073
+    },
+    {
+      "epoch": 3,
+      "loss": 1.2706519017743896,
+      "steps": 6051,
+      "seconds": 248.6316740512848,
+      "val_auc": 0.6539483500778894
+    }
+  ],
+  "best_epoch": 2,
+  "best_val_auc": 0.6559586424856073,
+  "test": {
+    "auc": {
+      "value": 0.6469383220187767,
+      "ci_low": 0.6458131292276922,
+      "ci_high": 0.6482033827255356,
+      "n": 244647
+    },
+    "mrr": {
+      "value": 0.4207177269752551,
+      "ci_low": 0.41957349238033637,
+      "ci_high": 0.42197833373648824,
+      "n": 244647
+    },
+    "ndcg@5": {
+      "value": 0.47439942284814135,
+      "ci_low": 0.4731708031031566,
+      "ci_high": 0.47572484811648114,
+      "n": 244647
+    },
+    "ndcg@10": {
+      "value": 0.534008091839843,
+      "ci_low": 0.5329888329132894,
+      "ci_high": 0.5351312167222276,
+      "n": 244647
+    }
+  }
+}

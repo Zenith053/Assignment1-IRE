@@ -1,0 +1,87 @@
+# Q4 serving & scale analysis: the one place that defines what is measured.
+# Every Q4 script (src/serving/) reads this file, so the reported numbers all come
+# from the setup written here. Change a value here, not inside a script.
+
+# ---------------------------------------------------------------------------
+# What is being served: the full two-stage pipeline (Q2.1 retrieve -> Q3 re-rank)
+# ---------------------------------------------------------------------------
+pipeline:
+  stage1:                     # candidate generation: src/rerank/retriever.UnionRetriever
+    k_bm25: 80                # BM25 top-k
+    k_semantic: 100           # FAISS (A1 embeddings) top-k
+    k_popularity: 20          # train-popularity top-k
+    k_total: 200              # deduplicated union, capped
+    pool: circulating         # same candidate pool as Q2's Universe B
+  stage2:                     # re-ranking: src/baseline/nrms.NRMS with candidate signals
+    top_n: 10                 # articles returned to the user
+
+# Trained weights to serve. Latency does not depend on weight values, only on the
+# architecture; these runs are chosen because their saved test scores also allow
+# the Phase 1 correctness check (serving path must reproduce offline scores).
+# MIND's selected Q3 model is the plain-sum variant, whose checkpoints stayed on
+# Kaggle; gate and sum differ by one 401-parameter layer, so serving cost is the same.
+models:
+  mind:
+    checkpoint: data/feature_store/mind/q3_runs/nrms_pop_seed13.pt
+    test_scores: data/feature_store/mind/q3_runs/nrms_pop_seed13_test_scores.npz
+    popularity: true
+    freshness: false
+    gate: learned
+  ebnerd:
+    checkpoint: data/feature_store/ebnerd/q3_runs/nrms_popfresh_seed13.pt
+    test_scores: data/feature_store/ebnerd/q3_runs/nrms_popfresh_seed13_test_scores.npz
+    popularity: true
+    freshness: true
+    gate: learned
+
+# ---------------------------------------------------------------------------
+# How it is measured
+# ---------------------------------------------------------------------------
+hardware:
+  device: cpu                 # recommendation serving is typically CPU; reported "per core"
+  threads: 1                  # torch, faiss and BLAS pinned to one thread
+
+latency:
+  n_requests: 2000            # p99 is then set by the 20 slowest requests
+  warmup_requests: 50         # discarded: first calls pay library/cache start-up
+  request_split: test         # requests replay (user, timestamp) from test impressions
+  seed: 13
+  percentiles: [50, 95, 99]
+
+correctness:
+  n_impressions: 200          # serving-path scores vs saved offline test scores
+  tolerance: 1.0e-4           # CPU vs Apple-GPU float rounding
+
+cost:
+  sla_p99_ms: 100
+  target_utilisation: 0.6     # headroom so queueing does not blow up p99 (checked by simulation)
+  target_qps: [100, 1000, 10000]
+  # ASSUMPTION, not a quote: an illustrative on-demand price per vCPU-hour. It is a
+  # parameter of the estimate and must be stated next to every cost number.
+  usd_per_core_hour: 0.04
+  price_sensitivity_usd_per_core_hour: [0.02, 0.04, 0.08]
+  # ASSUMPTION: a cloud vCPU (often one hyperthread of an x86 core) is slower than an
+  # M4 performance core; measured M4 service times are multiplied by these factors.
+  cloud_slowdown_factors: [1, 2, 3]
+  # ASSUMPTION: general-purpose cloud instances give ~4 GB RAM per vCPU.
+  ram_gb_per_vcpu: 4
+  # Python serves one request per process, so every core runs a worker holding its own
+  # copy of the indexes and model: RAM per worker = served structures + runtime.
+  simulation:
+    n_arrivals: 200000        # Poisson arrivals per simulated configuration
+    warmup_fraction: 0.05     # first arrivals discarded (queue starts empty)
+    seed: 13
+    utilisation_curve: [0.3, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]
+    utilisation_curve_cores: 8
+
+scale_10x:
+  mode: measure               # measure = synthetic 10x benchmark (full Q4); argue = reasoning only (short Q4)
+  factor: 10
+  n_queries: 1000             # real test users replayed against 1x and 10x structures
+  warmup_queries: 20
+  as_is_queries: 100          # as_is BM25 re-slices the whole matrix per request: slow at 10x
+  noise_std: 0.01             # perturbation so replicated article vectors are not exact duplicates
+  hnsw_m: 32
+  hnsw_ef_search: [32, 64, 128, 256]
+  recall_k: 100               # = stage1.k_semantic
+  build_threads: all          # index BUILD may use every core (offline); every timed SEARCH uses 1 thread

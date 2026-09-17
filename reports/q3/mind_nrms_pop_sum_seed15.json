@@ -1,0 +1,94 @@
+{
+  "dataset": "mind",
+  "scale": null,
+  "run": "nrms_pop_sum_seed15",
+  "seed": 15,
+  "device": "cuda",
+  "hparams": {
+    "tokenizer": "FacebookAI/xlm-roberta-base",
+    "title_len": 30,
+    "history_len": 20,
+    "npratio": 4,
+    "n_heads": 20,
+    "head_dim": 20,
+    "attention_hidden": 200,
+    "dropout": 0.2,
+    "batch_size": 32,
+    "lr": 0.0001,
+    "epochs_max": 3,
+    "patience": 1,
+    "max_steps": null
+  },
+  "variant": {
+    "popularity": true,
+    "freshness": false,
+    "gate": "sum",
+    "signals": [
+      "log1p_clicks_1h",
+      "log1p_clicks_24h",
+      "log1p_clicks_168h"
+    ],
+    "popularity_windows_hours": [
+      1.0,
+      24.0,
+      168.0
+    ]
+  },
+  "n_impressions": {
+    "train": 95071,
+    "val": 20000,
+    "test": 73152
+  },
+  "n_parameters": 17042529,
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.3826284131392874,
+      "steps": 4424,
+      "seconds": 233.09873127937317,
+      "val_auc": 0.6006103830678158
+    },
+    {
+      "epoch": 2,
+      "loss": 1.3051230652933683,
+      "steps": 4424,
+      "seconds": 233.57088923454285,
+      "val_auc": 0.6230472321936795
+    },
+    {
+      "epoch": 3,
+      "loss": 1.2682677814674461,
+      "steps": 4424,
+      "seconds": 233.63349556922913,
+      "val_auc": 0.6341966054541693
+    }
+  ],
+  "best_epoch": 3,
+  "best_val_auc": 0.6341966054541693,
+  "test": {
+    "auc": {
+      "value": 0.6314124820513412,
+      "ci_low": 0.6294013163449378,
+      "ci_high": 0.6334388967717053,
+      "n": 73152
+    },
+    "mrr": {
+      "value": 0.3010718174516866,
+      "ci_low": 0.2988366397800795,
+      "ci_high": 0.3032905483096895,
+      "n": 73152
+    },
+    "ndcg@5": {
+      "value": 0.32682252803075373,
+      "ci_low": 0.3243732274440788,
+      "ci_high": 0.3295005857606854,
+      "n": 73152
+    },
+    "ndcg@10": {
+      "value": 0.388979557762116,
+      "ci_low": 0.3867556055426475,
+      "ci_high": 0.3913033018240912,
+      "n": 73152
+    }
+  }
+}

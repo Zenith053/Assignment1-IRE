@@ -1,0 +1,9 @@
+{
+  "dataset": "ebnerd",
+  "n_impressions": 200,
+  "n_candidates": 2386,
+  "max_abs_diff": 4.172325134277344e-06,
+  "tolerance": 0.0001,
+  "passed": true,
+  "top1_agreement": 1.0
+}
