@@ -1,0 +1,153 @@
+{
+  "dataset": "ebnerd",
+  "scale": "small",
+  "mode": "serving",
+  "components": {
+    "stage1/faiss_flat_index (pool)": {
+      "mb": 5.64,
+      "what": "IndexFlatIP over 4,701 circulating articles x 300 dims"
+    },
+    "stage1/a1_article_embeddings": {
+      "mb": 24.89,
+      "what": "20,738 x 300 float32, read to build each user's query vector"
+    },
+    "stage1/bm25_weights (doc x term)": {
+      "mb": 2.65,
+      "what": "sparse BM25 weight matrix"
+    },
+    "stage1/bm25_weights_t (term x doc)": {
+      "mb": 2.74,
+      "what": "the same weights transposed, kept for fast scoring"
+    },
+    "stage1/bm25_vocabulary": {
+      "mb": 4.44,
+      "what": "term -> column dict"
+    },
+    "stage1/bm25_other": {
+      "mb": 2.41,
+      "what": "idf, doc ids/lengths"
+    },
+    "stage1/popularity_ranker": {
+      "mb": 2.75,
+      "what": "train-click ranking"
+    },
+    "stage1/pool_index": {
+      "mb": 0.39,
+      "what": "circulating-pool rows + id set"
+    },
+    "stage1/article_tokens+ids": {
+      "mb": 6.98,
+      "what": "tokens BM25 queries are built from"
+    },
+    "stage1/user_profile_store": {
+      "mb": 20.12,
+      "what": "15,342 users' full click histories"
+    },
+    "cache/bm25_pooled_weights_t": {
+      "mb": 0.79,
+      "what": "pool-sliced BM25 matrix, built once"
+    },
+    "cache/tokens_by_id": {
+      "mb": 7.75,
+      "what": "article -> tokens dict, built once"
+    },
+    "cache/popularity_top_k": {
+      "mb": 0.0,
+      "what": "static top-20, built once"
+    },
+    "stage2/nrms_parameters": {
+      "mb": 43.53,
+      "what": "10,882,866 float32 parameters"
+    },
+    "stage2/nrms_title_token_table": {
+      "mb": 4.98,
+      "what": "int64 token ids, only needed to encode new articles"
+    },
+    "stage2/article_vectors": {
+      "mb": 33.18,
+      "what": "(20739, 400) float32, precomputed at start-up"
+    },
+    "stage2/nrms_row_index": {
+      "mb": 1.99,
+      "what": "article id -> row dict"
+    },
+    "stage2/click_timeline": {
+      "mb": 3.84,
+      "what": "one int64 per click"
+    },
+    "stage2/publish_times": {
+      "mb": 0.17,
+      "what": "float64 per article (freshness)"
+    }
+  },
+  "summary": {
+    "stage1_index_mb": 73.01,
+    "stage1_serving_cache_mb": 8.54,
+    "stage2_mb": 87.69,
+    "served_total_mb": 169.24
+  },
+  "ann_index_option": {
+    "catalogue_articles": 20738,
+    "dims": 300,
+    "flat_full_catalogue_mb": 24.89,
+    "hnsw_full_catalogue_mb": 30.53,
+    "hnsw_m": 32,
+    "hnsw_build_seconds_1_thread": 0.7,
+    "hnsw_overhead_mb": 5.64,
+    "hnsw_overhead_bytes_per_article": 272.0
+  },
+  "loaded_but_not_served_mb": {
+    "rolling_popularity (Q2 features)": 4.1,
+    "session_context (Q2 features)": 179.04,
+    "other_splits_profiles": 42.54,
+    "unused_article_columns": 4.31,
+    "test_impressions (pool + replay)": 81.12
+  },
+  "process": {
+    "rss_python_torch_numpy_mb": 263.7,
+    "rss_after_all_imports_mb": 359.6,
+    "rss_before_load_mb": 359.6,
+    "rss_after_load_mb": 3665.8,
+    "rss_growth_mb": 3306.2,
+    "growth_accounted_by_components_mb": 480.4,
+    "growth_unaccounted_mb": 2825.9,
+    "peak_rss_mb": 3834.5,
+    "load_seconds": 8.8,
+    "load_breakdown_seconds": {
+      "stage1_indexes": 3.95,
+      "stage1_precompute": 0.01,
+      "stage2_model": 0.07,
+      "stage2_encode_all_articles": 3.88,
+      "stage2_signals": 0.88
+    }
+  },
+  "on_disk": {
+    "nrms_checkpoint_mb": 43.54,
+    "feature_store_dir_mb": 57.32
+  },
+  "method": "arrays/tensors/sparse/FAISS by buffer size; Python objects by object-graph walk (shared strings counted per component, so component sum is an upper bound)",
+  "loader_residue": [
+    {
+      "loader": "provided_word2vec",
+      "parses": "load_provided_embeddings: document_vector.parquet, lists of floats",
+      "live_result_mb": 24.9,
+      "rss_left_behind_mb": 931.0,
+      "peak_rss_mb": 1307.0
+    },
+    {
+      "loader": "session_context",
+      "parses": "SessionContext: raw behaviors/history parquet for Q2 session features",
+      "live_result_mb": 179.0,
+      "rss_left_behind_mb": 534.7,
+      "peak_rss_mb": 958.9
+    },
+    {
+      "loader": "rolling_popularity",
+      "parses": "RollingPopularity.from_impressions: all three splits",
+      "live_result_mb": 4.1,
+      "rss_left_behind_mb": 298.9,
+      "peak_rss_mb": 838.3
+    }
+  ],
+  "loader_residue_note": "Process RSS after load includes memory the research loaders (Q1/Q2 feature context) leave reserved after parsing raw files into Python objects; it is not needed to serve requests. A production server would load prebuilt serving artifacts instead."
+}

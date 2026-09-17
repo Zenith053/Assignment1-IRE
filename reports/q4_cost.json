@@ -1,0 +1,1071 @@
+{
+  "assumptions": {
+    "sla_p99_ms": 100,
+    "target_utilisation": 0.6,
+    "usd_per_core_hour": 0.04,
+    "price_sensitivity_usd_per_core_hour": [
+      0.02,
+      0.04,
+      0.08
+    ],
+    "cloud_slowdown_factors": [
+      1,
+      2,
+      3
+    ],
+    "ram_gb_per_vcpu": 4,
+    "workers": "one single-threaded worker process per core, each holding its own copy of indexes + model",
+    "not_included": "network, request parsing, load balancer, profile/click-counter storage round trips",
+    "hardware_measured_on": "Apple M4, 1 thread (see reports/q4_environment.json)"
+  },
+  "datasets": {
+    "mind": {
+      "worker_ram_gb": 0.81,
+      "worker_ram_fits_per_vcpu": true,
+      "modes": {
+        "as_is": {
+          "table": [
+            {
+              "cloud_slowdown": 1,
+              "qps": 100,
+              "service_mean_ms": 26.262,
+              "service_p99_ms": 29.551,
+              "capacity_per_core_rps": 38.1,
+              "cores": 5,
+              "actual_utilisation": 0.525,
+              "sim_p50_ms": 26.319,
+              "sim_p99_ms": 42.263,
+              "sim_p99_wait_ms": 15.715,
+              "meets_sla": true,
+              "ram_gb": 4.0,
+              "usd_per_hour": 0.2,
+              "usd_per_1k_queries": 0.0005555555555555556,
+              "usd_per_1k_by_price": {
+                "0.02": 0.0002777777777777778,
+                "0.04": 0.0005555555555555556,
+                "0.08": 0.0011111111111111111
+              },
+              "usd_per_month_24x7": 144.0
+            },
+            {
+              "cloud_slowdown": 1,
+              "qps": 1000,
+              "service_mean_ms": 26.262,
+              "service_p99_ms": 29.551,
+              "capacity_per_core_rps": 38.1,
+              "cores": 44,
+              "actual_utilisation": 0.597,
+              "sim_p50_ms": 26.128,
+              "sim_p99_ms": 29.55,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 35.5,
+              "usd_per_hour": 1.76,
+              "usd_per_1k_queries": 0.0004888888888888889,
+              "usd_per_1k_by_price": {
+                "0.02": 0.00024444444444444443,
+                "0.04": 0.0004888888888888889,
+                "0.08": 0.0009777777777777777
+              },
+              "usd_per_month_24x7": 1267.2
+            },
+            {
+              "cloud_slowdown": 1,
+              "qps": 10000,
+              "service_mean_ms": 26.262,
+              "service_p99_ms": 29.551,
+              "capacity_per_core_rps": 38.1,
+              "cores": 438,
+              "actual_utilisation": 0.6,
+              "sim_p50_ms": 26.128,
+              "sim_p99_ms": 29.55,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 352.9,
+              "usd_per_hour": 17.52,
+              "usd_per_1k_queries": 0.00048666666666666666,
+              "usd_per_1k_by_price": {
+                "0.02": 0.00024333333333333333,
+                "0.04": 0.00048666666666666666,
+                "0.08": 0.0009733333333333333
+              },
+              "usd_per_month_24x7": 12614.4
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 100,
+              "service_mean_ms": 52.525,
+              "service_p99_ms": 59.101,
+              "capacity_per_core_rps": 19.0,
+              "cores": 9,
+              "actual_utilisation": 0.584,
+              "sim_p50_ms": 52.486,
+              "sim_p99_ms": 72.649,
+              "sim_p99_wait_ms": 19.455,
+              "meets_sla": true,
+              "ram_gb": 7.3,
+              "usd_per_hour": 0.36,
+              "usd_per_1k_queries": 0.001,
+              "usd_per_1k_by_price": {
+                "0.02": 0.0005,
+                "0.04": 0.001,
+                "0.08": 0.002
+              },
+              "usd_per_month_24x7": 259.2
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 1000,
+              "service_mean_ms": 52.525,
+              "service_p99_ms": 59.101,
+              "capacity_per_core_rps": 19.0,
+              "cores": 88,
+              "actual_utilisation": 0.597,
+              "sim_p50_ms": 52.255,
+              "sim_p99_ms": 59.099,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 70.9,
+              "usd_per_hour": 3.52,
+              "usd_per_1k_queries": 0.0009777777777777777,
+              "usd_per_1k_by_price": {
+                "0.02": 0.0004888888888888889,
+                "0.04": 0.0009777777777777777,
+                "0.08": 0.0019555555555555554
+              },
+              "usd_per_month_24x7": 2534.4
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 10000,
+              "service_mean_ms": 52.525,
+              "service_p99_ms": 59.101,
+              "capacity_per_core_rps": 19.0,
+              "cores": 876,
+              "actual_utilisation": 0.6,
+              "sim_p50_ms": 52.255,
+              "sim_p99_ms": 59.099,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 705.9,
+              "usd_per_hour": 35.04,
+              "usd_per_1k_queries": 0.0009733333333333333,
+              "usd_per_1k_by_price": {
+                "0.02": 0.00048666666666666666,
+                "0.04": 0.0009733333333333333,
+                "0.08": 0.0019466666666666666
+              },
+              "usd_per_month_24x7": 25228.8
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 100,
+              "service_mean_ms": 78.787,
+              "service_p99_ms": 88.652,
+              "capacity_per_core_rps": 12.7,
+              "cores": 14,
+              "actual_utilisation": 0.563,
+              "sim_p50_ms": 78.502,
+              "sim_p99_ms": 92.248,
+              "sim_p99_wait_ms": 11.623,
+              "meets_sla": true,
+              "ram_gb": 11.3,
+              "usd_per_hour": 0.56,
+              "usd_per_1k_queries": 0.0015555555555555557,
+              "usd_per_1k_by_price": {
+                "0.02": 0.0007777777777777778,
+                "0.04": 0.0015555555555555557,
+                "0.08": 0.0031111111111111114
+              },
+              "usd_per_month_24x7": 403.2
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 1000,
+              "service_mean_ms": 78.787,
+              "service_p99_ms": 88.652,
+              "capacity_per_core_rps": 12.7,
+              "cores": 132,
+              "actual_utilisation": 0.597,
+              "sim_p50_ms": 78.383,
+              "sim_p99_ms": 88.649,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 106.4,
+              "usd_per_hour": 5.28,
+              "usd_per_1k_queries": 0.0014666666666666667,
+              "usd_per_1k_by_price": {
+                "0.02": 0.0007333333333333333,
+                "0.04": 0.0014666666666666667,
+                "0.08": 0.0029333333333333334
+              },
+              "usd_per_month_24x7": 3801.6
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 10000,
+              "service_mean_ms": 78.787,
+              "service_p99_ms": 88.652,
+              "capacity_per_core_rps": 12.7,
+              "cores": 1314,
+              "actual_utilisation": 0.6,
+              "sim_p50_ms": 78.383,
+              "sim_p99_ms": 88.649,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 1058.8,
+              "usd_per_hour": 52.56,
+              "usd_per_1k_queries": 0.0014600000000000001,
+              "usd_per_1k_by_price": {
+                "0.02": 0.0007300000000000001,
+                "0.04": 0.0014600000000000001,
+                "0.08": 0.0029200000000000003
+              },
+              "usd_per_month_24x7": 37843.2
+            }
+          ],
+          "utilisation_curve": {
+            "cores": 8,
+            "points": [
+              {
+                "utilisation": 0.3,
+                "qps": 91.4,
+                "sim_p50_ms": 26.131,
+                "sim_p99_ms": 29.682,
+                "p99_vs_no_queue": 1.0
+              },
+              {
+                "utilisation": 0.5,
+                "qps": 152.3,
+                "sim_p50_ms": 26.194,
+                "sim_p99_ms": 34.357,
+                "p99_vs_no_queue": 1.16
+              },
+              {
+                "utilisation": 0.6,
+                "qps": 182.8,
+                "sim_p50_ms": 26.284,
+                "sim_p99_ms": 38.667,
+                "p99_vs_no_queue": 1.31
+              },
+              {
+                "utilisation": 0.7,
+                "qps": 213.2,
+                "sim_p50_ms": 26.487,
+                "sim_p99_ms": 44.601,
+                "p99_vs_no_queue": 1.51
+              },
+              {
+                "utilisation": 0.8,
+                "qps": 243.7,
+                "sim_p50_ms": 26.987,
+                "sim_p99_ms": 57.433,
+                "p99_vs_no_queue": 1.94
+              },
+              {
+                "utilisation": 0.9,
+                "qps": 274.2,
+                "sim_p50_ms": 32.724,
+                "sim_p99_ms": 103.783,
+                "p99_vs_no_queue": 3.51
+              },
+              {
+                "utilisation": 0.95,
+                "qps": 289.4,
+                "sim_p50_ms": 44.046,
+                "sim_p99_ms": 195.793,
+                "p99_vs_no_queue": 6.63
+              }
+            ],
+            "highest_utilisation_meeting_sla": 0.8
+          }
+        },
+        "serving": {
+          "table": [
+            {
+              "cloud_slowdown": 1,
+              "qps": 100,
+              "service_mean_ms": 1.201,
+              "service_p99_ms": 2.239,
+              "capacity_per_core_rps": 832.6,
+              "cores": 1,
+              "actual_utilisation": 0.12,
+              "sim_p50_ms": 1.175,
+              "sim_p99_ms": 2.828,
+              "sim_p99_wait_ms": 1.432,
+              "meets_sla": true,
+              "ram_gb": 0.8,
+              "usd_per_hour": 0.04,
+              "usd_per_1k_queries": 0.00011111111111111112,
+              "usd_per_1k_by_price": {
+                "0.02": 5.555555555555556e-05,
+                "0.04": 0.00011111111111111112,
+                "0.08": 0.00022222222222222223
+              },
+              "usd_per_month_24x7": 28.8
+            },
+            {
+              "cloud_slowdown": 1,
+              "qps": 1000,
+              "service_mean_ms": 1.201,
+              "service_p99_ms": 2.239,
+              "capacity_per_core_rps": 832.6,
+              "cores": 3,
+              "actual_utilisation": 0.4,
+              "sim_p50_ms": 1.174,
+              "sim_p99_ms": 2.453,
+              "sim_p99_wait_ms": 0.918,
+              "meets_sla": true,
+              "ram_gb": 2.4,
+              "usd_per_hour": 0.12,
+              "usd_per_1k_queries": 3.3333333333333335e-05,
+              "usd_per_1k_by_price": {
+                "0.02": 1.6666666666666667e-05,
+                "0.04": 3.3333333333333335e-05,
+                "0.08": 6.666666666666667e-05
+              },
+              "usd_per_month_24x7": 86.4
+            },
+            {
+              "cloud_slowdown": 1,
+              "qps": 10000,
+              "service_mean_ms": 1.201,
+              "service_p99_ms": 2.239,
+              "capacity_per_core_rps": 832.6,
+              "cores": 21,
+              "actual_utilisation": 0.572,
+              "sim_p50_ms": 1.137,
+              "sim_p99_ms": 2.239,
+              "sim_p99_wait_ms": 0.023,
+              "meets_sla": true,
+              "ram_gb": 16.9,
+              "usd_per_hour": 0.84,
+              "usd_per_1k_queries": 2.3333333333333332e-05,
+              "usd_per_1k_by_price": {
+                "0.02": 1.1666666666666666e-05,
+                "0.04": 2.3333333333333332e-05,
+                "0.08": 4.6666666666666665e-05
+              },
+              "usd_per_month_24x7": 604.8
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 100,
+              "service_mean_ms": 2.402,
+              "service_p99_ms": 4.478,
+              "capacity_per_core_rps": 416.3,
+              "cores": 1,
+              "actual_utilisation": 0.24,
+              "sim_p50_ms": 2.444,
+              "sim_p99_ms": 6.869,
+              "sim_p99_wait_ms": 4.269,
+              "meets_sla": true,
+              "ram_gb": 0.8,
+              "usd_per_hour": 0.04,
+              "usd_per_1k_queries": 0.00011111111111111112,
+              "usd_per_1k_by_price": {
+                "0.02": 5.555555555555556e-05,
+                "0.04": 0.00011111111111111112,
+                "0.08": 0.00022222222222222223
+              },
+              "usd_per_month_24x7": 28.8
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 1000,
+              "service_mean_ms": 2.402,
+              "service_p99_ms": 4.478,
+              "capacity_per_core_rps": 416.3,
+              "cores": 5,
+              "actual_utilisation": 0.48,
+              "sim_p50_ms": 2.323,
+              "sim_p99_ms": 4.624,
+              "sim_p99_wait_ms": 1.292,
+              "meets_sla": true,
+              "ram_gb": 4.0,
+              "usd_per_hour": 0.2,
+              "usd_per_1k_queries": 5.555555555555556e-05,
+              "usd_per_1k_by_price": {
+                "0.02": 2.777777777777778e-05,
+                "0.04": 5.555555555555556e-05,
+                "0.08": 0.00011111111111111112
+              },
+              "usd_per_month_24x7": 144.0
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 10000,
+              "service_mean_ms": 2.402,
+              "service_p99_ms": 4.478,
+              "capacity_per_core_rps": 416.3,
+              "cores": 41,
+              "actual_utilisation": 0.586,
+              "sim_p50_ms": 2.272,
+              "sim_p99_ms": 4.478,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 33.0,
+              "usd_per_hour": 1.64,
+              "usd_per_1k_queries": 4.555555555555556e-05,
+              "usd_per_1k_by_price": {
+                "0.02": 2.277777777777778e-05,
+                "0.04": 4.555555555555556e-05,
+                "0.08": 9.111111111111112e-05
+              },
+              "usd_per_month_24x7": 1180.8
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 100,
+              "service_mean_ms": 3.603,
+              "service_p99_ms": 6.717,
+              "capacity_per_core_rps": 277.5,
+              "cores": 1,
+              "actual_utilisation": 0.36,
+              "sim_p50_ms": 3.898,
+              "sim_p99_ms": 12.686,
+              "sim_p99_wait_ms": 8.885,
+              "meets_sla": true,
+              "ram_gb": 0.8,
+              "usd_per_hour": 0.04,
+              "usd_per_1k_queries": 0.00011111111111111112,
+              "usd_per_1k_by_price": {
+                "0.02": 5.555555555555556e-05,
+                "0.04": 0.00011111111111111112,
+                "0.08": 0.00022222222222222223
+              },
+              "usd_per_month_24x7": 28.8
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 1000,
+              "service_mean_ms": 3.603,
+              "service_p99_ms": 6.717,
+              "capacity_per_core_rps": 277.5,
+              "cores": 7,
+              "actual_utilisation": 0.515,
+              "sim_p50_ms": 3.457,
+              "sim_p99_ms": 6.781,
+              "sim_p99_wait_ms": 1.424,
+              "meets_sla": true,
+              "ram_gb": 5.6,
+              "usd_per_hour": 0.28,
+              "usd_per_1k_queries": 7.777777777777778e-05,
+              "usd_per_1k_by_price": {
+                "0.02": 3.888888888888889e-05,
+                "0.04": 7.777777777777778e-05,
+                "0.08": 0.00015555555555555556
+              },
+              "usd_per_month_24x7": 201.6
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 10000,
+              "service_mean_ms": 3.603,
+              "service_p99_ms": 6.717,
+              "capacity_per_core_rps": 277.5,
+              "cores": 61,
+              "actual_utilisation": 0.591,
+              "sim_p50_ms": 3.408,
+              "sim_p99_ms": 6.717,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 49.2,
+              "usd_per_hour": 2.44,
+              "usd_per_1k_queries": 6.777777777777778e-05,
+              "usd_per_1k_by_price": {
+                "0.02": 3.388888888888889e-05,
+                "0.04": 6.777777777777778e-05,
+                "0.08": 0.00013555555555555556
+              },
+              "usd_per_month_24x7": 1756.8
+            }
+          ],
+          "utilisation_curve": {
+            "cores": 8,
+            "points": [
+              {
+                "utilisation": 0.3,
+                "qps": 1998.2,
+                "sim_p50_ms": 1.136,
+                "sim_p99_ms": 2.239,
+                "p99_vs_no_queue": 1.0
+              },
+              {
+                "utilisation": 0.5,
+                "qps": 3330.3,
+                "sim_p50_ms": 1.147,
+                "sim_p99_ms": 2.254,
+                "p99_vs_no_queue": 1.01
+              },
+              {
+                "utilisation": 0.6,
+                "qps": 3996.4,
+                "sim_p50_ms": 1.164,
+                "sim_p99_ms": 2.283,
+                "p99_vs_no_queue": 1.02
+              },
+              {
+                "utilisation": 0.7,
+                "qps": 4662.5,
+                "sim_p50_ms": 1.198,
+                "sim_p99_ms": 2.448,
+                "p99_vs_no_queue": 1.09
+              },
+              {
+                "utilisation": 0.8,
+                "qps": 5328.6,
+                "sim_p50_ms": 1.278,
+                "sim_p99_ms": 2.939,
+                "p99_vs_no_queue": 1.31
+              },
+              {
+                "utilisation": 0.9,
+                "qps": 5994.6,
+                "sim_p50_ms": 1.546,
+                "sim_p99_ms": 5.164,
+                "p99_vs_no_queue": 2.31
+              },
+              {
+                "utilisation": 0.95,
+                "qps": 6327.7,
+                "sim_p50_ms": 2.088,
+                "sim_p99_ms": 10.066,
+                "p99_vs_no_queue": 4.5
+              }
+            ],
+            "highest_utilisation_meeting_sla": 0.95
+          }
+        }
+      },
+      "serving_vs_as_is_cores_at_1000qps": {
+        "as_is": 44,
+        "serving": 3
+      }
+    },
+    "ebnerd": {
+      "worker_ram_gb": 0.53,
+      "worker_ram_fits_per_vcpu": true,
+      "modes": {
+        "as_is": {
+          "table": [
+            {
+              "cloud_slowdown": 1,
+              "qps": 100,
+              "service_mean_ms": 9.74,
+              "service_p99_ms": 11.731,
+              "capacity_per_core_rps": 102.7,
+              "cores": 2,
+              "actual_utilisation": 0.487,
+              "sim_p50_ms": 10.142,
+              "sim_p99_ms": 24.509,
+              "sim_p99_wait_ms": 14.688,
+              "meets_sla": true,
+              "ram_gb": 1.1,
+              "usd_per_hour": 0.08,
+              "usd_per_1k_queries": 0.00022222222222222223,
+              "usd_per_1k_by_price": {
+                "0.02": 0.00011111111111111112,
+                "0.04": 0.00022222222222222223,
+                "0.08": 0.00044444444444444447
+              },
+              "usd_per_month_24x7": 57.6
+            },
+            {
+              "cloud_slowdown": 1,
+              "qps": 1000,
+              "service_mean_ms": 9.74,
+              "service_p99_ms": 11.731,
+              "capacity_per_core_rps": 102.7,
+              "cores": 17,
+              "actual_utilisation": 0.573,
+              "sim_p50_ms": 9.626,
+              "sim_p99_ms": 11.857,
+              "sim_p99_wait_ms": 0.911,
+              "meets_sla": true,
+              "ram_gb": 9.0,
+              "usd_per_hour": 0.68,
+              "usd_per_1k_queries": 0.0001888888888888889,
+              "usd_per_1k_by_price": {
+                "0.02": 9.444444444444446e-05,
+                "0.04": 0.0001888888888888889,
+                "0.08": 0.0003777777777777778
+              },
+              "usd_per_month_24x7": 489.6
+            },
+            {
+              "cloud_slowdown": 1,
+              "qps": 10000,
+              "service_mean_ms": 9.74,
+              "service_p99_ms": 11.731,
+              "capacity_per_core_rps": 102.7,
+              "cores": 163,
+              "actual_utilisation": 0.598,
+              "sim_p50_ms": 9.607,
+              "sim_p99_ms": 11.731,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 86.2,
+              "usd_per_hour": 6.52,
+              "usd_per_1k_queries": 0.00018111111111111114,
+              "usd_per_1k_by_price": {
+                "0.02": 9.055555555555557e-05,
+                "0.04": 0.00018111111111111114,
+                "0.08": 0.0003622222222222223
+              },
+              "usd_per_month_24x7": 4694.4
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 100,
+              "service_mean_ms": 19.48,
+              "service_p99_ms": 23.461,
+              "capacity_per_core_rps": 51.3,
+              "cores": 4,
+              "actual_utilisation": 0.487,
+              "sim_p50_ms": 19.552,
+              "sim_p99_ms": 33.155,
+              "sim_p99_wait_ms": 13.402,
+              "meets_sla": true,
+              "ram_gb": 2.1,
+              "usd_per_hour": 0.16,
+              "usd_per_1k_queries": 0.00044444444444444447,
+              "usd_per_1k_by_price": {
+                "0.02": 0.00022222222222222223,
+                "0.04": 0.00044444444444444447,
+                "0.08": 0.0008888888888888889
+              },
+              "usd_per_month_24x7": 115.2
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 1000,
+              "service_mean_ms": 19.48,
+              "service_p99_ms": 23.461,
+              "capacity_per_core_rps": 51.3,
+              "cores": 33,
+              "actual_utilisation": 0.59,
+              "sim_p50_ms": 19.214,
+              "sim_p99_ms": 23.499,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 17.5,
+              "usd_per_hour": 1.32,
+              "usd_per_1k_queries": 0.00036666666666666667,
+              "usd_per_1k_by_price": {
+                "0.02": 0.00018333333333333334,
+                "0.04": 0.00036666666666666667,
+                "0.08": 0.0007333333333333333
+              },
+              "usd_per_month_24x7": 950.4
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 10000,
+              "service_mean_ms": 19.48,
+              "service_p99_ms": 23.461,
+              "capacity_per_core_rps": 51.3,
+              "cores": 325,
+              "actual_utilisation": 0.599,
+              "sim_p50_ms": 19.214,
+              "sim_p99_ms": 23.461,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 171.9,
+              "usd_per_hour": 13.0,
+              "usd_per_1k_queries": 0.0003611111111111111,
+              "usd_per_1k_by_price": {
+                "0.02": 0.00018055555555555555,
+                "0.04": 0.0003611111111111111,
+                "0.08": 0.0007222222222222222
+              },
+              "usd_per_month_24x7": 9360.0
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 100,
+              "service_mean_ms": 29.22,
+              "service_p99_ms": 35.192,
+              "capacity_per_core_rps": 34.2,
+              "cores": 5,
+              "actual_utilisation": 0.584,
+              "sim_p50_ms": 29.586,
+              "sim_p99_ms": 51.108,
+              "sim_p99_wait_ms": 21.303,
+              "meets_sla": true,
+              "ram_gb": 2.6,
+              "usd_per_hour": 0.2,
+              "usd_per_1k_queries": 0.0005555555555555556,
+              "usd_per_1k_by_price": {
+                "0.02": 0.0002777777777777778,
+                "0.04": 0.0005555555555555556,
+                "0.08": 0.0011111111111111111
+              },
+              "usd_per_month_24x7": 144.0
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 1000,
+              "service_mean_ms": 29.22,
+              "service_p99_ms": 35.192,
+              "capacity_per_core_rps": 34.2,
+              "cores": 49,
+              "actual_utilisation": 0.596,
+              "sim_p50_ms": 28.821,
+              "sim_p99_ms": 35.192,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 25.9,
+              "usd_per_hour": 1.96,
+              "usd_per_1k_queries": 0.0005444444444444444,
+              "usd_per_1k_by_price": {
+                "0.02": 0.0002722222222222222,
+                "0.04": 0.0005444444444444444,
+                "0.08": 0.0010888888888888888
+              },
+              "usd_per_month_24x7": 1411.2
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 10000,
+              "service_mean_ms": 29.22,
+              "service_p99_ms": 35.192,
+              "capacity_per_core_rps": 34.2,
+              "cores": 487,
+              "actual_utilisation": 0.6,
+              "sim_p50_ms": 28.821,
+              "sim_p99_ms": 35.192,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 257.5,
+              "usd_per_hour": 19.48,
+              "usd_per_1k_queries": 0.0005411111111111111,
+              "usd_per_1k_by_price": {
+                "0.02": 0.00027055555555555557,
+                "0.04": 0.0005411111111111111,
+                "0.08": 0.0010822222222222223
+              },
+              "usd_per_month_24x7": 14025.6
+            }
+          ],
+          "utilisation_curve": {
+            "cores": 8,
+            "points": [
+              {
+                "utilisation": 0.3,
+                "qps": 246.4,
+                "sim_p50_ms": 9.607,
+                "sim_p99_ms": 11.758,
+                "p99_vs_no_queue": 1.0
+              },
+              {
+                "utilisation": 0.5,
+                "qps": 410.7,
+                "sim_p50_ms": 9.657,
+                "sim_p99_ms": 12.923,
+                "p99_vs_no_queue": 1.1
+              },
+              {
+                "utilisation": 0.6,
+                "qps": 492.8,
+                "sim_p50_ms": 9.739,
+                "sim_p99_ms": 14.506,
+                "p99_vs_no_queue": 1.24
+              },
+              {
+                "utilisation": 0.7,
+                "qps": 575.0,
+                "sim_p50_ms": 9.914,
+                "sim_p99_ms": 16.679,
+                "p99_vs_no_queue": 1.42
+              },
+              {
+                "utilisation": 0.8,
+                "qps": 657.1,
+                "sim_p50_ms": 10.358,
+                "sim_p99_ms": 21.407,
+                "p99_vs_no_queue": 1.82
+              },
+              {
+                "utilisation": 0.9,
+                "qps": 739.2,
+                "sim_p50_ms": 12.175,
+                "sim_p99_ms": 38.572,
+                "p99_vs_no_queue": 3.29
+              },
+              {
+                "utilisation": 0.95,
+                "qps": 780.3,
+                "sim_p50_ms": 16.552,
+                "sim_p99_ms": 71.716,
+                "p99_vs_no_queue": 6.11
+              }
+            ],
+            "highest_utilisation_meeting_sla": 0.95
+          }
+        },
+        "serving": {
+          "table": [
+            {
+              "cloud_slowdown": 1,
+              "qps": 100,
+              "service_mean_ms": 1.885,
+              "service_p99_ms": 3.812,
+              "capacity_per_core_rps": 530.4,
+              "cores": 1,
+              "actual_utilisation": 0.189,
+              "sim_p50_ms": 1.929,
+              "sim_p99_ms": 5.486,
+              "sim_p99_wait_ms": 3.236,
+              "meets_sla": true,
+              "ram_gb": 0.5,
+              "usd_per_hour": 0.04,
+              "usd_per_1k_queries": 0.00011111111111111112,
+              "usd_per_1k_by_price": {
+                "0.02": 5.555555555555556e-05,
+                "0.04": 0.00011111111111111112,
+                "0.08": 0.00022222222222222223
+              },
+              "usd_per_month_24x7": 28.8
+            },
+            {
+              "cloud_slowdown": 1,
+              "qps": 1000,
+              "service_mean_ms": 1.885,
+              "service_p99_ms": 3.812,
+              "capacity_per_core_rps": 530.4,
+              "cores": 4,
+              "actual_utilisation": 0.471,
+              "sim_p50_ms": 1.826,
+              "sim_p99_ms": 4.143,
+              "sim_p99_wait_ms": 1.45,
+              "meets_sla": true,
+              "ram_gb": 2.1,
+              "usd_per_hour": 0.16,
+              "usd_per_1k_queries": 4.4444444444444447e-05,
+              "usd_per_1k_by_price": {
+                "0.02": 2.2222222222222223e-05,
+                "0.04": 4.4444444444444447e-05,
+                "0.08": 8.888888888888889e-05
+              },
+              "usd_per_month_24x7": 115.2
+            },
+            {
+              "cloud_slowdown": 1,
+              "qps": 10000,
+              "service_mean_ms": 1.885,
+              "service_p99_ms": 3.812,
+              "capacity_per_core_rps": 530.4,
+              "cores": 32,
+              "actual_utilisation": 0.589,
+              "sim_p50_ms": 1.744,
+              "sim_p99_ms": 3.828,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 16.9,
+              "usd_per_hour": 1.28,
+              "usd_per_1k_queries": 3.555555555555555e-05,
+              "usd_per_1k_by_price": {
+                "0.02": 1.7777777777777777e-05,
+                "0.04": 3.555555555555555e-05,
+                "0.08": 7.11111111111111e-05
+              },
+              "usd_per_month_24x7": 921.6
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 100,
+              "service_mean_ms": 3.771,
+              "service_p99_ms": 7.624,
+              "capacity_per_core_rps": 265.2,
+              "cores": 1,
+              "actual_utilisation": 0.377,
+              "sim_p50_ms": 4.444,
+              "sim_p99_ms": 15.108,
+              "sim_p99_wait_ms": 10.899,
+              "meets_sla": true,
+              "ram_gb": 0.5,
+              "usd_per_hour": 0.04,
+              "usd_per_1k_queries": 0.00011111111111111112,
+              "usd_per_1k_by_price": {
+                "0.02": 5.555555555555556e-05,
+                "0.04": 0.00011111111111111112,
+                "0.08": 0.00022222222222222223
+              },
+              "usd_per_month_24x7": 28.8
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 1000,
+              "service_mean_ms": 3.771,
+              "service_p99_ms": 7.624,
+              "capacity_per_core_rps": 265.2,
+              "cores": 7,
+              "actual_utilisation": 0.539,
+              "sim_p50_ms": 3.579,
+              "sim_p99_ms": 7.831,
+              "sim_p99_wait_ms": 1.785,
+              "meets_sla": true,
+              "ram_gb": 3.7,
+              "usd_per_hour": 0.28,
+              "usd_per_1k_queries": 7.777777777777778e-05,
+              "usd_per_1k_by_price": {
+                "0.02": 3.888888888888889e-05,
+                "0.04": 7.777777777777778e-05,
+                "0.08": 0.00015555555555555556
+              },
+              "usd_per_month_24x7": 201.6
+            },
+            {
+              "cloud_slowdown": 2,
+              "qps": 10000,
+              "service_mean_ms": 3.771,
+              "service_p99_ms": 7.624,
+              "capacity_per_core_rps": 265.2,
+              "cores": 63,
+              "actual_utilisation": 0.599,
+              "sim_p50_ms": 3.487,
+              "sim_p99_ms": 7.655,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 33.3,
+              "usd_per_hour": 2.52,
+              "usd_per_1k_queries": 7e-05,
+              "usd_per_1k_by_price": {
+                "0.02": 3.5e-05,
+                "0.04": 7e-05,
+                "0.08": 0.00014
+              },
+              "usd_per_month_24x7": 1814.4
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 100,
+              "service_mean_ms": 5.656,
+              "service_p99_ms": 11.435,
+              "capacity_per_core_rps": 176.8,
+              "cores": 1,
+              "actual_utilisation": 0.566,
+              "sim_p50_ms": 8.164,
+              "sim_p99_ms": 34.147,
+              "sim_p99_wait_ms": 28.015,
+              "meets_sla": true,
+              "ram_gb": 0.5,
+              "usd_per_hour": 0.04,
+              "usd_per_1k_queries": 0.00011111111111111112,
+              "usd_per_1k_by_price": {
+                "0.02": 5.555555555555556e-05,
+                "0.04": 0.00011111111111111112,
+                "0.08": 0.00022222222222222223
+              },
+              "usd_per_month_24x7": 28.8
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 1000,
+              "service_mean_ms": 5.656,
+              "service_p99_ms": 11.435,
+              "capacity_per_core_rps": 176.8,
+              "cores": 10,
+              "actual_utilisation": 0.566,
+              "sim_p50_ms": 5.305,
+              "sim_p99_ms": 11.582,
+              "sim_p99_wait_ms": 1.786,
+              "meets_sla": true,
+              "ram_gb": 5.3,
+              "usd_per_hour": 0.4,
+              "usd_per_1k_queries": 0.00011111111111111112,
+              "usd_per_1k_by_price": {
+                "0.02": 5.555555555555556e-05,
+                "0.04": 0.00011111111111111112,
+                "0.08": 0.00022222222222222223
+              },
+              "usd_per_month_24x7": 288.0
+            },
+            {
+              "cloud_slowdown": 3,
+              "qps": 10000,
+              "service_mean_ms": 5.656,
+              "service_p99_ms": 11.435,
+              "capacity_per_core_rps": 176.8,
+              "cores": 95,
+              "actual_utilisation": 0.595,
+              "sim_p50_ms": 5.23,
+              "sim_p99_ms": 11.483,
+              "sim_p99_wait_ms": 0.0,
+              "meets_sla": true,
+              "ram_gb": 50.2,
+              "usd_per_hour": 3.8,
+              "usd_per_1k_queries": 0.00010555555555555557,
+              "usd_per_1k_by_price": {
+                "0.02": 5.2777777777777784e-05,
+                "0.04": 0.00010555555555555557,
+                "0.08": 0.00021111111111111113
+              },
+              "usd_per_month_24x7": 2736.0
+            }
+          ],
+          "utilisation_curve": {
+            "cores": 8,
+            "points": [
+              {
+                "utilisation": 0.3,
+                "qps": 1272.9,
+                "sim_p50_ms": 1.744,
+                "sim_p99_ms": 3.828,
+                "p99_vs_no_queue": 1.0
+              },
+              {
+                "utilisation": 0.5,
+                "qps": 2121.5,
+                "sim_p50_ms": 1.762,
+                "sim_p99_ms": 3.86,
+                "p99_vs_no_queue": 1.01
+              },
+              {
+                "utilisation": 0.6,
+                "qps": 2545.8,
+                "sim_p50_ms": 1.802,
+                "sim_p99_ms": 3.964,
+                "p99_vs_no_queue": 1.04
+              },
+              {
+                "utilisation": 0.7,
+                "qps": 2970.1,
+                "sim_p50_ms": 1.884,
+                "sim_p99_ms": 4.216,
+                "p99_vs_no_queue": 1.11
+              },
+              {
+                "utilisation": 0.8,
+                "qps": 3394.4,
+                "sim_p50_ms": 2.074,
+                "sim_p99_ms": 5.066,
+                "p99_vs_no_queue": 1.33
+              },
+              {
+                "utilisation": 0.9,
+                "qps": 3818.7,
+                "sim_p50_ms": 2.59,
+                "sim_p99_ms": 8.639,
+                "p99_vs_no_queue": 2.27
+              },
+              {
+                "utilisation": 0.95,
+                "qps": 4030.8,
+                "sim_p50_ms": 3.563,
+                "sim_p99_ms": 15.635,
+                "p99_vs_no_queue": 4.1
+              }
+            ],
+            "highest_utilisation_meeting_sla": 0.95
+          }
+        }
+      },
+      "serving_vs_as_is_cores_at_1000qps": {
+        "as_is": 17,
+        "serving": 4
+      }
+    }
+  }
+}

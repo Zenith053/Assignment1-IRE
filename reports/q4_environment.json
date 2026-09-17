@@ -1,0 +1,89 @@
+{
+  "machine": {
+    "cpu": "Apple M4",
+    "cores_logical": 10,
+    "cores_performance": "4",
+    "cores_efficiency": "6",
+    "ram_gb": 16.0,
+    "os": "macOS-26.5.1-arm64-arm-64bit",
+    "python": "3.12.14",
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "torch": "2.13.0",
+    "faiss": "1.15.0"
+  },
+  "threads": {
+    "faiss_omp": 1,
+    "torch": 1,
+    "threadpools": {
+      "openmp:libomp.dylib": 1
+    }
+  },
+  "thread_env": {
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "numpy_blas": "accelerate",
+  "threads_pinned": true,
+  "datasets": [
+    {
+      "dataset": "mind",
+      "checks": {
+        "checkpoint_exists": true,
+        "test_scores_exist": true,
+        "variant_matches_config": true,
+        "checkpoint_loads_strict": true,
+        "scores_cover_full_test_split": true
+      },
+      "checkpoint_variant": {
+        "popularity": true,
+        "freshness": false,
+        "gate": "learned",
+        "signals": [
+          "log1p_clicks_1h",
+          "log1p_clicks_24h",
+          "log1p_clicks_168h"
+        ],
+        "popularity_windows_hours": [
+          1.0,
+          24.0,
+          168.0
+        ]
+      },
+      "n_parameters": 17042930,
+      "n_test_impressions": 73152
+    },
+    {
+      "dataset": "ebnerd",
+      "checks": {
+        "checkpoint_exists": true,
+        "test_scores_exist": true,
+        "variant_matches_config": true,
+        "checkpoint_loads_strict": true,
+        "scores_cover_full_test_split": true
+      },
+      "checkpoint_variant": {
+        "popularity": true,
+        "freshness": true,
+        "gate": "learned",
+        "signals": [
+          "log1p_clicks_1h",
+          "log1p_clicks_24h",
+          "log1p_clicks_168h",
+          "log1p_age_hours"
+        ],
+        "popularity_windows_hours": [
+          1.0,
+          24.0,
+          168.0
+        ]
+      },
+      "n_parameters": 10882866,
+      "n_test_impressions": 244647
+    }
+  ],
+  "caveat": "numpy/scipy BLAS is Apple Accelerate, limited only via VECLIB_MAXIMUM_THREADS and partly offloaded to the AMX coprocessor; per-core figures from this M4 are indicative, not cloud-vCPU exact."
+}

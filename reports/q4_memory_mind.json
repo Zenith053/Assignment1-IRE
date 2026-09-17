@@ -1,0 +1,135 @@
+{
+  "dataset": "mind",
+  "scale": null,
+  "mode": "serving",
+  "components": {
+    "stage1/faiss_flat_index (pool)": {
+      "mb": 8.25,
+      "what": "IndexFlatIP over 5,369 circulating articles x 384 dims"
+    },
+    "stage1/a1_article_embeddings": {
+      "mb": 100.21,
+      "what": "65,238 x 384 float32, read to build each user's query vector"
+    },
+    "stage1/bm25_weights (doc x term)": {
+      "mb": 14.12,
+      "what": "sparse BM25 weight matrix"
+    },
+    "stage1/bm25_weights_t (term x doc)": {
+      "mb": 14.09,
+      "what": "the same weights transposed, kept for fast scoring"
+    },
+    "stage1/bm25_vocabulary": {
+      "mb": 6.37,
+      "what": "term -> column dict"
+    },
+    "stage1/bm25_other": {
+      "mb": 7.82,
+      "what": "idf, doc ids/lengths"
+    },
+    "stage1/popularity_ranker": {
+      "mb": 9.08,
+      "what": "train-click ranking"
+    },
+    "stage1/pool_index": {
+      "mb": 0.82,
+      "what": "circulating-pool rows + id set"
+    },
+    "stage1/article_tokens+ids": {
+      "mb": 25.48,
+      "what": "tokens BM25 queries are built from"
+    },
+    "stage1/user_profile_store": {
+      "mb": 32.08,
+      "what": "91,935 users' full click histories"
+    },
+    "cache/bm25_pooled_weights_t": {
+      "mb": 1.29,
+      "what": "pool-sliced BM25 matrix, built once"
+    },
+    "cache/tokens_by_id": {
+      "mb": 28.51,
+      "what": "article -> tokens dict, built once"
+    },
+    "cache/popularity_top_k": {
+      "mb": 0.0,
+      "what": "static top-20, built once"
+    },
+    "stage2/nrms_parameters": {
+      "mb": 68.17,
+      "what": "17,042,930 float32 parameters"
+    },
+    "stage2/nrms_title_token_table": {
+      "mb": 15.66,
+      "what": "int64 token ids, only needed to encode new articles"
+    },
+    "stage2/article_vectors": {
+      "mb": 104.38,
+      "what": "(65239, 400) float32, precomputed at start-up"
+    },
+    "stage2/nrms_row_index": {
+      "mb": 6.8,
+      "what": "article id -> row dict"
+    },
+    "stage2/click_timeline": {
+      "mb": 2.78,
+      "what": "one int64 per click"
+    }
+  },
+  "summary": {
+    "stage1_index_mb": 218.32,
+    "stage1_serving_cache_mb": 29.8,
+    "stage2_mb": 197.79,
+    "served_total_mb": 445.91
+  },
+  "ann_index_option": {
+    "catalogue_articles": 65238,
+    "dims": 384,
+    "flat_full_catalogue_mb": 100.21,
+    "hnsw_full_catalogue_mb": 117.96,
+    "hnsw_m": 32,
+    "hnsw_build_seconds_1_thread": 7.6,
+    "hnsw_overhead_mb": 17.75,
+    "hnsw_overhead_bytes_per_article": 272.1
+  },
+  "loaded_but_not_served_mb": {
+    "rolling_popularity (Q2 features)": 3.42,
+    "session_context (Q2 features)": 0.0,
+    "other_splits_profiles": 54.59,
+    "unused_article_columns": 21.22,
+    "test_impressions (pool + replay)": 40.31
+  },
+  "process": {
+    "rss_python_torch_numpy_mb": 264.2,
+    "rss_after_all_imports_mb": 359.9,
+    "rss_before_load_mb": 359.9,
+    "rss_after_load_mb": 1485.3,
+    "rss_growth_mb": 1125.4,
+    "growth_accounted_by_components_mb": 565.4,
+    "growth_unaccounted_mb": 559.9,
+    "peak_rss_mb": 3084.4,
+    "load_seconds": 16.0,
+    "load_breakdown_seconds": {
+      "stage1_indexes": 2.99,
+      "stage1_precompute": 0.02,
+      "stage2_model": 0.2,
+      "stage2_encode_all_articles": 12.01,
+      "stage2_signals": 0.75
+    }
+  },
+  "on_disk": {
+    "nrms_checkpoint_mb": 68.18,
+    "feature_store_dir_mb": 205.45
+  },
+  "method": "arrays/tensors/sparse/FAISS by buffer size; Python objects by object-graph walk (shared strings counted per component, so component sum is an upper bound)",
+  "loader_residue": [
+    {
+      "loader": "rolling_popularity",
+      "parses": "RollingPopularity.from_impressions: all three splits",
+      "live_result_mb": 3.4,
+      "rss_left_behind_mb": 233.6,
+      "peak_rss_mb": 752.4
+    }
+  ],
+  "loader_residue_note": "Process RSS after load includes memory the research loaders (Q1/Q2 feature context) leave reserved after parsing raw files into Python objects; it is not needed to serve requests. A production server would load prebuilt serving artifacts instead."
+}
