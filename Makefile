@@ -1,7 +1,7 @@
 PY := .venv/bin/python
 CONFIGS := config/mind.yaml config/ebnerd.yaml
 
-.PHONY: all data download clean split features retrieval eval submission sweep test ebnerd-testset
+.PHONY: all data download clean split features retrieval eval submission sweep test ebnerd-testset q3 q3-train q3-tables
 
 # One-command rebuild from raw files (Q1.5).
 all: data retrieval eval submission
@@ -39,6 +39,17 @@ sweep:
 	  $(PY) tools/sweep_pooling_k.py --config $$cfg \
 	    --out reports/sweep_pooling_k_$${ds}_val.json || exit 1; \
 	done
+
+# Q3: NRMS baseline, popularity/freshness-aware NRMS, ablation (A2).
+# q3-train is ~11 h on an M4 (resumable; skips finished runs); q3-tables ~3 min.
+q3: q3-train q3-tables
+
+q3-train:
+	@for cfg in $(CONFIGS); do $(PY) src/baseline/news_data.py --config $$cfg || exit 1; done
+	tools/run_q3.sh
+
+q3-tables:
+	$(PY) src/baseline/q3_tables.py
 
 test:
 	.venv/bin/pytest tests/ -v

@@ -1,0 +1,93 @@
+{
+  "dataset": "ebnerd",
+  "scale": "small",
+  "run": "nrms_seed15",
+  "seed": 15,
+  "device": "cuda",
+  "hparams": {
+    "tokenizer": "FacebookAI/xlm-roberta-base",
+    "title_len": 30,
+    "history_len": 20,
+    "npratio": 4,
+    "n_heads": 20,
+    "head_dim": 20,
+    "attention_hidden": 200,
+    "dropout": 0.2,
+    "batch_size": 32,
+    "lr": 0.0001,
+    "epochs_max": 4,
+    "patience": 1,
+    "max_steps": null
+  },
+  "variant": {
+    "popularity": false,
+    "freshness": false,
+    "gate": null,
+    "signals": [],
+    "popularity_windows_hours": null
+  },
+  "n_impressions": {
+    "train": 192884,
+    "val": 20000,
+    "test": 244647
+  },
+  "n_parameters": 10882080,
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.4412561556847137,
+      "steps": 6051,
+      "seconds": 237.05630612373352,
+      "val_auc": 0.5726136485158697
+    },
+    {
+      "epoch": 2,
+      "loss": 1.3831809698721726,
+      "steps": 6051,
+      "seconds": 248.33946084976196,
+      "val_auc": 0.5779199250150788
+    },
+    {
+      "epoch": 3,
+      "loss": 1.350954696412694,
+      "steps": 6051,
+      "seconds": 242.8300426006317,
+      "val_auc": 0.5842559883354975
+    },
+    {
+      "epoch": 4,
+      "loss": 1.331002217375156,
+      "steps": 6051,
+      "seconds": 242.32599306106567,
+      "val_auc": 0.5848149933082247
+    }
+  ],
+  "best_epoch": 4,
+  "best_val_auc": 0.5848149933082247,
+  "test": {
+    "auc": {
+      "value": 0.54975781048474,
+      "ci_low": 0.5485500161276216,
+      "ci_high": 0.5510071680079136,
+      "n": 244647
+    },
+    "mrr": {
+      "value": 0.3476847676904062,
+      "ci_low": 0.34663059443025995,
+      "ci_high": 0.3487679352027864,
+      "n": 244647
+    },
+    "ndcg@5": {
+      "value": 0.38686218722557963,
+      "ci_low": 0.38555636939300614,
+      "ci_high": 0.3881768370818763,
+      "n": 244647
+    },
+    "ndcg@10": {
+      "value": 0.46472099331369093,
+      "ci_low": 0.46371540998448346,
+      "ci_high": 0.46577114404332803,
+      "n": 244647
+    }
+  }
+}

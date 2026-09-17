@@ -17,3 +17,9 @@ __pycache__/
 #   python src/data/download.py --id ebnerd_testset
 #   python src/submission/predict_ebnerd_test.py --dir data/raw/ebnerd/ebnerd_testset
 reports/submissions/
+
+# Local training logs (Q3); the summaries that matter are in reports/q3/.
+logs/
+
+# macOS Finder metadata
+.DS_Store

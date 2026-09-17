@@ -1,0 +1,94 @@
+{
+  "dataset": "mind",
+  "scale": null,
+  "run": "nrms_pop_sum_seed13",
+  "seed": 13,
+  "device": "cuda",
+  "hparams": {
+    "tokenizer": "FacebookAI/xlm-roberta-base",
+    "title_len": 30,
+    "history_len": 20,
+    "npratio": 4,
+    "n_heads": 20,
+    "head_dim": 20,
+    "attention_hidden": 200,
+    "dropout": 0.2,
+    "batch_size": 32,
+    "lr": 0.0001,
+    "epochs_max": 3,
+    "patience": 1,
+    "max_steps": null
+  },
+  "variant": {
+    "popularity": true,
+    "freshness": false,
+    "gate": "sum",
+    "signals": [
+      "log1p_clicks_1h",
+      "log1p_clicks_24h",
+      "log1p_clicks_168h"
+    ],
+    "popularity_windows_hours": [
+      1.0,
+      24.0,
+      168.0
+    ]
+  },
+  "n_impressions": {
+    "train": 95071,
+    "val": 20000,
+    "test": 73152
+  },
+  "n_parameters": 17042529,
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.3851947812803382,
+      "steps": 4424,
+      "seconds": 245.23088312149048,
+      "val_auc": 0.5965448841662061
+    },
+    {
+      "epoch": 2,
+      "loss": 1.3046356443262113,
+      "steps": 4424,
+      "seconds": 245.2324390411377,
+      "val_auc": 0.6208254471823471
+    },
+    {
+      "epoch": 3,
+      "loss": 1.2664638448141166,
+      "steps": 4424,
+      "seconds": 245.20740246772766,
+      "val_auc": 0.6389253145396486
+    }
+  ],
+  "best_epoch": 3,
+  "best_val_auc": 0.6389253145396486,
+  "test": {
+    "auc": {
+      "value": 0.6359470223389039,
+      "ci_low": 0.6338121866768119,
+      "ci_high": 0.6380130651258593,
+      "n": 73152
+    },
+    "mrr": {
+      "value": 0.29784846530137854,
+      "ci_low": 0.29569193754590833,
+      "ci_high": 0.29996827299443174,
+      "n": 73152
+    },
+    "ndcg@5": {
+      "value": 0.3267858911428442,
+      "ci_low": 0.3243258714028646,
+      "ci_high": 0.3292139719282012,
+      "n": 73152
+    },
+    "ndcg@10": {
+      "value": 0.38968261954834216,
+      "ci_low": 0.3874649187478382,
+      "ci_high": 0.3918788405945924,
+      "n": 73152
+    }
+  }
+}

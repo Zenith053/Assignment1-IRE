@@ -1,0 +1,93 @@
+{
+  "dataset": "ebnerd",
+  "scale": "small",
+  "run": "nrms_seed13",
+  "seed": 13,
+  "device": "mps",
+  "hparams": {
+    "tokenizer": "FacebookAI/xlm-roberta-base",
+    "title_len": 30,
+    "history_len": 20,
+    "npratio": 4,
+    "n_heads": 20,
+    "head_dim": 20,
+    "attention_hidden": 200,
+    "dropout": 0.2,
+    "batch_size": 32,
+    "lr": 0.0001,
+    "epochs_max": 5,
+    "patience": 1,
+    "max_steps": null
+  },
+  "n_impressions": {
+    "train": 192884,
+    "val": 20000,
+    "test": 244647
+  },
+  "n_parameters": 10882080,
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.440966557277855,
+      "steps": 6051,
+      "seconds": 799.822692155838,
+      "val_auc": 0.5658990834914545
+    },
+    {
+      "epoch": 2,
+      "loss": 1.3834542748318739,
+      "steps": 6051,
+      "seconds": 741.1182219982147,
+      "val_auc": 0.5782539238970219
+    },
+    {
+      "epoch": 3,
+      "loss": 1.3533581179358898,
+      "steps": 6051,
+      "seconds": 794.233363866806,
+      "val_auc": 0.5790109369112575
+    },
+    {
+      "epoch": 4,
+      "loss": 1.332164936059837,
+      "steps": 6051,
+      "seconds": 766.9817020893097,
+      "val_auc": 0.5837538791068494
+    },
+    {
+      "epoch": 5,
+      "loss": 1.3155494611516463,
+      "steps": 6051,
+      "seconds": 812.500461101532,
+      "val_auc": 0.581804932075721
+    }
+  ],
+  "best_epoch": 4,
+  "best_val_auc": 0.5837538791068494,
+  "test": {
+    "auc": {
+      "value": 0.5538975492188986,
+      "ci_low": 0.5527350735687762,
+      "ci_high": 0.5551707694459992,
+      "n": 244647
+    },
+    "mrr": {
+      "value": 0.3491138908033253,
+      "ci_low": 0.3479791061489226,
+      "ci_high": 0.3501970142034014,
+      "n": 244647
+    },
+    "ndcg@5": {
+      "value": 0.3888472477471623,
+      "ci_low": 0.3875041008836808,
+      "ci_high": 0.3901722693885324,
+      "n": 244647
+    },
+    "ndcg@10": {
+      "value": 0.46644109250774846,
+      "ci_low": 0.465407331192843,
+      "ci_high": 0.4675511962002516,
+      "n": 244647
+    }
+  }
+}
