@@ -100,3 +100,27 @@ def test_bootstrap_ci_ignores_undefined_entries():
     """None values (undefined AUC) must be dropped, not treated as zero."""
     point, _, _ = M.bootstrap_ci([1.0, None, 1.0], n_boot=100)
     assert point == pytest.approx(1.0)
+
+
+def test_paired_bootstrap_ci_many_agrees_with_single():
+    """Same estimate and (statistically) the same interval as paired_bootstrap_ci."""
+    rng = np.random.default_rng(0)
+    a = rng.normal(0.62, 0.1, 4000)
+    b = a - 0.01 + rng.normal(0, 0.05, 4000)
+    a_list, b_list = list(a), list(b)
+    a_list[7] = None                                   # undefined entry, as AUC can be
+    single = M.paired_bootstrap_ci(a_list, b_list, n_boot=4000)
+    diff = np.array([np.nan if x is None else x - y for x, y in zip(a_list, b_list)])
+    many = M.paired_bootstrap_ci_many({"d": diff, "zero": np.zeros(4000)}, n_boot=4000, chunk=333)
+    assert many["d"]["mean_diff"] == pytest.approx(single["mean_diff"], abs=1e-12)
+    assert many["d"]["n_paired"] == single["n_paired"] == 3999
+    width = single["ci_high"] - single["ci_low"]
+    assert many["d"]["ci_low"] == pytest.approx(single["ci_low"], abs=0.1 * width)
+    assert many["d"]["ci_high"] == pytest.approx(single["ci_high"], abs=0.1 * width)
+    assert many["d"]["excludes_zero"] and not many["zero"]["excludes_zero"]
+
+
+def test_paired_bootstrap_ci_many_undefined_rows_do_not_dilute_mean():
+    diff = np.array([1.0, 1.0, np.nan, np.nan])
+    res = M.paired_bootstrap_ci_many({"d": diff}, n_boot=200)
+    assert res["d"]["mean_diff"] == 1.0 and res["d"]["ci_low"] == 1.0 and res["d"]["ci_high"] == 1.0

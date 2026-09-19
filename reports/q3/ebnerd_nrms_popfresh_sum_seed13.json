@@ -1,0 +1,102 @@
+{
+  "dataset": "ebnerd",
+  "scale": "small",
+  "run": "nrms_popfresh_sum_seed13",
+  "seed": 13,
+  "device": "cuda",
+  "hparams": {
+    "tokenizer": "FacebookAI/xlm-roberta-base",
+    "title_len": 30,
+    "history_len": 20,
+    "npratio": 4,
+    "n_heads": 20,
+    "head_dim": 20,
+    "attention_hidden": 200,
+    "dropout": 0.2,
+    "batch_size": 32,
+    "lr": 0.0001,
+    "epochs_max": 4,
+    "patience": 1,
+    "max_steps": null
+  },
+  "variant": {
+    "popularity": true,
+    "freshness": true,
+    "gate": "sum",
+    "signals": [
+      "log1p_clicks_1h",
+      "log1p_clicks_24h",
+      "log1p_clicks_168h",
+      "log1p_age_hours"
+    ],
+    "popularity_windows_hours": [
+      1.0,
+      24.0,
+      168.0
+    ]
+  },
+  "n_impressions": {
+    "train": 192884,
+    "val": 20000,
+    "test": 244647
+  },
+  "n_parameters": 10882465,
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.2952297395508179,
+      "steps": 6051,
+      "seconds": 249.2473623752594,
+      "val_auc": 0.7378790653861722
+    },
+    {
+      "epoch": 2,
+      "loss": 1.2384382817329453,
+      "steps": 6051,
+      "seconds": 249.33097529411316,
+      "val_auc": 0.7395722492217057
+    },
+    {
+      "epoch": 3,
+      "loss": 1.2100827909845464,
+      "steps": 6051,
+      "seconds": 248.22592782974243,
+      "val_auc": 0.7398581105688341
+    },
+    {
+      "epoch": 4,
+      "loss": 1.1912605631923268,
+      "steps": 6051,
+      "seconds": 249.0683090686798,
+      "val_auc": 0.7397739536734665
+    }
+  ],
+  "best_epoch": 3,
+  "best_val_auc": 0.7398581105688341,
+  "test": {
+    "auc": {
+      "value": 0.7234416548152274,
+      "ci_low": 0.7223436515485693,
+      "ci_high": 0.7244990135176377,
+      "n": 244647
+    },
+    "mrr": {
+      "value": 0.48750573061709257,
+      "ci_low": 0.4861378243530848,
+      "ci_high": 0.48876785940748346,
+      "n": 244647
+    },
+    "ndcg@5": {
+      "value": 0.5493188597406353,
+      "ci_low": 0.5479015500648341,
+      "ci_high": 0.550588299213696,
+      "n": 244647
+    },
+    "ndcg@10": {
+      "value": 0.593926953960722,
+      "ci_low": 0.5928187047708242,
+      "ci_high": 0.5950191951751548,
+      "n": 244647
+    }
+  }
+}

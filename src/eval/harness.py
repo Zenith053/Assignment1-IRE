@@ -107,14 +107,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--split", default="test", choices=["train", "val", "test"])
     parser.add_argument("--sample", type=int, default=20000)
-    parser.add_argument("--last-n", type=int, default=20)
     parser.add_argument("--pooling", default="topk", choices=["mean", "topk"],
                         help="semantic user representation: mean-pool history into one "
                              "vector, or score each candidate by its k highest similarities "
-                             "to individual history clicks. Measured on MIND val: topk beats "
-                             "mean pooling, AUC 0.6414 vs 0.6299.")
+                             "to individual history clicks. mean is the k>=|history| "
+                             "limit of topk, not a separate method; topk k=5 wins on val, "
+                             "AUC 0.6508 vs 0.6408 (MIND) and 0.5590 vs 0.5219 (EB-NeRD).")
     parser.add_argument("--topk", type=int, default=5,
-                        help="k for --pooling topk; 5 was the peak of a 1..20 sweep on MIND val")
+                        help="k for --pooling topk; peak of a 1..50 val sweep on MIND and "
+                             "inside EB-NeRD's flat 5..20 plateau "
+                             "(tools/sweep_pooling_k.py)")
     parser.add_argument("--fit-sample", type=int, default=5000,
                         help="val impressions used to fit the hybrid combiner")
     parser.add_argument("--n-boot", type=int, default=1000)
@@ -148,7 +150,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  fitting hybrid combiner on val (pooling={args.pooling})")
     combiner, fit_scores, n_fit = fit_hybrid_from_val(
         cfg, index, embeddings, articles, row_of, popularity, profiles_all,
-        args.last_n, args.pooling, args.topk, args.fit_sample
+        args.pooling, args.topk, args.fit_sample
     )
     coef_bm25, coef_semantic = combiner.coef_[0]
     intercept = float(combiner.intercept_[0])
@@ -173,7 +175,7 @@ def main(argv: list[str] | None = None) -> int:
         impressions = impressions.reset_index(drop=True)
         print(f"[{cfg.dataset}/{args.split}] evaluating {len(impressions):,} impressions")
         report = score_split(index, embeddings, articles, row_of, popularity, profiles_all,
-                             impressions, args.split, args.last_n, args.pooling, args.topk)
+                             impressions, args.split, args.pooling, args.topk)
 
     ids_by_imp = report["ids_by_imp"]
     labels_by_imp = report["labels_by_imp"]
@@ -251,7 +253,7 @@ def main(argv: list[str] | None = None) -> int:
         "dataset": cfg.dataset, "split": args.split, "scale": cfg.scale,
         "n_impressions": int(len(impressions)),
         "params": {
-            "last_n": args.last_n, "pooling": args.pooling, "topk": args.topk,
+            "history": "full", "pooling": args.pooling, "topk": args.topk,
             "n_boot": args.n_boot, "top_k_list": TOP_K_LIST,
             "hybrid": {
                 "method": "logistic_regression", "fit_split": "val",

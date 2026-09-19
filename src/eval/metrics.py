@@ -140,3 +140,79 @@ def bootstrap_ci(values: np.ndarray, n_boot: int = 1000, alpha: float = 0.05,
     means = values[idx].mean(axis=1)
     lo, hi = np.percentile(means, [100 * alpha / 2, 100 * (1 - alpha / 2)])
     return point, float(lo), float(hi)
+
+
+def paired_bootstrap_ci(a: list, b: list, n_boot: int = 10_000, alpha: float = 0.05,
+                        seed: int = 13) -> dict:
+    """95% CI on the per-impression difference a - b (e.g. after - before re-ranking).
+
+    A claimed gain needs a *paired* CI, not two independent `bootstrap_ci` calls
+    compared by eye - the same impression's difficulty cancels out of the
+    difference, which is what makes "does a beat b" answerable at all. Only
+    impressions where BOTH a and b are defined enter the comparison, so an
+    AUC that is None for one scorer never silently drops out of only one side.
+    """
+    paired = [(x, y) for x, y in zip(a, b) if x is not None and y is not None]
+    n = len(paired)
+    if n == 0:
+        return {"mean_diff": float("nan"), "ci_low": float("nan"),
+               "ci_high": float("nan"), "n_paired": 0, "excludes_zero": False}
+    diff = np.array([x - y for x, y in paired], dtype=np.float64)
+    mean_diff = float(diff.mean())
+    if n == 1:
+        return {"mean_diff": mean_diff, "ci_low": mean_diff, "ci_high": mean_diff,
+               "n_paired": 1, "excludes_zero": mean_diff != 0.0}
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, n, size=(n_boot, n))
+    means = diff[idx].mean(axis=1)
+    lo, hi = np.percentile(means, [100 * alpha / 2, 100 * (1 - alpha / 2)])
+    return {"mean_diff": mean_diff, "ci_low": float(lo), "ci_high": float(hi),
+           "n_paired": n, "excludes_zero": bool(lo > 0 or hi < 0)}
+
+
+def paired_bootstrap_ci_many(diffs: dict[str, np.ndarray], n_boot: int = 10_000,
+                             alpha: float = 0.05, seed: int = 13,
+                             chunk: int = 100) -> dict[str, dict]:
+    """`paired_bootstrap_ci` for many paired differences at once, in bounded memory.
+
+    `paired_bootstrap_ci` materialises an (n_boot, n) index matrix: fine for a
+    few thousand impressions, ~19 GB at EB-NeRD-small's 244,647 test
+    impressions. Here each replicate is a vector of resample *counts*
+    (bincount of n draws), so a chunk of replicates is a (chunk, n) matrix and
+    every difference's resampled mean is one matrix product. All differences
+    share the same resamples, so their CIs stay comparable - the same property
+    `bootstrap_ci`'s docstring asks of the harness.
+
+    `diffs` values are per-impression differences with NaN where undefined
+    (e.g. AUC on an all-click impression); each is averaged over its own
+    defined entries, resample by resample. Same percentile interval and output
+    keys as `paired_bootstrap_ci`.
+    """
+    names = list(diffs)
+    if not names:
+        return {}
+    D = np.stack([np.asarray(diffs[k], dtype=np.float64) for k in names], axis=1)   # (n, m)
+    n = D.shape[0]
+    defined = ~np.isnan(D)
+    D0 = np.where(defined, D, 0.0)
+
+    rng = np.random.default_rng(seed)
+    means = np.empty((n_boot, len(names)))
+    for start in range(0, n_boot, chunk):
+        b = min(chunk, n_boot - start)
+        draws = rng.integers(0, n, size=(b, n))
+        counts = np.stack([np.bincount(row, minlength=n) for row in draws]).astype(np.float64)
+        totals = counts @ D0                          # (b, m) resampled sums over defined rows
+        support = counts @ defined.astype(np.float64)  # (b, m) resampled defined counts
+        # A resample that drew no defined row has no mean; drop it rather than call it 0.
+        with np.errstate(invalid="ignore", divide="ignore"):
+            means[start:start + b] = np.where(support > 0, totals / support, np.nan)
+
+    out = {}
+    for j, k in enumerate(names):
+        n_def = int(defined[:, j].sum())
+        mean_diff = float(D0[:, j].sum() / n_def) if n_def else float("nan")
+        lo, hi = np.nanpercentile(means[:, j], [100 * alpha / 2, 100 * (1 - alpha / 2)])
+        out[k] = {"mean_diff": mean_diff, "ci_low": float(lo), "ci_high": float(hi),
+                  "n_paired": n_def, "excludes_zero": bool(lo > 0 or hi < 0)}
+    return out

@@ -1,0 +1,42 @@
+{
+  "dataset": "mind",
+  "scale": null,
+  "tokenizer": "FacebookAI/xlm-roberta-base",
+  "title_len": 30,
+  "history_len": 20,
+  "npratio": 4,
+  "n_articles": 65238,
+  "vocab_used": 20155,
+  "title_tokens_median": 16.0,
+  "titles_truncated_pct": 1.3596370213679143,
+  "empty_titles": 0,
+  "splits": {
+    "train": {
+      "impressions": 95071,
+      "users": 40148,
+      "clicks": 141558,
+      "candidates_per_impression_median": 23.0,
+      "users_empty_history_pct": 1.70369632360267,
+      "users_short_history_pct": 68.04074922785694,
+      "train_rows": 141558,
+      "rows_with_padded_negatives_pct": 10.854208169089702,
+      "clicks_skipped_no_negative": 0
+    },
+    "val": {
+      "impressions": 61894,
+      "users": 31664,
+      "clicks": 94786,
+      "candidates_per_impression_median": 26.0,
+      "users_empty_history_pct": 2.131758463870642,
+      "users_short_history_pct": 63.89274886306215
+    },
+    "test": {
+      "impressions": 73152,
+      "users": 50000,
+      "clicks": 111383,
+      "candidates_per_impression_median": 23.0,
+      "users_empty_history_pct": 2.814,
+      "users_short_history_pct": 58.821999999999996
+    }
+  }
+}

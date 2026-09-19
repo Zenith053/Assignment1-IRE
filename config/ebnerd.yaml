@@ -3,7 +3,7 @@
 # `{scale}` is substituted with the `scale:` value below, so demo -> small is a one-line change.
 dataset: ebnerd
 language: da
-scale: demo   # demo | small
+scale: small  # demo | small
 
 raw:
   articles: ebnerd/ebnerd_{scale}/articles.parquet

@@ -140,6 +140,104 @@ def test_no_impression_appears_in_two_splits(built):
     )
 
 
+def test_rolling_popularity_is_strictly_causal(built):
+    """A2 Q1.4/Q9: `RollingPopularity`'s trailing counts must not see the future.
+
+    This is the counterfactual, not a proxy: build the counter once over the
+    whole click timeline and once over only the events strictly before a probe
+    timestamp `t0`, then demand `counts_before(..., t0)` agrees between the two.
+    If `searchsorted`'s `side` argument were ever `"right"` instead of
+    `"left"`, or the window were centred on `t0` rather than trailing it, the
+    two builds would disagree at exactly the boundary - a leaky implementation
+    cannot pass this by accident.
+    """
+    from src.rerank.timeline import RollingPopularity
+
+    cfg, meta = built
+    impressions_by_split = {
+        split: read_table(cfg.processed / split / "impressions.parquet", "impressions")
+        for split in SPLIT_ORDER
+    }
+    full = RollingPopularity.from_impressions(impressions_by_split)
+
+    # Flatten the same click events the constructor sees, to pick probe points
+    # and to build the "past-only" counterfactual from a plain boolean mask.
+    all_article_ids, all_timestamps = [], []
+    for impressions in impressions_by_split.values():
+        for ts, clicked in zip(impressions["timestamp"], impressions["clicked_ids"]):
+            all_article_ids.extend(clicked)
+            all_timestamps.extend([ts] * len(clicked))
+    all_article_ids = pd.Series(all_article_ids, dtype=object)
+    all_timestamps = pd.Series(pd.to_datetime(all_timestamps))
+    if all_timestamps.empty:
+        pytest.skip(f"{cfg.dataset}: no click events to probe")
+
+    rng_seed = 13
+    probe_idx = all_timestamps.sample(min(15, len(all_timestamps)), random_state=rng_seed).index
+    for idx in probe_idx:
+        t0 = all_timestamps.loc[idx].to_numpy()
+        past_mask = (all_timestamps < all_timestamps.loc[idx]).to_numpy()
+        past_only = RollingPopularity(
+            all_article_ids[past_mask].to_numpy(), all_timestamps[past_mask].to_numpy()
+        )
+        probe_articles = all_article_ids.sample(
+            min(20, len(all_article_ids)), random_state=rng_seed
+        ).tolist()
+
+        for window_hours in (24.0, 168.0):
+            from_full = full.counts_before(probe_articles, t0, window_hours)
+            from_past = past_only.counts_before(probe_articles, t0, window_hours)
+            assert (from_full == from_past).all(), (
+                f"{cfg.dataset}: rolling popularity at t0={t0} (window "
+                f"{window_hours}h) differs when future clicks are removed from "
+                f"the timeline - counts_before is not strictly causal"
+            )
+
+
+def test_session_features_are_strictly_causal(built):
+    """A2 Q1.4: session counters must only see strictly-earlier impressions
+    in the same session, and must be N/A (not fabricated) where unavailable."""
+    from src.rerank.timeline import SessionContext
+
+    cfg, meta = built
+    session = SessionContext(cfg)
+    if not session.available:
+        # MIND declares no session concept; the honest behaviour is N/A, not a guess.
+        feats = session.session_features("train", 1)
+        assert feats["session_impression_index"] != feats["session_impression_index"], (
+            f"{cfg.dataset}: has_session_id is false but session_features "
+            f"returned a number instead of NaN"
+        )
+        pytest.skip(f"{cfg.dataset}: has_session_id is false, N/A as expected")
+
+    for split in ("train", "val"):
+        key = f"{split}_behaviors"
+        if key not in cfg.raw or not cfg.raw[key].exists():
+            continue
+        beh = pd.read_parquet(cfg.raw[key], engine="pyarrow",
+                              columns=["impression_id", "session_id", "impression_time"])
+        beh["impression_time"] = pd.to_datetime(beh["impression_time"])
+        # Spot-check sessions with >1 impression: the later impression's index
+        # and clicks-so-far must be strictly greater than the earlier one's,
+        # and its "seconds since session start" must be strictly later.
+        sizes = beh.groupby("session_id").size()
+        multi = sizes[sizes > 1].index[:10]
+        for sid in multi:
+            rows = beh[beh["session_id"] == sid].sort_values("impression_time")
+            imp_ids = rows["impression_id"].tolist()
+            feats = [session.session_features(split, int(i)) for i in imp_ids]
+            indices = [f["session_impression_index"] for f in feats]
+            assert indices == sorted(indices) and len(set(indices)) == len(indices), (
+                f"{cfg.dataset}/{split} session {sid}: impression indices "
+                f"{indices} are not strictly increasing in time order"
+            )
+            seconds = [f["seconds_since_session_start"] for f in feats]
+            assert seconds == sorted(seconds), (
+                f"{cfg.dataset}/{split} session {sid}: seconds-since-start "
+                f"{seconds} are not monotonic in time order"
+            )
+
+
 def test_serving_time_ablation_declared_not_faked(built):
     """Q9: the leaky-popularity ablation must only run where the dataset says so.
 

@@ -4,7 +4,7 @@
   "method": "semantic",
   "embedding_source": "sentence-transformers/all-MiniLM-L6-v2",
   "params": {
-    "last_n": 20,
+    "history": "full",
     "pooling": "mean",
     "half_life": 5.0
   },
@@ -15,28 +15,28 @@
     "all": {
       "available": true,
       "pool_size": 65238,
-      "exact_search_ms": 5415.8,
-      "recall@50": 0.007571641993752547,
-      "recall@100": 0.014837702023631672,
-      "recall@200": 0.028181447779437728,
+      "exact_search_ms": 10132.5,
+      "recall@50": 0.008080945266874915,
+      "recall@100": 0.01534700529675404,
+      "recall@200": 0.028011680021730274,
       "random@50": 0.0007664244765320825,
       "random@100": 0.001532848953064165,
       "random@200": 0.00306569790612833,
-      "ann_search_ms": 2726.6,
-      "ann_recall_vs_exact": 0.7686052953869481
+      "ann_search_ms": 6644.1,
+      "ann_recall_vs_exact": 0.768877646235493
     },
     "circulating": {
       "available": true,
       "pool_size": 4174,
-      "exact_search_ms": 533.5,
-      "recall@50": 0.07513920956132011,
-      "recall@100": 0.127936982208339,
-      "recall@200": 0.20684503599076465,
+      "exact_search_ms": 1188.5,
+      "recall@50": 0.0790438679885916,
+      "recall@100": 0.13238489746027435,
+      "recall@200": 0.21499388836072253,
       "random@50": 0.011978917105893628,
       "random@100": 0.023957834211787255,
       "random@200": 0.04791566842357451,
-      "ann_search_ms": 626.8,
-      "ann_recall_vs_exact": 0.9260491631189129
+      "ann_search_ms": 2665.9,
+      "ann_recall_vs_exact": 0.9281734414183239
     },
     "fresh": {
       "available": false,

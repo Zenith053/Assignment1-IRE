@@ -58,21 +58,36 @@ silently faked.
 
 `config/ebnerd.yaml` has `scale: demo`. Change it to `small` to rerun at ~10×.
 
-## Results (test split)
+## Results (held-out split, evaluated in full)
+
+The test split is the partition each dataset ships as held out — MIND's `dev` file
+and EB-NeRD's `validation/` directory — scored end to end with no subsampling.
+`split.py` never touches it; it only subdivides the shipped *train* file into
+train + val so hyperparameters are never tuned on the reported split.
 
 | | MIND | EB-NeRD demo |
 |---|---|---|
-| Best AUC | **semantic 0.6375** [0.634, 0.642] | semantic 0.5195 [0.515, 0.524] |
-| Hybrid AUC (learned) | 0.6337 [0.630, 0.638] | 0.5169 [0.512, 0.521] |
-| BM25 AUC | 0.5671 [0.563, 0.571] | 0.5098 [0.505, 0.514] |
-| Popularity AUC | 0.4955 | 0.4685 |
-| Best recall@50 (circulating pool) | semantic 0.075 | bm25 0.026 |
+| Impressions scored | 73,152 (all of `MINDsmall_dev`) | 25,356 (all of `validation/`) |
+| Best AUC | **semantic 0.6423** [0.640, 0.644] | **hybrid 0.5358** [0.532, 0.540] |
+| Hybrid AUC (learned) | 0.6388 [0.637, 0.641] | 0.5358 [0.532, 0.540] |
+| Semantic AUC | 0.6423 [0.640, 0.644] | 0.5319 [0.528, 0.536] |
+| BM25 AUC | 0.5696 [0.567, 0.572] | 0.5242 [0.520, 0.528] |
+| Popularity AUC | 0.4950 [0.494, 0.496] | 0.4684 [0.467, 0.469] |
+| Best recall@50 (circulating pool) | semantic 0.079 | bm25 0.037 |
 | Codabench leaderboard AUC | **0.6567** (MINDlarge_test) | **0.5149** (ebnerd_testset) |
 
-Semantic uses top-5 similarity pooling; hybrid is a logistic regression over
-(bm25, semantic) fit on the val split, replacing an earlier fixed-α blend. Full
-numbers, slices and confidence intervals are in `reports/`, and the analysis is
-in `reports/design_note.md`.
+Semantic uses top-5 similarity pooling over the user's **full** click history —
+there is no truncation window, which was measured to cost AUC monotonically on
+EB-NeRD (0.5029 at 5 clicks, 0.5094 at 20, 0.5242 uncapped). k=5 is the peak of a
+1..50 val sweep (`make sweep`); mean-pooling is that sweep's k≥|history| endpoint
+and costs 0.010 AUC on MIND, 0.037 on EB-NeRD. Hybrid is a logistic
+regression over (bm25, semantic) fit on the val split, replacing an earlier fixed-α
+blend; it ties semantic on MIND and leads it on EB-NeRD, with overlapping CIs in
+both cases. Full numbers, slices and confidence intervals are in `reports/`, and
+the analysis is in `reports/design_note.md`.
+
+The two Codabench figures were produced before the truncation window was removed
+and have not been resubmitted.
 
 ## Known limitations
 
@@ -83,4 +98,9 @@ in `reports/design_note.md`.
   is an optimistic bound rather than a deployable filter. Reported alongside
   the honest full-catalogue number.
 - `recall_at_k` (Q2.4/Q3.4) still measures mean-pooled semantic similarity;
-  top-5 pooling is only wired into the ranking harness and submissions so far.
+  top-5 pooling is only wired into the ranking harness and submissions so far,
+  because it yields no single query vector for FAISS to index — retrieving under
+  it needs one ANN query per history click, merged.
+- The Codabench scores above were produced before the truncation window was
+  removed (MIND at N=50, EB-NeRD at N=20) and have not been resubmitted; the
+  offline tables in `reports/` are full-history.
