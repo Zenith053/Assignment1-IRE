@@ -119,11 +119,13 @@ in someone's top-20" rather than genuine personalized matching.
 - **`stage1_order` is a proxy, not the retriever's literal ranking** — `UnionRetriever.retrieve()`
   returns a deduplicated set with no score; semantic similarity stands in for "how stage 1 would
   have ordered its own candidates," same convention as `evaluate_reranker.py`.
-- **Finding 2's fix lives only in `evaluate_twostage.py`.** `reports/rerank_{mind,ebnerd}.json`'s
-  Universe-B numbers (from the earlier Q1/Q2 pass) still have the double-counting bug described
-  above and should be treated as superseded by this report's numbers, not cross-cited.
-- **EB-NeRD is `scale: small` here**, matching this branch's current config — not directly
-  comparable to `reports/a2_q1_q2_implementation.md`'s `demo`-scale numbers.
+- **Finding 2 is now also fixed in `evaluate_reranker.py`** (19 Sep), and
+  `reports/rerank_{mind,ebnerd}.json` were regenerated on EB-NeRD small with 10,000 impressions per
+  split — see "Final Q2 results" in `reports/a2_q1_q2_implementation.md`. The Universe-B numbers
+  there use the corrected conditional metrics and can be cross-cited with this report.
+- **EB-NeRD is `scale: small` here**, matching this branch's current config — comparable to the
+  "Final Q2 results" section of `reports/a2_q1_q2_implementation.md`, not to its older
+  `demo`-scale tables.
 
 ## Files
 

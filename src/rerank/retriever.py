@@ -35,6 +35,11 @@ class UnionRetriever:
                 k_pop: int = 20):
         import faiss  # local import: only retrieval needs it, mirrors semantic.py
 
+        # One OpenMP thread: faiss, torch and lightgbm each link a different libomp in
+        # this environment, and multi-threaded faiss search segfaults once torch is loaded
+        # (reproduced in evaluate_reranker.py after MLP training; see also Q4 scale_10x.py).
+        faiss.omp_set_num_threads(1)
+
         self.index = index
         self.embeddings = embeddings
         self.articles = articles

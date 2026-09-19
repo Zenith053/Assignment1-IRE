@@ -62,7 +62,11 @@ def train(X_train: np.ndarray, y_train: np.ndarray, group_train: np.ndarray,
         # - finer bins gave the noisier behavioural features more precise
         # ways to overfit, which outweighed any resolution gained on
         # `semantic`. Left at the library default on that evidence.
-        "num_threads": 4, "verbosity": -1, "seed": seed,
+        # One thread: LightGBM links whichever libomp is already loaded, and faiss and
+        # torch (imported by the feature context and the MLP) each bundle an incompatible
+        # copy - with more than one thread, training segfaults (reproduced: 4 threads
+        # exit -11, 1 thread OK). Fixed seed + one thread also makes runs reproducible.
+        "num_threads": 1, "verbosity": -1, "seed": seed,
     }
     booster = lgb.train(
         params, train_set, num_boost_round=num_boost_round, valid_sets=[val_set],
@@ -75,7 +79,7 @@ def train(X_train: np.ndarray, y_train: np.ndarray, group_train: np.ndarray,
 def predict_per_impression(booster, X: np.ndarray, offsets: np.ndarray) -> list[np.ndarray]:
     """Score every candidate, then split back into the per-impression shape
     `eval.metrics` and both submission scripts already consume."""
-    flat = booster.predict(X, num_iteration=booster.best_iteration)
+    flat = booster.predict(X, num_iteration=booster.best_iteration, num_threads=1)
     return [flat[offsets[i]:offsets[i + 1]] for i in range(len(offsets) - 1)]
 
 

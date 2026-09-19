@@ -101,6 +101,9 @@ def main(argv: list[str] | None = None) -> int:
                        help="impressions per split; A1's own default elsewhere is 20000")
     parser.add_argument("--n-boot", type=int, default=1000)
     parser.add_argument("--retrieve-k", type=int, default=TOP_K_RETRIEVE)
+    parser.add_argument("--retrieve-sample", type=int, default=None,
+                       help="Universe B on this many of the sampled test impressions (default: all); "
+                            "its feature frame is retrieve_k rows per impression")
     parser.add_argument("--diagnose-single-feature", action="store_true",
                        help="sanity-check GBDT plumbing with a semantic-only / bm25-only model")
     parser.add_argument("--skip-retrieval", action="store_true",
@@ -228,10 +231,13 @@ def main(argv: list[str] | None = None) -> int:
     if not args.skip_retrieval:
         print(f"\n[Universe B] stage 1: retrieving top-{args.retrieve_k} per user")
         retriever = UnionRetriever(cfg, ctx.bm25, ctx.embeddings, ctx.articles, imp["test"], ctx.row_of)
-        profiles_test = profiles_for(ctx, from_inview(imp["test"], ctx.row_of), "test")
+        imp_b = imp["test"]
+        if args.retrieve_sample and args.retrieve_sample < len(imp_b):
+            imp_b = imp_b.sample(args.retrieve_sample, random_state=13).reset_index(drop=True)
+        profiles_test = profiles_for(ctx, from_inview(imp_b, ctx.row_of), "test")
         retrieved = retriever.retrieve(profiles_test, ctx.articles, k=args.retrieve_k)
 
-        cand_b = from_retrieval(imp["test"], retrieved, ctx.row_of)
+        cand_b = from_retrieval(imp_b, retrieved, ctx.row_of)
         n_with_click = sum(1 for l in cand_b.labels_by_imp if l.sum() > 0)
         recall_at_k = n_with_click / max(1, cand_b.n_impressions)
         print(f"  recall@{args.retrieve_k}: {recall_at_k:.4f} "
@@ -244,27 +250,42 @@ def main(argv: list[str] | None = None) -> int:
         gbdt_b_scores = gbdt.predict_per_impression(booster, X_b, cand_b.offsets)
         stage1_scores = _per_imp_generic(base_b["semantic"], cand_b.offsets)
 
-        raw_b_before = per_impression_metrics(cand_b.labels_by_imp, stage1_scores)
-        raw_b_after = per_impression_metrics(cand_b.labels_by_imp, gbdt_b_scores)
-        # nDCG@10 conditional on the click being retrieved: only impressions
-        # with >=1 label==1 have a defined nDCG in the first place, so
-        # restricting to those is exactly "conditional on retrieval".
-        cond_before = [v for v in raw_b_before["ndcg@10"] if v is not None]
-        cond_after = [v for v in raw_b_after["ndcg@10"] if v is not None]
-        end_to_end_before = recall_at_k * (float(np.mean(cond_before)) if cond_before else 0.0)
-        end_to_end_after = recall_at_k * (float(np.mean(cond_after)) if cond_after else 0.0)
+        # Conditional on the click being retrieved. M.ndcg / M.mrr return 0.0 (not None)
+        # for an impression with no positive, so filtering on `is not None` - as this
+        # code previously did - kept every impression: the "conditional" figure was the
+        # unconditional mean and end_to_end applied recall twice. Select the impressions
+        # with a retrieved click explicitly instead (fix found in the Q5 pass,
+        # src/eval/evaluate_twostage.py).
+        retrieved_idx = [i for i, l in enumerate(cand_b.labels_by_imp) if l.sum() > 0]
+        labels_r = [cand_b.labels_by_imp[i] for i in retrieved_idx]
+        raw_b_before = per_impression_metrics(labels_r, [stage1_scores[i] for i in retrieved_idx])
+        raw_b_after = per_impression_metrics(labels_r, [gbdt_b_scores[i] for i in retrieved_idx])
+        cond = {name: {m: summarise(v, args.n_boot) for m, v in raw.items()}
+                for name, raw in (("stage1_order", raw_b_before), ("gbdt_inview_applied_to_retrieved", raw_b_after))}
+        paired_b = {m: M.paired_bootstrap_ci(raw_b_after[m], raw_b_before[m], n_boot=10_000) for m in raw_b_after}
+        end_to_end_before = recall_at_k * cond["stage1_order"]["ndcg@10"]["value"]
+        end_to_end_after = recall_at_k * cond["gbdt_inview_applied_to_retrieved"]["ndcg@10"]["value"]
 
-        print(f"  nDCG@10 | click retrieved: before(stage-1 order)={np.mean(cond_before):.4f}  "
-             f"after(gbdt_inview applied to retrieved)={np.mean(cond_after):.4f}")
+        print(f"  conditional on a retrieved click ({len(retrieved_idx):,} impressions):")
+        for name, c in cond.items():
+            print(f"    {name:<34} AUC {c['auc']['value']:.4f}  MRR {c['mrr']['value']:.4f}  "
+                  f"nDCG@5 {c['ndcg@5']['value']:.4f}  nDCG@10 {c['ndcg@10']['value']:.4f}")
+        for m, res in paired_b.items():
+            print(f"    gbdt - stage1 {m:<8} {res['mean_diff']:+.4f} [{res['ci_low']:+.4f}, {res['ci_high']:+.4f}]"
+                  f"{'  SIGNIFICANT' if res['excludes_zero'] else ''}")
         print(f"  end-to-end nDCG@10 = recall@K x conditional: "
              f"before={end_to_end_before:.4f}  after={end_to_end_after:.4f}")
 
         result["universe_b"] = {
             "retrieve_k": args.retrieve_k,
+            "n_impressions": cand_b.n_impressions,
             "recall_at_k": recall_at_k,
+            "n_impressions_click_retrieved": len(retrieved_idx),
+            "conditional_on_retrieval": cond,
+            "paired_gbdt_vs_stage1_conditional": paired_b,
             "ndcg10_conditional_on_retrieval": {
-                "stage1_order": float(np.mean(cond_before)) if cond_before else None,
-                "gbdt_inview_applied_to_retrieved": float(np.mean(cond_after)) if cond_after else None,
+                "stage1_order": cond["stage1_order"]["ndcg@10"]["value"],
+                "gbdt_inview_applied_to_retrieved": cond["gbdt_inview_applied_to_retrieved"]["ndcg@10"]["value"],
             },
             "end_to_end_ndcg10": {"before": end_to_end_before, "after": end_to_end_after},
             "note": ("gbdt here is gbdt_inview scoring retrieved candidates, not a model "
