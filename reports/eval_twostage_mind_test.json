@@ -1,0 +1,1088 @@
+{
+  "dataset": "mind",
+  "split": "test",
+  "scale": null,
+  "pipeline": "two-stage (UnionRetriever -> GBDT)",
+  "retrieve_k": 200,
+  "n_impressions": 3500,
+  "overall_recall_at_k": 0.2742857142857143,
+  "scorers": {
+    "stage1_order": {
+      "slices": {
+        "all": {
+          "available": true,
+          "n_impressions": 3500,
+          "recall_at_k": 0.2742857142857143,
+          "auc": {
+            "value": 0.6695513369012679,
+            "ci_low": 0.6551826031830016,
+            "ci_high": 0.6834553932199904,
+            "n": 960,
+            "n_undefined": 2540
+          },
+          "mrr": {
+            "value": 0.019243453216069524,
+            "ci_low": 0.01644256623133965,
+            "ci_high": 0.022372977015285345,
+            "n": 3500,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.014997455090351228,
+            "ci_low": 0.011887777232490467,
+            "ci_high": 0.018382297246688096,
+            "n": 3500,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.019674598315219248,
+            "ci_low": 0.016147261105348084,
+            "ci_high": 0.02334707313071292,
+            "n": 3500,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.6816168077408321,
+            "ci_low": 0.6783326323547656,
+            "ci_high": 0.6850975220200596,
+            "n": 3402,
+            "n_undefined": 98
+          },
+          "cat_entropy": {
+            "value": 1.0860773732949447,
+            "ci_low": 1.0578398402820082,
+            "ci_high": 1.1122172319692072,
+            "n": 3500,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 15.69524199398268,
+            "ci_low": 15.597450497199025,
+            "ci_high": 15.783308754252761,
+            "n": 3500,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.07015842318358682,
+            "ci_low": 0.06110789120545307,
+            "ci_high": 0.0806054081300321,
+            "n": 960,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.054678221683572184,
+            "ci_low": 0.04335250565332388,
+            "ci_high": 0.06644687813729158,
+            "n": 960,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.07173030635757018,
+            "ci_low": 0.0602617184695919,
+            "ci_high": 0.08472344502647207,
+            "n": 960,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.019674598315219248
+        },
+        "cold_users": {
+          "available": true,
+          "n_impressions": 377,
+          "recall_at_k": 0.1989389920424403,
+          "auc": {
+            "value": 0.6969676730841663,
+            "ci_low": 0.648272023879012,
+            "ci_high": 0.7437238809240182,
+            "n": 75,
+            "n_undefined": 302
+          },
+          "mrr": {
+            "value": 0.012080695283164945,
+            "ci_low": 0.007104051486476592,
+            "ci_high": 0.018811784975012485,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.007744275851205921,
+            "ci_low": 0.0021685129053260867,
+            "ci_high": 0.015804708624120832,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.011927914478954856,
+            "ci_low": 0.005278453544327675,
+            "ci_high": 0.02027811473881479,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.6988024678407361,
+            "ci_low": 0.688998918713562,
+            "ci_high": 0.7082663958363571,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "cat_entropy": {
+            "value": 1.328140872842039,
+            "ci_low": 1.2552338074243117,
+            "ci_high": 1.4013537851356794,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 16.383421801920054,
+            "ci_low": 16.292762043653333,
+            "ci_high": 16.46468775880664,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.060725628290042445,
+            "ci_low": 0.03835321250699342,
+            "ci_high": 0.09335593297775154,
+            "n": 75,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.03892789327872842,
+            "ci_low": 0.011484708215290481,
+            "ci_high": 0.07887234556702341,
+            "n": 75,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.05995765011421308,
+            "ci_low": 0.02804901213349091,
+            "ci_high": 0.10146894820792157,
+            "n": 75,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.011927914478954856
+        },
+        "warm_users": {
+          "available": true,
+          "n_impressions": 3123,
+          "recall_at_k": 0.28338136407300674,
+          "auc": {
+            "value": 0.6672279185806833,
+            "ci_low": 0.6508522128355376,
+            "ci_high": 0.6828343824101065,
+            "n": 885,
+            "n_undefined": 2238
+          },
+          "mrr": {
+            "value": 0.020108121720938253,
+            "ci_low": 0.017093473585545235,
+            "ci_high": 0.0233060287115652,
+            "n": 3123,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.015873039007468673,
+            "ci_low": 0.012360592641377429,
+            "ci_high": 0.019422415560035034,
+            "n": 3123,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.02060975675462741,
+            "ci_low": 0.016790300625785872,
+            "ci_high": 0.024525426415159243,
+            "n": 3123,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.6794749915895383,
+            "ci_low": 0.6759117359105221,
+            "ci_high": 0.6832534457459922,
+            "n": 3025,
+            "n_undefined": 98
+          },
+          "cat_entropy": {
+            "value": 1.0568561311145879,
+            "ci_low": 1.0301785516905981,
+            "ci_high": 1.0832728992121294,
+            "n": 3123,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 15.612166813837826,
+            "ci_low": 15.504442597293117,
+            "ci_high": 15.717283137105035,
+            "n": 3123,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.07095781258134481,
+            "ci_low": 0.06074509870645876,
+            "ci_high": 0.08249789311660065,
+            "n": 885,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.056012995277203007,
+            "ci_low": 0.044050537162461816,
+            "ci_high": 0.06910083622817025,
+            "n": 885,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.07272798909005808,
+            "ci_low": 0.06024578137778717,
+            "ci_high": 0.08651918712160152,
+            "n": 885,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.02060975675462741
+        },
+        "low_history_users": {
+          "available": true,
+          "n_impressions": 637,
+          "recall_at_k": 0.20408163265306123,
+          "auc": {
+            "value": 0.6967399403012611,
+            "ci_low": 0.6572359412512669,
+            "ci_high": 0.7332415530149154,
+            "n": 130,
+            "n_undefined": 507
+          },
+          "mrr": {
+            "value": 0.013193773195703652,
+            "ci_low": 0.008309089980024767,
+            "ci_high": 0.018932681536882653,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.008799448708874913,
+            "ci_low": 0.003325247454028973,
+            "ci_high": 0.01487647776806502,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.01443448918873799,
+            "ci_low": 0.007846987125731281,
+            "ci_high": 0.021204372696522946,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.6995936755669921,
+            "ci_low": 0.6923541029543855,
+            "ci_high": 0.7065783737265333,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "cat_entropy": {
+            "value": 1.3490437886362439,
+            "ci_low": 1.2892553705121166,
+            "ci_high": 1.4064562673543521,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 16.380264437289647,
+            "ci_low": 16.307334393235035,
+            "ci_high": 16.445026060319805,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.06464948865894789,
+            "ci_low": 0.0425706367265973,
+            "ci_high": 0.09021324369406485,
+            "n": 130,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.04311729867348708,
+            "ci_low": 0.017923503419051613,
+            "ci_high": 0.07186306305133332,
+            "n": 130,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.07072899702481615,
+            "ci_low": 0.04114609433637728,
+            "ci_high": 0.10294702863844253,
+            "n": 130,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.01443448918873799
+        },
+        "high_history_users": {
+          "available": true,
+          "n_impressions": 2863,
+          "recall_at_k": 0.2899056933286762,
+          "auc": {
+            "value": 0.6652928809470521,
+            "ci_low": 0.6497530175060696,
+            "ci_high": 0.6816239333487817,
+            "n": 830,
+            "n_undefined": 2033
+          },
+          "mrr": {
+            "value": 0.020589470042116705,
+            "ci_low": 0.017452741129312967,
+            "ci_high": 0.02414355644142429,
+            "n": 2863,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.016376473625105126,
+            "ci_low": 0.012843361950226862,
+            "ci_high": 0.02037004168739343,
+            "n": 2863,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.020840490565854443,
+            "ci_low": 0.017159964732442867,
+            "ci_high": 0.025101196385209298,
+            "n": 2863,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.6774753014821472,
+            "ci_low": 0.6734834319353104,
+            "ci_high": 0.681699299852197,
+            "n": 2765,
+            "n_undefined": 98
+          },
+          "cat_entropy": {
+            "value": 1.0275689532556826,
+            "ci_low": 1.0012935845465207,
+            "ci_high": 1.053250123406848,
+            "n": 2863,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 15.542828687525631,
+            "ci_low": 15.427298680963483,
+            "ci_high": 15.65622491687089,
+            "n": 2863,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.07102126835009652,
+            "ci_low": 0.06047978346470241,
+            "ci_high": 0.0812636833218477,
+            "n": 830,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.0564889686610554,
+            "ci_low": 0.04429122142204472,
+            "ci_high": 0.0687743025512762,
+            "n": 830,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.07188713793980875,
+            "ci_low": 0.058960050358989664,
+            "ci_high": 0.08449810962257276,
+            "n": 830,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.02084049056585444
+        },
+        "head_clicks": {
+          "available": true,
+          "n_impressions": 100,
+          "recall_at_k": 0.5,
+          "auc": {
+            "value": 0.6448598253512836,
+            "ci_low": 0.5723031729967047,
+            "ci_high": 0.7193890648966812,
+            "n": 50,
+            "n_undefined": 50
+          },
+          "mrr": {
+            "value": 0.07889731095554403,
+            "ci_low": 0.03973358971035554,
+            "ci_high": 0.1249116018700374,
+            "n": 100,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.07275963644409023,
+            "ci_low": 0.030318866980721074,
+            "ci_high": 0.12196931787536609,
+            "n": 100,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.08393782894667363,
+            "ci_low": 0.04279984419489084,
+            "ci_high": 0.13440258111752273,
+            "n": 100,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.6903113032642164,
+            "ci_low": 0.6679750823033483,
+            "ci_high": 0.7092772034281178,
+            "n": 95,
+            "n_undefined": 5
+          },
+          "cat_entropy": {
+            "value": 1.1406883056660622,
+            "ci_low": 0.9946347454077996,
+            "ci_high": 1.2811157699965008,
+            "n": 100,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 15.070012734101752,
+            "ci_low": 14.275186320026943,
+            "ci_high": 15.712361824192271,
+            "n": 100,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.15779462191108806,
+            "ci_low": 0.07648209528206548,
+            "ci_high": 0.2513010689317804,
+            "n": 50,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.14551927288818045,
+            "ci_low": 0.05848792884609474,
+            "ci_high": 0.2465190910132033,
+            "n": 50,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.16787565789334727,
+            "ci_low": 0.08310110058319695,
+            "ci_high": 0.2631364846809815,
+            "n": 50,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.08393782894667363
+        },
+        "tail_clicks": {
+          "available": true,
+          "n_impressions": 3400,
+          "recall_at_k": 0.2676470588235294,
+          "auc": {
+            "value": 0.6709080133600583,
+            "ci_low": 0.6553057629250972,
+            "ci_high": 0.6855617326083708,
+            "n": 910,
+            "n_undefined": 2490
+          },
+          "mrr": {
+            "value": 0.017488927988437923,
+            "ci_low": 0.01506771836005454,
+            "ci_high": 0.02002904552666359,
+            "n": 3400,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.013298567403476553,
+            "ci_low": 0.01031141805276878,
+            "ci_high": 0.01630249846933543,
+            "n": 3400,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.017784503296647058,
+            "ci_low": 0.01452022747760198,
+            "ci_high": 0.02094686344483173,
+            "n": 3400,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.6813670414648353,
+            "ci_low": 0.677695551571851,
+            "ci_high": 0.6846520792673749,
+            "n": 3307,
+            "n_undefined": 93
+          },
+          "cat_entropy": {
+            "value": 1.0844711694016764,
+            "ci_low": 1.0563254094599814,
+            "ci_high": 1.110658186025444,
+            "n": 3400,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 15.71363108986153,
+            "ci_low": 15.614760756369607,
+            "ci_high": 15.80969551726237,
+            "n": 3400,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.06534324742932851,
+            "ci_low": 0.05732124186928174,
+            "ci_high": 0.07518180446529195,
+            "n": 910,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.049686955133868435,
+            "ci_low": 0.03963703926795155,
+            "ci_high": 0.06154014261832552,
+            "n": 910,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.06644759473472528,
+            "ci_low": 0.05538252477183881,
+            "ci_high": 0.07855510205722359,
+            "n": 910,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.01778450329664706
+        }
+      },
+      "coverage": 0.029277415003525552,
+      "n_distinct_recommended": 1910
+    },
+    "gbdt": {
+      "slices": {
+        "all": {
+          "available": true,
+          "n_impressions": 3500,
+          "recall_at_k": 0.2742857142857143,
+          "auc": {
+            "value": 0.5704964634450145,
+            "ci_low": 0.5558883766273628,
+            "ci_high": 0.5838631609553913,
+            "n": 960,
+            "n_undefined": 2540
+          },
+          "mrr": {
+            "value": 0.008727664826786817,
+            "ci_low": 0.007271186921101838,
+            "ci_high": 0.010390174956214847,
+            "n": 3500,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.004169053531190029,
+            "ci_low": 0.0025564344987311235,
+            "ci_high": 0.00595235403981546,
+            "n": 3500,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.005971570970087652,
+            "ci_low": 0.004241741979075827,
+            "ci_high": 0.007873779367545934,
+            "n": 3500,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.8524067491590801,
+            "ci_low": 0.8504320995394865,
+            "ci_high": 0.8544204826020515,
+            "n": 3402,
+            "n_undefined": 98
+          },
+          "cat_entropy": {
+            "value": 1.8575470146652409,
+            "ci_low": 1.8362518024425305,
+            "ci_high": 1.8770858049054355,
+            "n": 3500,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 10.044618103659936,
+            "ci_low": 9.9733068378889,
+            "ci_high": 10.119348294539712,
+            "n": 3500,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.03181961134766027,
+            "ci_low": 0.02667392106158931,
+            "ci_high": 0.037617011068394705,
+            "n": 960,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.015199674332463648,
+            "ci_low": 0.009190490235041591,
+            "ci_high": 0.02172352506878467,
+            "n": 960,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.021771352495111234,
+            "ci_low": 0.015154571757304657,
+            "ci_high": 0.028893034449015108,
+            "n": 960,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.005971570970087653
+        },
+        "cold_users": {
+          "available": true,
+          "n_impressions": 377,
+          "recall_at_k": 0.1989389920424403,
+          "auc": {
+            "value": 0.5211763332089897,
+            "ci_low": 0.4614624897632071,
+            "ci_high": 0.5740662065717514,
+            "n": 75,
+            "n_undefined": 302
+          },
+          "mrr": {
+            "value": 0.003988939237527079,
+            "ci_low": 0.0027620650471785265,
+            "ci_high": 0.005375474674144034,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.002487700361901724,
+            "ci_low": 0.0,
+            "ci_high": 0.005742150926238164,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.8799257014411198,
+            "ci_low": 0.8740483927987616,
+            "ci_high": 0.8854935430128632,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "cat_entropy": {
+            "value": 2.125681303290686,
+            "ci_low": 2.077459398820099,
+            "ci_high": 2.1731965660832926,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 9.853090496088038,
+            "ci_low": 9.717258454092365,
+            "ci_high": 10.0008261091314,
+            "n": 377,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.020051067900636113,
+            "ci_low": 0.015233081426111654,
+            "ci_high": 0.025455413886487168,
+            "n": 75,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "n": 75,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.012504840485826,
+            "ci_low": 0.0,
+            "ci_high": 0.028755811799567505,
+            "n": 75,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.002487700361901724
+        },
+        "warm_users": {
+          "available": true,
+          "n_impressions": 3123,
+          "recall_at_k": 0.28338136407300674,
+          "auc": {
+            "value": 0.574676135498915,
+            "ci_low": 0.5581246062539883,
+            "ci_high": 0.5900641100140462,
+            "n": 885,
+            "n_undefined": 2238
+          },
+          "mrr": {
+            "value": 0.009299710791292395,
+            "ci_low": 0.00754981012254317,
+            "ci_high": 0.011247116453360921,
+            "n": 3123,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.004672330246290459,
+            "ci_low": 0.0027634672315859916,
+            "ci_high": 0.006713194026260929,
+            "n": 3123,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.006392134280778044,
+            "ci_low": 0.004306999819580112,
+            "ci_high": 0.008647569391595094,
+            "n": 3123,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.8489771144449219,
+            "ci_low": 0.8468312895411303,
+            "ci_high": 0.8510564177523959,
+            "n": 3025,
+            "n_undefined": 98
+          },
+          "cat_entropy": {
+            "value": 1.8251785782861845,
+            "ci_low": 1.8039079653569925,
+            "ci_high": 1.845923636443681,
+            "n": 3123,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 10.067738791477616,
+            "ci_low": 9.985599323789742,
+            "ci_high": 10.14597019420327,
+            "n": 3123,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.03281694553808605,
+            "ci_low": 0.027197003113148002,
+            "ci_high": 0.039141406284406245,
+            "n": 885,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.016487782326740228,
+            "ci_low": 0.009982020015715794,
+            "ci_high": 0.02340525455531913,
+            "n": 885,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.02255665012301676,
+            "ci_low": 0.015776430287752413,
+            "ci_high": 0.029677998908782192,
+            "n": 885,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.006392134280778045
+        },
+        "low_history_users": {
+          "available": true,
+          "n_impressions": 637,
+          "recall_at_k": 0.20408163265306123,
+          "auc": {
+            "value": 0.5097522853815567,
+            "ci_low": 0.4676682375781327,
+            "ci_high": 0.5480339081642815,
+            "n": 130,
+            "n_undefined": 507
+          },
+          "mrr": {
+            "value": 0.004401983967180305,
+            "ci_low": 0.003065993075476239,
+            "ci_high": 0.006021751566061028,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.0014610307034119202,
+            "ci_low": 0.0,
+            "ci_high": 0.003706990763181768,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.0029333431624966135,
+            "ci_low": 0.0006761013470539922,
+            "ci_high": 0.005713924006545594,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.8785925937035769,
+            "ci_low": 0.8741979211989902,
+            "ci_high": 0.8832670168094395,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "cat_entropy": {
+            "value": 2.094719680384341,
+            "ci_low": 2.0563812873651353,
+            "ci_high": 2.131819214023313,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 9.693627290743416,
+            "ci_low": 9.588024251132566,
+            "ci_high": 9.798097655075598,
+            "n": 637,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.021569721439183495,
+            "ci_low": 0.015699841740218448,
+            "ci_high": 0.028553540047194067,
+            "n": 130,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.007159050446718409,
+            "ci_low": 0.0,
+            "ci_high": 0.018164254739590664,
+            "n": 130,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.014373381496233408,
+            "ci_low": 0.00242665289835176,
+            "ci_high": 0.027125561349100418,
+            "n": 130,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.002933343162496614
+        },
+        "high_history_users": {
+          "available": true,
+          "n_impressions": 2863,
+          "recall_at_k": 0.2899056933286762,
+          "auc": {
+            "value": 0.5800106118163996,
+            "ci_low": 0.5641335620722807,
+            "ci_high": 0.5951553353613024,
+            "n": 830,
+            "n_undefined": 2033
+          },
+          "mrr": {
+            "value": 0.009690102377457216,
+            "ci_low": 0.007919993816717295,
+            "ci_high": 0.011816342133992902,
+            "n": 2863,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.004771572057663888,
+            "ci_low": 0.002798419266482694,
+            "ci_high": 0.0070839036827639885,
+            "n": 2863,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.006647558086202041,
+            "ci_low": 0.004562808255914213,
+            "ci_high": 0.009161307190171825,
+            "n": 2863,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.8463740609222468,
+            "ci_low": 0.8444579951651058,
+            "ci_high": 0.8485901921976755,
+            "n": 2765,
+            "n_undefined": 98
+          },
+          "cat_entropy": {
+            "value": 1.8047775462534115,
+            "ci_low": 1.7830702488127133,
+            "ci_high": 1.8255404404881244,
+            "n": 2863,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 10.122711414113247,
+            "ci_low": 10.039865715896147,
+            "ci_high": 10.21153138722647,
+            "n": 2863,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.033425015791156636,
+            "ci_low": 0.027624677521422693,
+            "ci_high": 0.04002611873276421,
+            "n": 830,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.01645904915794182,
+            "ci_low": 0.01004499234346339,
+            "ci_high": 0.024226914223160482,
+            "n": 830,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.022930070844333062,
+            "ci_low": 0.01597349591880537,
+            "ci_high": 0.030978028946655106,
+            "n": 830,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.006647558086202041
+        },
+        "head_clicks": {
+          "available": true,
+          "n_impressions": 100,
+          "recall_at_k": 0.5,
+          "auc": {
+            "value": 0.7277993522384264,
+            "ci_low": 0.6599106653164207,
+            "ci_high": 0.7932939874331738,
+            "n": 50,
+            "n_undefined": 50
+          },
+          "mrr": {
+            "value": 0.08434945262014935,
+            "ci_low": 0.046773061827681324,
+            "ci_high": 0.1315774057120747,
+            "n": 100,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.08403745029639578,
+            "ci_low": 0.04279642067948914,
+            "ci_high": 0.13685557237031074,
+            "n": 100,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.09344649448934676,
+            "ci_low": 0.04984959468332323,
+            "ci_high": 0.14581156632916306,
+            "n": 100,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.849103067423168,
+            "ci_low": 0.8374121852140677,
+            "ci_high": 0.860160292434065,
+            "n": 95,
+            "n_undefined": 5
+          },
+          "cat_entropy": {
+            "value": 1.7803516136872874,
+            "ci_low": 1.6505039495071652,
+            "ci_high": 1.903488584894772,
+            "n": 100,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 9.732331884329993,
+            "ci_low": 9.195941500763679,
+            "ci_high": 10.196300836378736,
+            "n": 100,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.1686989052402987,
+            "ci_low": 0.09418454946668038,
+            "ci_high": 0.2528632287325238,
+            "n": 50,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.16807490059279157,
+            "ci_low": 0.08318447038565024,
+            "ci_high": 0.2569842814360983,
+            "n": 50,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.18689298897869353,
+            "ci_low": 0.1034500631881753,
+            "ci_high": 0.27906829142505435,
+            "n": 50,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.09344649448934676
+        },
+        "tail_clicks": {
+          "available": true,
+          "n_impressions": 3400,
+          "recall_at_k": 0.2676470588235294,
+          "auc": {
+            "value": 0.5618534475772446,
+            "ci_low": 0.5478549655640557,
+            "ci_high": 0.5780599781700889,
+            "n": 910,
+            "n_undefined": 2490
+          },
+          "mrr": {
+            "value": 0.006503494597570272,
+            "ci_low": 0.005616340867082614,
+            "ci_high": 0.007510804712591417,
+            "n": 3400,
+            "n_undefined": 0
+          },
+          "ndcg@5": {
+            "value": 0.0018199830380957426,
+            "ci_low": 0.0007939231392498206,
+            "ci_high": 0.0029014633280456266,
+            "n": 3400,
+            "n_undefined": 0
+          },
+          "ndcg@10": {
+            "value": 0.003398779101874149,
+            "ci_low": 0.0021903323998050477,
+            "ci_high": 0.004625525538166567,
+            "n": 3400,
+            "n_undefined": 0
+          },
+          "diversity": {
+            "value": 0.8525016538354974,
+            "ci_low": 0.8505449255414157,
+            "ci_high": 0.8544630341770283,
+            "n": 3307,
+            "n_undefined": 93
+          },
+          "cat_entropy": {
+            "value": 1.8598174676351809,
+            "ci_low": 1.8404707645050633,
+            "ci_high": 1.878976072778903,
+            "n": 3400,
+            "n_undefined": 0
+          },
+          "novelty": {
+            "value": 10.05380299246376,
+            "ci_low": 9.984245150680607,
+            "ci_high": 10.128712540687296,
+            "n": 3400,
+            "n_undefined": 0
+          },
+          "mrr_given_retrieved": {
+            "value": 0.02429877102388893,
+            "ci_low": 0.02137130835557798,
+            "ci_high": 0.028376271504899176,
+            "n": 910,
+            "n_undefined": 0
+          },
+          "ndcg@5_given_retrieved": {
+            "value": 0.0067999366258522246,
+            "ci_low": 0.0033153033385896497,
+            "ci_high": 0.011617589946614208,
+            "n": 910,
+            "n_undefined": 0
+          },
+          "ndcg@10_given_retrieved": {
+            "value": 0.012698735105903414,
+            "ci_low": 0.008291868375240711,
+            "ci_high": 0.01800170315311511,
+            "n": 910,
+            "n_undefined": 0
+          },
+          "end_to_end_ndcg10": 0.003398779101874149
+        }
+      },
+      "coverage": 0.017137251295257366,
+      "n_distinct_recommended": 1118
+    }
+  },
+  "note": "gbdt is the Universe-A-trained booster applied to retrieved candidates, not retrained on them - the same convention reports/rerank_<ds>.json uses, so the distribution-shift cost stays a visible, comparable number. click-based metrics (auc/mrr/ndcg) are undefined for any impression whose retrieved list never contained the true click; n_undefined in each slice reports exactly how many that is, never averaged in as zero."
+}
