@@ -157,6 +157,11 @@ checked line by line against its source file by an independently written validat
 which did catch real defects, a stray folder inside the archive and a row order that
 no longer matched the input.
 
+**Confirmed afterwards by the leaderboard.** MIND scored 0.6208 against 0.6232
+predicted offline, EB-NeRD 0.6411 against 0.6459. Both landed within 0.005 of the
+offline estimate on hidden sets of 2.4M and 13.5M impressions, which is the strongest
+check available that the offline numbers were not self-flattering.
+
 ---
 
 ## Q6 — Design note

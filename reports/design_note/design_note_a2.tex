@@ -212,18 +212,27 @@ of EB-NeRD test titles), and every zip is validated line by line against the sou
 permutations). Rank-averaging click-free scorers looks promising offline (MIND NRMS + A1 semantic
 0.6531; EB-NeRD NRMS + freshness with exposure counts
 0.6609) but was not submitted.
+
+\textbf{Leaderboard outcome.} Both scored close to what our own splits predicted --- MIND
+0.6208 against 0.6232 offline, EB-NeRD 0.6411 against
+0.6459 --- so the estimate held on hidden sets of 2,370,727 and 13,536,710
+impressions, and the popularity model we did not submit would have scored near chance. EB-NeRD scores 50\% of its
+testset and publishes per-day metrics: AUC runs 0.6288--0.6566 over
+eight days (day mean 0.6404 vs 0.6411 pooled), so one leaderboard
+figure hides $\pm$0.014 of day-to-day movement --- more
+than separates most models in Table~\ref{tab:q3main}.
 \begin{table}[H]\centering\footnotesize\caption{Codabench submissions (hidden test sets).}\label{tab:cb}
 \fitwidth{\begin{tabular}{llrrrrrrr}\toprule
  competition & model & impressions & zip MB & offline AUC & AUC & MRR & nDCG@5 & nDCG@10\\\midrule
-MIND 13967 & NRMS & 2,370,727 & 107.3 & 0.6232 & \multicolumn{4}{c}{\textit{pending}}\\
-EB-NeRD 2469 & NRMS + freshness & 13,536,710 & 221.4 & 0.6459 & \multicolumn{4}{c}{\textit{pending}}\\
+MIND 13967 & NRMS & 2,370,727 & 107.3 & 0.6232 & 0.6208 & 0.2904 & 0.3118 & 0.3683\\
+EB-NeRD 2469 & NRMS + freshness & 13,536,710 & 221.4 & 0.6459 & 0.6411 & 0.4131 & 0.4689 & 0.5294\\
 \bottomrule\end{tabular}}\end{table}
 \begin{figure}[H]\centering
-\begin{minipage}{0.48\linewidth}\centering \fbox{\parbox[c][2.7cm][c]{0.92\linewidth}{\centering\small\textit{Screenshot pending:} MIND submission result\\\footnotesize add \texttt{screenshots/mind\_submission.png} and rebuild}}\end{minipage}\hfill
-\begin{minipage}{0.48\linewidth}\centering \fbox{\parbox[c][2.7cm][c]{0.92\linewidth}{\centering\small\textit{Screenshot pending:} MIND leaderboard\\\footnotesize add \texttt{screenshots/mind\_leaderboard.png} and rebuild}}\end{minipage}\\[4pt]
-\begin{minipage}{0.48\linewidth}\centering \fbox{\parbox[c][2.7cm][c]{0.92\linewidth}{\centering\small\textit{Screenshot pending:} EB-NeRD submission result\\\footnotesize add \texttt{screenshots/ebnerd\_submission.png} and rebuild}}\end{minipage}\hfill
-\begin{minipage}{0.48\linewidth}\centering \fbox{\parbox[c][2.7cm][c]{0.92\linewidth}{\centering\small\textit{Screenshot pending:} EB-NeRD leaderboard\\\footnotesize add \texttt{screenshots/ebnerd\_leaderboard.png} and rebuild}}\end{minipage}
-\caption{Codabench: submission results and leaderboards (MIND top, EB-NeRD bottom).}\label{fig:cb}\end{figure}
+\begin{minipage}{0.49\linewidth}\centering \includegraphics[width=1.0\linewidth,height=1.1cm,keepaspectratio]{screenshots/mind_submission.png}\end{minipage}\hfill
+\begin{minipage}{0.49\linewidth}\centering \includegraphics[width=1.0\linewidth,height=1.1cm,keepaspectratio]{screenshots/ebnerd_submission.png}\end{minipage}\\[4pt]
+\includegraphics[width=1.0\linewidth,height=0.8cm,keepaspectratio]{screenshots/mind_leaderboard.png}\\[3pt]
+\includegraphics[width=1.0\linewidth,height=1.1cm,keepaspectratio]{screenshots/ebnerd_leaderboard.png}
+\caption{Codabench. Top: the two submissions accepted (MIND left, EB-NeRD right). Bottom: our leaderboard rows, MIND above EB-NeRD.}\label{fig:cb}\end{figure}
 \section{Q4: Serving and scale analysis}
 A one-request serving path loads everything once (indexes, model, every article's NRMS vector, so a request never
 encodes text) and times eight stages; it reproduces the offline test scores (max difference
@@ -317,18 +326,14 @@ time available; NRMS epochs took 11--13 min on an M4); retraining the GBDT on re
 \appendix
 \section{Reproduce}
 {\small\begin{verbatim}
-make data                                  # A1 pipeline; EB-NeRD at scale: small
-python src/rerank/evaluate_reranker.py --config config/<ds>.yaml \
-       --sample 10000 --retrieve-sample 3000                               # Q2
-make q3                                    # Q3: 18 NRMS runs (resumable) + tables
-make q4                                    # Q4: serving, memory, latency, cost, 10x
-python src/eval/evaluate_twostage.py --config config/<ds>.yaml --sample 3500  # Q5
-python src/submission/predict_nrms.py ...  # Codabench zips; validate_zip.py checks them
-python src/report/build_design_note.py     # this document
+make data                       # A1 pipeline; EB-NeRD rebuilt at scale: small
+make q1 q2 q3 q4 q5 q6          # one target per question, in order
 \end{verbatim}}
-Detailed tables are in \texttt{reports/q3\_summary.md} and \texttt{reports/q4\_summary.md}; each question's
-implementation notes are in \texttt{reports/a2\_q*\_implementation.md}. AI assistance is logged per question in
-\texttt{reports/a2\_ai\_usage\_log.md} (A1's is \texttt{reports/ai\_usage\_log.md}); the run logs behind every
-number are in \texttt{logs/}. The build also writes three figures to
+\vspace{-6pt}
+Codabench zips come from \texttt{src/submission/predict\_nrms.py} and are checked by
+\texttt{validate\_zip.py}. Detailed tables are in \texttt{reports/q3\_summary.md} and
+\texttt{reports/q4\_summary.md}; per-question implementation notes in \texttt{reports/a2\_q*\_implementation.md};
+AI assistance in \texttt{reports/a2\_ai\_usage\_log.md} (A1's in \texttt{reports/ai\_usage\_log.md}); the run logs
+behind every number in \texttt{logs/}. The build also writes three figures to
 \texttt{reports/design\_note/figures/}, omitted here for length.
 \end{document}

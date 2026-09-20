@@ -45,9 +45,18 @@ FIG = OUT / "figures"
 SHOTS = OUT / "screenshots"
 
 TEAM = "Parth Dhawale \\quad\\&\\quad Peeyush Prashant"
-# Fill in once Codabench has scored the submissions (AUC, MRR, nDCG@5, nDCG@10), e.g.
-# "mind": {"auc": 0.6412, "mrr": 0.31, "ndcg@5": 0.34, "ndcg@10": 0.40}
-CODABENCH_SCORES: dict[str, dict | None] = {"mind": None, "ebnerd": None}
+# Codabench leaderboard scores of the two scored submissions.
+#   MIND    entry 930394, 2026-09-17
+#   EB-NeRD entry 934390, 2026-09-20 (the competition scores 50% of the testset)
+CODABENCH_SCORES: dict[str, dict | None] = {
+    "mind": {"auc": 0.6208, "mrr": 0.2904, "ndcg@5": 0.3118, "ndcg@10": 0.3683},
+    "ebnerd": {"auc": 0.6411, "mrr": 0.4131, "ndcg@5": 0.4689, "ndcg@10": 0.5294},
+}
+# Per-day AUC from EB-NeRD's "Detailed Results" page (2023-06-01 .. 06-08).
+# Transcribed from the leaderboard: the only numbers in the note that do not
+# come from a stored results file.
+EBNERD_PER_DAY_AUC = [0.6376, 0.6502, 0.6566, 0.6512, 0.6298, 0.6311, 0.6381, 0.6288]
+EBNERD_PER_DAY_MEAN = 0.6404
 
 
 # --------------------------------------------------------------------------- #
@@ -94,14 +103,17 @@ def table(spec: str, header: list[str], rows: list[list[str]], caption: str, lab
             f"\\bottomrule\\end{{tabular}}}}\\end{{table}}\n")
 
 
-def shot(name: str, what: str) -> str:
+def shot(name: str, what: str, w: float = 1.0, h: float = 1.6) -> str:
+    """A Codabench screenshot, or a same-sized placeholder if it is not there yet.
+
+    Height-capped so the page count does not move when a screenshot is added,
+    replaced or removed.
+    """
     p = SHOTS / f"{name}.png"
     if p.exists():
-        # Height-capped so a filled screenshot occupies exactly the space the
-        # placeholder reserved: the page count cannot grow when they are added.
-        return f"\\includegraphics[width=\\linewidth,height=2.7cm,keepaspectratio]{{screenshots/{name}.png}}"
-    return ("\\fbox{\\parbox[c][2.7cm][c]{0.92\\linewidth}{\\centering\\small\\textit{Screenshot pending:} "
-            f"{tex(what)}\\\\\\footnotesize add \\texttt{{screenshots/{tex(name)}.png}} and rebuild}}}}")
+        return f"\\includegraphics[width={w}\\linewidth,height={h}cm,keepaspectratio]{{screenshots/{name}.png}}"
+    return (f"\\fbox{{\\parbox[c][{h}cm][c]{{0.9\\linewidth}}{{\\centering\\small\\textit{{Screenshot pending:}} "
+            f"{tex(what)}}}}}")
 
 
 # --------------------------------------------------------------------------- #
@@ -488,11 +500,12 @@ def sec_q5(d: dict) -> str:
                    f"EB-NeRD 2469 & NRMS + freshness & {se.get('impressions', 0):,} & {se.get('zip_mb', 0)} & 0.6459 & {lb('ebnerd')}\\\\\n"
                    "\\bottomrule\\end{tabular}}\\end{table}\n")
     shots = ("\\begin{figure}[H]\\centering\n"
-             f"\\begin{{minipage}}{{0.48\\linewidth}}\\centering {shot('mind_submission', 'MIND submission result')}\\end{{minipage}}\\hfill\n"
-             f"\\begin{{minipage}}{{0.48\\linewidth}}\\centering {shot('mind_leaderboard', 'MIND leaderboard')}\\end{{minipage}}\\\\[4pt]\n"
-             f"\\begin{{minipage}}{{0.48\\linewidth}}\\centering {shot('ebnerd_submission', 'EB-NeRD submission result')}\\end{{minipage}}\\hfill\n"
-             f"\\begin{{minipage}}{{0.48\\linewidth}}\\centering {shot('ebnerd_leaderboard', 'EB-NeRD leaderboard')}\\end{{minipage}}\n"
-             "\\caption{Codabench: submission results and leaderboards (MIND top, EB-NeRD bottom).}\\label{fig:cb}\\end{figure}\n")
+             f"\\begin{{minipage}}{{0.49\\linewidth}}\\centering {shot('mind_submission', 'MIND submission', 1.0, 1.1)}\\end{{minipage}}\\hfill\n"
+             f"\\begin{{minipage}}{{0.49\\linewidth}}\\centering {shot('ebnerd_submission', 'EB-NeRD submission', 1.0, 1.1)}\\end{{minipage}}\\\\[4pt]\n"
+             f"{shot('mind_leaderboard', 'MIND leaderboard', 1.0, 0.8)}\\\\[3pt]\n"
+             f"{shot('ebnerd_leaderboard', 'EB-NeRD leaderboard', 1.0, 1.1)}\n"
+             "\\caption{Codabench. Top: the two submissions accepted (MIND left, EB-NeRD right). "
+             "Bottom: our leaderboard rows, MIND above EB-NeRD.}\\label{fig:cb}\\end{figure}\n")
     return rf"""\section{{Q5: Extended evaluation}}
 {q5_table(d)}{q5_slices(d)}
 \textbf{{Observations.}} Beyond-accuracy metrics move against accuracy. On MIND the two-stage GBDT recommends a
@@ -515,6 +528,15 @@ of EB-NeRD test titles), and every zip is validated line by line against the sou
 permutations). Rank-averaging click-free scorers looks promising offline (MIND NRMS + A1 semantic
 {f(bl['mind']['rank_avg_0.5nrms_0.5semantic'])}; EB-NeRD NRMS + freshness with exposure counts
 {f(bl['ebnerd']['rank_avg_0.5fresh_0.5exposure'])}) but was not submitted.
+
+\textbf{{Leaderboard outcome.}} Both scored close to what our own splits predicted --- MIND
+{f(CODABENCH_SCORES['mind']['auc'])} against 0.6232 offline, EB-NeRD {f(CODABENCH_SCORES['ebnerd']['auc'])} against
+0.6459 --- so the estimate held on hidden sets of {sm.get('impressions', 0):,} and {se.get('impressions', 0):,}
+impressions, and the popularity model we did not submit would have scored near chance. EB-NeRD scores 50\% of its
+testset and publishes per-day metrics: AUC runs {f(min(EBNERD_PER_DAY_AUC))}--{f(max(EBNERD_PER_DAY_AUC))} over
+eight days (day mean {f(EBNERD_PER_DAY_MEAN)} vs {f(CODABENCH_SCORES['ebnerd']['auc'])} pooled), so one leaderboard
+figure hides $\pm${f((max(EBNERD_PER_DAY_AUC) - min(EBNERD_PER_DAY_AUC)) / 2, 3)} of day-to-day movement --- more
+than separates most models in Table~\ref{{tab:q3main}}.
 {leaderboard}{shots}"""
 
 
@@ -650,22 +672,20 @@ def references() -> str:
 
 
 def appendix(d: dict) -> str:
+    # Every question now has a make target, so the long command list this used
+    # to spell out is redundant.
     return r"""\appendix
 \section{Reproduce}
 {\small\begin{verbatim}
-make data                                  # A1 pipeline; EB-NeRD at scale: small
-python src/rerank/evaluate_reranker.py --config config/<ds>.yaml \
-       --sample 10000 --retrieve-sample 3000                               # Q2
-make q3                                    # Q3: 18 NRMS runs (resumable) + tables
-make q4                                    # Q4: serving, memory, latency, cost, 10x
-python src/eval/evaluate_twostage.py --config config/<ds>.yaml --sample 3500  # Q5
-python src/submission/predict_nrms.py ...  # Codabench zips; validate_zip.py checks them
-python src/report/build_design_note.py     # this document
+make data                       # A1 pipeline; EB-NeRD rebuilt at scale: small
+make q1 q2 q3 q4 q5 q6          # one target per question, in order
 \end{verbatim}}
-Detailed tables are in \texttt{reports/q3\_summary.md} and \texttt{reports/q4\_summary.md}; each question's
-implementation notes are in \texttt{reports/a2\_q*\_implementation.md}. AI assistance is logged per question in
-\texttt{reports/a2\_ai\_usage\_log.md} (A1's is \texttt{reports/ai\_usage\_log.md}); the run logs behind every
-number are in \texttt{logs/}. The build also writes three figures to
+\vspace{-6pt}
+Codabench zips come from \texttt{src/submission/predict\_nrms.py} and are checked by
+\texttt{validate\_zip.py}. Detailed tables are in \texttt{reports/q3\_summary.md} and
+\texttt{reports/q4\_summary.md}; per-question implementation notes in \texttt{reports/a2\_q*\_implementation.md};
+AI assistance in \texttt{reports/a2\_ai\_usage\_log.md} (A1's in \texttt{reports/ai\_usage\_log.md}); the run logs
+behind every number in \texttt{logs/}. The build also writes three figures to
 \texttt{reports/design\_note/figures/}, omitted here for length.
 """
 
