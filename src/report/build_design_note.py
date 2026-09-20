@@ -97,8 +97,10 @@ def table(spec: str, header: list[str], rows: list[list[str]], caption: str, lab
 def shot(name: str, what: str) -> str:
     p = SHOTS / f"{name}.png"
     if p.exists():
-        return f"\\includegraphics[width=\\linewidth]{{screenshots/{name}.png}}"
-    return ("\\fbox{\\parbox[c][3.2cm][c]{0.92\\linewidth}{\\centering\\small\\textit{Screenshot pending:} "
+        # Height-capped so a filled screenshot occupies exactly the space the
+        # placeholder reserved: the page count cannot grow when they are added.
+        return f"\\includegraphics[width=\\linewidth,height=2.7cm,keepaspectratio]{{screenshots/{name}.png}}"
+    return ("\\fbox{\\parbox[c][2.7cm][c]{0.92\\linewidth}{\\centering\\small\\textit{Screenshot pending:} "
             f"{tex(what)}\\\\\\footnotesize add \\texttt{{screenshots/{tex(name)}.png}} and rebuild}}}}")
 
 
@@ -212,8 +214,8 @@ def figures(d: dict) -> None:
 # --------------------------------------------------------------------------- #
 
 def preamble() -> str:
-    return r"""\documentclass[11pt]{article}
-\usepackage[margin=1in]{geometry}
+    return r"""\documentclass[10pt]{article}
+\usepackage[margin=0.9in]{geometry}
 \usepackage{fontspec}
 \usepackage{booktabs,graphicx,xcolor,tabularx,amsmath,float,array}
 \usepackage[hidelinks]{hyperref}
@@ -221,6 +223,10 @@ def preamble() -> str:
 \setlength{\abovecaptionskip}{3pt}\setlength{\belowcaptionskip}{2pt}
 \setlength{\textfloatsep}{8pt}\setlength{\floatsep}{6pt}\setlength{\intextsep}{6pt}
 \renewcommand{\arraystretch}{1.05}
+% Long \texttt{} paths and feature names cannot hyphenate; let TeX stretch the
+% interword space a little rather than push a line past the margin.
+\emergencystretch=3em
+\hyphenpenalty=1000
 \newcommand{\sig}{$^{*}$}
 \newcommand{\fitwidth}[1]{\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}
 \newenvironment{tightitem}{\begin{itemize}\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}\setlength{\topsep}{2pt}}{\end{itemize}}
@@ -416,20 +422,16 @@ sum. The variant reported as ``improved'' is chosen by mean \emph{{validation}} 
 (MIND: plain sum {f(sel['nrms_pop_sum'])} vs gate {f(sel['nrms_pop'])}), never by test.
 
 {tmain}
-\begin{{figure}}[H]\centering\includegraphics[width=\linewidth]{{figures/q3_ablation.pdf}}
-\caption{{Q3 ablation, test AUC. Left: EB-NeRD, one seed per variant. Right: MIND, mean $\pm$ sd over 3 seeds.}}\label{{fig:q3}}\end{{figure}}
 {tabl}
 \textbf{{Findings.}} (1) On EB-NeRD the change is large and robust: $+0.175$ AUC, significant on every seed and
 metric, seed spread $\pm0.001$. Popularity carries almost all of it; freshness alone adds $+0.09$ but is largely
 redundant with popularity (no AUC gain on top of it, $+0.003$ MRR/nDCG). (2) Freshness is not monotone: click
 rate peaks at {peak['age']} ({f(peak['click_rate'], 3)}) and falls to {f(fr['bins'][-1]['click_rate'], 3)} for
-articles older than 30 days (Fig.~\ref{{fig:fresh}}); ``newer ranks higher'' scores {f(fr['auc_newer_is_better'], 3)} AUC,
+articles older than 30 days; ``newer ranks higher'' scores {f(fr['auc_newer_is_better'], 3)} AUC,
 the bump rule {f(fr['auc_closest_to_4h'], 3)}. (3) The per-user gate does not earn its keep: equal to a plain sum
 on EB-NeRD and slightly worse on MIND. (4) On MIND the gain is small ($+0.005$) and \emph{{not robust to training
 randomness}}: seed 14 is significantly worse than its baseline, the seed spread ($\pm0.009$) exceeds the gain, and
 validation disagreed with test on that seed. The paired CI covers test-impression sampling, not training noise.
-\begin{{figure}}[H]\centering\includegraphics[width=0.55\linewidth]{{figures/freshness_curve.pdf}}
-\caption{{Click rate of EB-NeRD test candidates by article age ({d['fresh']['candidates']:,} candidates).}}\label{{fig:fresh}}\end{{figure}}
 """
 
 
@@ -469,24 +471,6 @@ def q5_slices(d: dict) -> str:
                  "$<$5-click rule (every user has $\\ge$5), so the lowest-history quartile stands in.", "tab:q5slices", size="\\scriptsize")
 
 
-def a1_beyond(d: dict) -> str:
-    rows = []
-    for ds, lab in (("mind", "MIND"), ("ebnerd", "EB-NeRD small")):
-        sc = d[f"a1_{ds}"]["scorers"]
-        for s in ("popularity", "semantic"):
-            a = sc[s]["slices"]["all"]
-            cold, warm = sc[s]["slices"]["cold_users"], sc[s]["slices"]["warm_users"]
-            head, tail = sc[s]["slices"]["head_clicks"], sc[s]["slices"]["tail_clicks"]
-            rows.append([lab if s == "popularity" else "", s, ci(a["auc"], 3), f(a["diversity"]["value"], 3),
-                         f(a["novelty"]["value"], 2), f(sc[s]["coverage"], 3),
-                         f"{f(cold['auc']['value'], 3)} / {f(warm['auc']['value'], 3)}",
-                         f"{f(head['auc']['value'], 3)} / {f(tail['auc']['value'], 3)}"])
-    return table("llrrrrrr", ["", "scorer", "AUC [95\\% CI]", "diversity", "novelty", "coverage", "AUC cold / warm", "AUC head / tail"],
-                 rows, f"Single-stage A1 scorers on the shown lists (A1 harness; MIND {d['a1_mind']['n_impressions']:,} and EB-NeRD "
-                 f"small {d['a1_ebnerd']['n_impressions']:,} test impressions).",
-                 "tab:a1", size="\\scriptsize")
-
-
 def sec_q5(d: dict) -> str:
     cb = d["cb"]
     pc = cb["popularity_collapse_ebnerd"]
@@ -510,7 +494,7 @@ def sec_q5(d: dict) -> str:
              f"\\begin{{minipage}}{{0.48\\linewidth}}\\centering {shot('ebnerd_leaderboard', 'EB-NeRD leaderboard')}\\end{{minipage}}\n"
              "\\caption{Codabench: submission results and leaderboards (MIND top, EB-NeRD bottom).}\\label{fig:cb}\\end{figure}\n")
     return rf"""\section{{Q5: Extended evaluation}}
-{q5_table(d)}{q5_slices(d)}{a1_beyond(d)}
+{q5_table(d)}{q5_slices(d)}
 \textbf{{Observations.}} Beyond-accuracy metrics move against accuracy. On MIND the two-stage GBDT recommends a
 \emph{{more}} diverse but far \emph{{less}} novel list than stage 1 alone (it learned to push popular articles), and
 covers fewer articles; on EB-NeRD it gains accuracy with little change in diversity. Head-click impressions retrieve
@@ -572,8 +556,6 @@ encodes text) and times eight stages; it reproduces the offline test scores (max
 {q['correct_mind']['max_abs_diff']:.0e} MIND, {q['correct_ebnerd']['max_abs_diff']:.0e} EB-NeRD). PyTorch, FAISS and BLAS
 are pinned to one thread (they defaulted to 4--10), so figures are per core.
 {t}
-\begin{{figure}}[H]\centering\includegraphics[width=\linewidth]{{figures/q4_latency.pdf}}
-\caption{{Left: where a serving-mode request spends its time. Right: p99 at 1$\times$ and a synthetic 10$\times$ catalogue.}}\label{{fig:q4}}\end{{figure}}
 \textbf{{Findings.}} BM25 is the largest stage and sets the tail: its query is the user's whole click history
 (EB-NeRD users with 200+ clicks: p99 {q['lat_ebnerd']['modes']['serving']['by_history_length']['201-inf']['p99']:.2f}\,ms vs
 {q['lat_ebnerd']['modes']['serving']['by_history_length']['1-10']['p99']:.2f}\,ms for 1--10). NRMS re-ranking is a constant
@@ -632,8 +614,8 @@ def sec_q9_and_close(d: dict) -> str:
                "dataset's serving-time-unavailable article totals added. $^{*}$ = CI excludes zero.", "tab:q9",
                size="\\footnotesize")
     return rf"""\section{{Anti-gaming, limitations and alternatives}}
-\textbf{{Features unavailable at serving time}} (Q9). EB-NeRD ships lifetime totals ({cols}) that are only known
-after the fact. Adding them to the A2 GBDT's features inflates every metric significantly (Table~\ref{{tab:q9}});
+\textbf{{Features unavailable at serving time}} (Q9). EB-NeRD ships lifetime totals
+({cols}), known only after the fact. Adding them to the A2 GBDT's features inflates every metric significantly (Table~\ref{{tab:q9}});
 using \texttt{{total\_pageviews}} alone as a popularity score inflates A1's popularity scorer far more,
 {f(q9['leaky_popularity_auc'])} against {f(q9['honest_popularity_auc'])} AUC ({sg(q9['inflation'])}). The A2 feature table
 excludes all of them by default (asserted by \texttt{{tests/test\_no\_leakage.py}}), and every trailing count is
@@ -681,8 +663,10 @@ python src/submission/predict_nrms.py ...  # Codabench zips; validate_zip.py che
 python src/report/build_design_note.py     # this document
 \end{verbatim}}
 Detailed tables are in \texttt{reports/q3\_summary.md} and \texttt{reports/q4\_summary.md}; each question's
-implementation notes are in \texttt{reports/a2\_q*\_implementation.md}. AI assistance is logged in
-\texttt{reports/ai\_usage\_log.md}.
+implementation notes are in \texttt{reports/a2\_q*\_implementation.md}. AI assistance is logged per question in
+\texttt{reports/a2\_ai\_usage\_log.md} (A1's is \texttt{reports/ai\_usage\_log.md}); the run logs behind every
+number are in \texttt{logs/}. The build also writes three figures to
+\texttt{reports/design\_note/figures/}, omitted here for length.
 """
 
 
