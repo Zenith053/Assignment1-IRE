@@ -1,0 +1,58 @@
+[ebnerd] building feature context (BM25 index, embeddings, rolling popularity, session context)
+  loaded 20,738/20,738 provided vectors (dim 300), 0 missing
+  context ready in 3.6s (session features available)
+  sampled impressions: train=10,000, val=10,000, test=10,000
+
+[Universe A] building feature frames (inview candidates)
+  train  110,911 candidates over 10,000 impressions (10032 clicks)
+  val    110,184 candidates over 10,000 impressions (10043 clicks)
+  test   120,096 candidates over 10,000 impressions (10033 clicks)
+
+[Universe A] training GBDT (LightGBM LambdaRank)
+  best iteration 42
+
+[Universe A] training MLP (listwise softmax ranker)
+  best val AUC during training: 0.6001
+
+[Universe A] test-split metrics (before vs after re-ranking)
+  semantic     AUC 0.5296  MRR 0.3370  nDCG@5 0.3716  nDCG@10 0.4538
+  bm25         AUC 0.5204  MRR 0.3292  nDCG@5 0.3624  nDCG@10 0.4450
+  popularity   AUC 0.4441  MRR 0.2629  nDCG@5 0.2882  nDCG@10 0.3839
+  gbdt         AUC 0.7499  MRR 0.5226  nDCG@5 0.5831  nDCG@10 0.6208
+  mlp          AUC 0.6065  MRR 0.3684  nDCG@5 0.4180  nDCG@10 0.4946
+
+[Universe A] paired bootstrap CI, after vs before='semantic' (95% CI excluding zero = statistically significant gain)
+  gbdt  auc      delta=+0.2203 [+0.2126, +0.2283]  n=10000  SIGNIFICANT
+  gbdt  mrr      delta=+0.1856 [+0.1779, +0.1932]  n=10000  SIGNIFICANT
+  gbdt  ndcg@5   delta=+0.2115 [+0.2035, +0.2195]  n=10000  SIGNIFICANT
+  gbdt  ndcg@10  delta=+0.1670 [+0.1604, +0.1735]  n=10000  SIGNIFICANT
+  mlp   auc      delta=+0.0769 [+0.0690, +0.0848]  n=10000  SIGNIFICANT
+  mlp   mrr      delta=+0.0314 [+0.0240, +0.0388]  n=10000  SIGNIFICANT
+  mlp   ndcg@5   delta=+0.0464 [+0.0384, +0.0543]  n=10000  SIGNIFICANT
+  mlp   ndcg@10  delta=+0.0408 [+0.0344, +0.0471]  n=10000  SIGNIFICANT
+
+[Universe A] top-10 GBDT feature importances (gain, normalised)
+  rolling_clicks_24h           0.265
+  freshness_hours              0.132
+  rolling_clicks_168h          0.091
+  hour_of_day                  0.075
+  category_match_rate          0.059
+  popularity_rank              0.050
+  train_clicks_log1p           0.047
+  inview_size                  0.046
+  semantic                     0.037
+  semantic_rank_in_imp         0.033
+
+[Universe B] stage 1: retrieving top-200 per user
+  recall@200: 0.0960 (288/3,000 impressions retrieved a click)
+  conditional on a retrieved click (288 impressions):
+    stage1_order                       AUC 0.4437  MRR 0.0213  nDCG@5 0.0057  nDCG@10 0.0166
+    gbdt_inview_applied_to_retrieved   AUC 0.9169  MRR 0.2957  nDCG@5 0.3252  nDCG@10 0.4093
+    gbdt - stage1 auc      +0.4732 [+0.4334, +0.5115]  SIGNIFICANT
+    gbdt - stage1 mrr      +0.2743 [+0.2410, +0.3084]  SIGNIFICANT
+    gbdt - stage1 ndcg@5   +0.3195 [+0.2794, +0.3596]  SIGNIFICANT
+    gbdt - stage1 ndcg@10  +0.3927 [+0.3579, +0.4270]  SIGNIFICANT
+  end-to-end nDCG@10 = recall@K x conditional: before=0.0016  after=0.0393
+
+  -> /Users/parth/Documents/ire-team/reports/rerank_ebnerd.json
+ebnerd exit 0

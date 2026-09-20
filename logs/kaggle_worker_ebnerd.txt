@@ -1,0 +1,21 @@
+skip  ebnerd nrms_popfresh seed 13 (report exists)
+skip  ebnerd nrms seed 14 (report exists)
+start ebnerd nrms_popfresh seed 14  16:51
+  test (244,647 impressions, best epoch 1, scored in 31s)
+    auc      0.7257  [0.7246, 0.7266]
+start ebnerd nrms seed 15  17:00
+  test (244,647 impressions, best epoch 4, scored in 32s)
+    auc      0.5498  [0.5486, 0.5510]
+start ebnerd nrms_popfresh seed 15  17:18
+  test (244,647 impressions, best epoch 1, scored in 31s)
+    auc      0.7265  [0.7255, 0.7275]
+start ebnerd nrms_pop seed 13  17:27
+  test (244,647 impressions, best epoch 1, scored in 30s)
+    auc      0.7247  [0.7237, 0.7258]
+start ebnerd nrms_fresh seed 13  17:36
+  test (244,647 impressions, best epoch 2, scored in 31s)
+    auc      0.6469  [0.6458, 0.6482]
+start ebnerd nrms_popfresh_sum seed 13  17:50
+  test (244,647 impressions, best epoch 3, scored in 30s)
+    auc      0.7234  [0.7223, 0.7245]
+queue done 18:08

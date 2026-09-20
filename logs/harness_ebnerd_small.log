@@ -1,0 +1,27 @@
+[ebnerd] building BM25 index
+[ebnerd] loading embeddings
+  loaded 20,738/20,738 provided vectors (dim 300), 0 missing
+  fitting hybrid combiner on val (pooling=topk)
+  hybrid = sigmoid(0.232*bm25 + 0.259*semantic + -0.262), fit on 5,000 val impressions
+[ebnerd/test] evaluating 20,000 impressions
+  Q9 ablation: added popularity_leaky (raw total_pageviews) alongside honest train-only popularity
+
+  Q9 serving-time ablation: popularity AUC 0.4459 (honest, train clicks only) vs 0.5978 (leaky, total_pageviews) -> inflation +0.1520
+
+  scorer                         AUC                MRR             nDCG@5            nDCG@10    cov
+  random          0.5037[0.499,0.508] 0.3135[0.309,0.317] 0.3462[0.341,0.351] 0.4306[0.427,0.434]  0.128
+  popularity      0.4459[0.444,0.447] 0.2628[0.260,0.266] 0.2886[0.284,0.292] 0.3836[0.380,0.387]  0.130
+  bm25            0.5211[0.517,0.526] 0.3298[0.326,0.334] 0.3636[0.359,0.369] 0.4451[0.441,0.449]  0.128
+  semantic        0.5285[0.524,0.533] 0.3356[0.331,0.340] 0.3688[0.364,0.373] 0.4518[0.448,0.456]  0.128
+  hybrid          0.5315[0.527,0.536] 0.3368[0.333,0.341] 0.3709[0.366,0.376] 0.4526[0.449,0.456]  0.128
+  popularity_leaky 0.5978[0.593,0.602] 0.3762[0.372,0.380] 0.4211[0.416,0.426] 0.4951[0.491,0.499]  0.123
+
+  slices (nDCG@10):
+    all          n=20,000  random=0.4306  popularity=0.3836  bm25=0.4451  semantic=0.4518  hybrid=0.4526  popularity_leaky=0.4951
+    cold_users   n= 1,716  random=0.4184  popularity=0.3764  bm25=0.4214  semantic=0.4396  hybrid=0.4290  popularity_leaky=0.5011
+    warm_users   n=18,284  random=0.4318  popularity=0.3842  bm25=0.4473  semantic=0.4530  hybrid=0.4548  popularity_leaky=0.4945
+    head_clicks  n=   138  random=0.2874  popularity=0.8695  bm25=0.3909  semantic=0.4807  hybrid=0.4761  popularity_leaky=0.5153
+    tail_clicks  n=19,862  random=0.4316  popularity=0.3802  bm25=0.4455  semantic=0.4516  hybrid=0.4524  popularity_leaky=0.4949
+
+  -> reports/a2/eval_ebnerd_small_test.json
+exit 0

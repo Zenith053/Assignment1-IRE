@@ -1,0 +1,59 @@
+[mind] nrms_seed13 on mps
+  data ready in 4.4s: train=95,071 impressions, val=20,000 impressions, test=73,152 impressions; vocab 20,156 x 768
+  parameters: 17,042,208 (15,479,808 word embeddings + 1,562,400 attention)
+
+  epoch 1: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.4547  8 batches/s
+    step   1000/4424  loss 1.4287  7 batches/s
+    step   1500/4424  loss 1.4201  7 batches/s
+    step   2000/4424  loss 1.4132  7 batches/s
+    step   2500/4424  loss 1.4083  7 batches/s
+    step   3000/4424  loss 1.4033  7 batches/s
+    step   3500/4424  loss 1.3982  7 batches/s
+    step   4000/4424  loss 1.3916  7 batches/s
+    step   4424/4424  loss 1.3873  7 batches/s
+  epoch 1: train loss 1.3873  val AUC 0.5978  (best so far)  [667s]
+
+  epoch 2: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.3224  7 batches/s
+    step   1000/4424  loss 1.3219  7 batches/s
+    step   1500/4424  loss 1.3190  6 batches/s
+    step   2000/4424  loss 1.3195  6 batches/s
+    step   2500/4424  loss 1.3154  6 batches/s
+    step   3000/4424  loss 1.3138  6 batches/s
+    step   3500/4424  loss 1.3110  6 batches/s
+    step   4000/4424  loss 1.3097  6 batches/s
+    step   4424/4424  loss 1.3094  6 batches/s
+  epoch 2: train loss 1.3094  val AUC 0.6157  (best so far)  [779s]
+
+  epoch 3: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.2734  6 batches/s
+    step   1000/4424  loss 1.2771  6 batches/s
+    step   1500/4424  loss 1.2751  6 batches/s
+    step   2000/4424  loss 1.2756  6 batches/s
+    step   2500/4424  loss 1.2756  6 batches/s
+    step   3000/4424  loss 1.2748  6 batches/s
+    step   3500/4424  loss 1.2746  6 batches/s
+    step   4000/4424  loss 1.2722  6 batches/s
+    step   4424/4424  loss 1.2724  6 batches/s
+  epoch 3: train loss 1.2724  val AUC 0.6331  (best so far)  [789s]
+
+  epoch 4: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.2464  6 batches/s
+    step   1000/4424  loss 1.2527  6 batches/s
+    step   1500/4424  loss 1.2465  6 batches/s
+    step   2000/4424  loss 1.2470  6 batches/s
+    step   2500/4424  loss 1.2487  6 batches/s
+    step   3000/4424  loss 1.2484  6 batches/s
+    step   3500/4424  loss 1.2498  6 batches/s
+    step   4000/4424  loss 1.2501  6 batches/s
+    step   4424/4424  loss 1.2495  6 batches/s
+  epoch 4: train loss 1.2495  val AUC 0.6293  [777s]
+  early stop: no val improvement for 1 epoch(s)
+
+  test (73,152 impressions, best epoch 3, scored in 12s)
+    auc      0.6232  [0.6211, 0.6252]
+    mrr      0.2913  [0.2892, 0.2934]
+    ndcg@5   0.3184  [0.3159, 0.3209]
+    ndcg@10  0.3814  [0.3790, 0.3836]
+  -> /Users/parth/Documents/ire-team/reports/q3/mind_nrms_seed13.json

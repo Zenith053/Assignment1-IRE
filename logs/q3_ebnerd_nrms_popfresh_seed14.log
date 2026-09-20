@@ -1,0 +1,44 @@
+[ebnerd] nrms_popfresh_seed14 on cuda
+  candidate signals: ['log1p_clicks_1h', 'log1p_clicks_24h', 'log1p_clicks_168h', 'log1p_age_hours']
+  data ready in 18.5s: train=192,884 impressions, val=20,000 impressions, test=244,647 impressions; vocab 12,135 x 768
+  parameters: 10,882,866 (9,319,680 word embeddings + 1,563,186 attention)
+
+  epoch 1: 193,617 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/6051  loss 1.5381  27 batches/s
+    step   1000/6051  loss 1.4380  27 batches/s
+    step   1500/6051  loss 1.3918  27 batches/s
+    step   2000/6051  loss 1.3690  27 batches/s
+    step   2500/6051  loss 1.3526  26 batches/s
+    step   3000/6051  loss 1.3419  26 batches/s
+    step   3500/6051  loss 1.3333  26 batches/s
+    step   4000/6051  loss 1.3279  26 batches/s
+    step   4500/6051  loss 1.3236  26 batches/s
+    step   5000/6051  loss 1.3199  25 batches/s
+    step   5500/6051  loss 1.3159  25 batches/s
+    step   6000/6051  loss 1.3114  25 batches/s
+    step   6051/6051  loss 1.3111  25 batches/s
+  epoch 1: train loss 1.3111  val AUC 0.7383  (best so far)  [239s]
+
+  epoch 2: 193,617 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/6051  loss 1.2648  25 batches/s
+    step   1000/6051  loss 1.2627  25 batches/s
+    step   1500/6051  loss 1.2623  25 batches/s
+    step   2000/6051  loss 1.2613  25 batches/s
+    step   2500/6051  loss 1.2600  25 batches/s
+    step   3000/6051  loss 1.2589  25 batches/s
+    step   3500/6051  loss 1.2577  25 batches/s
+    step   4000/6051  loss 1.2573  25 batches/s
+    step   4500/6051  loss 1.2556  25 batches/s
+    step   5000/6051  loss 1.2527  25 batches/s
+    step   5500/6051  loss 1.2505  25 batches/s
+    step   6000/6051  loss 1.2491  25 batches/s
+    step   6051/6051  loss 1.2492  25 batches/s
+  epoch 2: train loss 1.2492  val AUC 0.7353  [243s]
+  early stop: no val improvement for 1 epoch(s)
+
+  test (244,647 impressions, best epoch 1, scored in 31s)
+    auc      0.7257  [0.7246, 0.7266]
+    mrr      0.4846  [0.4833, 0.4859]
+    ndcg@5   0.5474  [0.5461, 0.5487]
+    ndcg@10  0.5920  [0.5909, 0.5930]
+  -> /kaggle/working/ire-team/reports/q3/ebnerd_nrms_popfresh_seed14.json

@@ -1,0 +1,21 @@
+  popfresh with real_clicks_up_to_impression: AUC 0.7246
+  popfresh with clicks_before_test_period_only: AUC 0.4810
+  popfresh with no_clicks: AUC 0.4854
+  blends: {
+ "mind": {
+  "nrms": 0.6231516479210992,
+  "a1_semantic": 0.6422760528120729,
+  "rank_avg_0.3nrms_0.7semantic": 0.6547232976881541,
+  "rank_avg_0.5nrms_0.5semantic": 0.6530520916893657,
+  "rank_avg_0.7nrms_0.3semantic": 0.6410892036438327
+ },
+ "ebnerd": {
+  "nrms_fresh": 0.6458890252288495,
+  "exposure_24h": 0.636247887684028,
+  "rank_avg_0.3fresh_0.7exposure": 0.6533799411912902,
+  "rank_avg_0.5fresh_0.5exposure": 0.6608793205787893,
+  "rank_avg_0.7fresh_0.3exposure": 0.6559255438330975
+ }
+}
+-> /Users/parth/Documents/ire-team/reports/a2/codabench_analysis.json
+exit 0

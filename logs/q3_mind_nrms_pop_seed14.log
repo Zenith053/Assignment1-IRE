@@ -1,0 +1,47 @@
+[mind] nrms_pop_seed14 on mps
+  candidate signals: ['log1p_clicks_1h', 'log1p_clicks_24h', 'log1p_clicks_168h']
+  data ready in 4.1s: train=95,071 impressions, val=20,000 impressions, test=73,152 impressions; vocab 20,156 x 768
+  parameters: 17,042,930 (15,479,808 word embeddings + 1,563,122 attention)
+
+  epoch 1: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.4662  7 batches/s
+    step   1000/4424  loss 1.4399  7 batches/s
+    step   1500/4424  loss 1.4260  7 batches/s
+    step   2000/4424  loss 1.4163  7 batches/s
+    step   2500/4424  loss 1.4099  7 batches/s
+    step   3000/4424  loss 1.4042  7 batches/s
+    step   3500/4424  loss 1.3999  7 batches/s
+    step   4000/4424  loss 1.3956  7 batches/s
+    step   4424/4424  loss 1.3908  7 batches/s
+  epoch 1: train loss 1.3908  val AUC 0.5903  (best so far)  [643s]
+
+  epoch 2: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.3412  7 batches/s
+    step   1000/4424  loss 1.3377  7 batches/s
+    step   1500/4424  loss 1.3314  7 batches/s
+    step   2000/4424  loss 1.3286  7 batches/s
+    step   2500/4424  loss 1.3248  7 batches/s
+    step   3000/4424  loss 1.3205  7 batches/s
+    step   3500/4424  loss 1.3194  7 batches/s
+    step   4000/4424  loss 1.3169  7 batches/s
+    step   4424/4424  loss 1.3141  6 batches/s
+  epoch 2: train loss 1.3141  val AUC 0.6185  (best so far)  [681s]
+
+  epoch 3: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.2717  6 batches/s
+    step   1000/4424  loss 1.2718  6 batches/s
+    step   1500/4424  loss 1.2735  6 batches/s
+    step   2000/4424  loss 1.2735  7 batches/s
+    step   2500/4424  loss 1.2745  7 batches/s
+    step   3000/4424  loss 1.2732  6 batches/s
+    step   3500/4424  loss 1.2730  6 batches/s
+    step   4000/4424  loss 1.2719  6 batches/s
+    step   4424/4424  loss 1.2702  6 batches/s
+  epoch 3: train loss 1.2702  val AUC 0.6274  (best so far)  [734s]
+
+  test (73,152 impressions, best epoch 3, scored in 13s)
+    auc      0.6228  [0.6207, 0.6249]
+    mrr      0.2964  [0.2942, 0.2985]
+    ndcg@5   0.3211  [0.3186, 0.3236]
+    ndcg@10  0.3833  [0.3810, 0.3857]
+  -> /Users/parth/Documents/ire-team/reports/q3/mind_nrms_pop_seed14.json

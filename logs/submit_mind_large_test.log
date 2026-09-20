@@ -1,0 +1,26 @@
+[mind_large_test_nrms] 120,961 articles encoded on mps; 2,449 tokens new to the model (2.89% of titles); signals=None [29s]
+  200,000 impressions, 7,836,608 candidates [1.1 min]     400,000 impressions, 15,702,174 candidates [1.9 min]     600,000 impressions, 23,536,019 candidates [3.0 min]     800,000 impressions, 31,398,618 candidates [4.6 min]     1,000,000 impressions, 39,258,766 candidates [6.2 min]     1,200,000 impressions, 47,128,500 candidates [7.7 min]     1,400,000 impressions, 54,986,124 candidates [9.0 min]     1,600,000 impressions, 62,849,269 candidates [10.8 min]     1,800,000 impressions, 70,706,540 candidates [12.7 min]     2,000,000 impressions, 78,572,127 candidates [14.4 min]     2,200,000 impressions, 86,411,049 candidates [16.2 min]     2,370,727 impressions, 93,115,001 candidates [18.1 min]   
+{
+  "checkpoint": "data/feature_store/mind/q3_runs/nrms_seed13.pt",
+  "run": "nrms_seed13",
+  "variant": {},
+  "articles": 120961,
+  "tokens_trained": 20155,
+  "tokens_new": 2449,
+  "titles_with_new_tokens_pct": 2.89,
+  "name": "mind_large_test_nrms",
+  "dataset": "mind",
+  "source": "data/raw/mind/MINDlarge_test",
+  "split": "test",
+  "impressions": 2370727,
+  "candidates": 93115001,
+  "candidates_unknown_article": 0,
+  "impressions_without_history": 29108,
+  "device": "mps",
+  "minutes": 19.0,
+  "txt_mb": 291.3,
+  "zip_mb": 107.3,
+  "zip_contents": [
+    "prediction.txt"
+  ]
+}

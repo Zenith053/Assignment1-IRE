@@ -1,0 +1,35 @@
+[ebnerd_testset_nrms_fresh] 125,541 articles encoded on mps; 7,771 tokens new to the model (15.84% of titles); signals=['log1p_age_hours'] [15s]
+  807,677 user histories [17s]
+  200,000 impressions, 2,348,461 candidates [0.5 min]     400,000 impressions, 4,666,021 candidates [0.6 min]     600,000 impressions, 7,002,629 candidates [0.8 min]     800,000 impressions, 9,340,621 candidates [0.9 min]     1,000,000 impressions, 11,679,399 candidates [1.1 min]     1,200,000 impressions, 14,013,268 candidates [1.2 min]     1,400,000 impressions, 16,357,404 candidates [1.4 min]     1,600,000 impressions, 18,700,431 candidates [1.6 min]     1,800,000 impressions, 21,061,890 candidates [1.8 min]     2,000,000 impressions, 23,375,414 candidates [2.0 min]     2,200,000 impressions, 25,703,124 candidates [2.2 min]     2,400,000 impressions, 28,039,668 candidates [2.5 min]     2,600,000 impressions, 30,404,643 candidates [2.7 min]     2,800,000 impressions, 32,747,729 candidates [2.9 min]     3,000,000 impressions, 35,090,992 candidates [3.1 min]     3,200,000 impressions, 37,439,097 candidates [3.3 min]     3,400,000 impressions, 39,766,031 candidates [3.5 min]     3,600,000 impressions, 42,099,975 candidates [3.8 min]     3,800,000 impressions, 44,408,862 candidates [4.0 min]     4,000,000 impressions, 46,747,607 candidates [4.2 min]     4,200,000 impressions, 49,097,680 candidates [4.4 min]     4,400,000 impressions, 51,424,334 candidates [4.6 min]     4,600,000 impressions, 53,751,237 candidates [4.8 min]     4,800,000 impressions, 56,095,814 candidates [5.0 min]     5,000,000 impressions, 58,402,459 candidates [5.2 min]     5,200,000 impressions, 60,738,387 candidates [5.4 min]     5,400,000 impressions, 63,059,304 candidates [5.6 min]     5,600,000 impressions, 65,367,109 candidates [5.8 min]     5,800,000 impressions, 67,703,217 candidates [6.0 min]     6,000,000 impressions, 70,018,230 candidates [6.2 min]     6,200,000 impressions, 72,375,031 candidates [6.4 min]     6,400,000 impressions, 74,734,592 candidates [6.6 min]     6,600,000 impressions, 77,090,509 candidates [6.8 min]     6,800,000 impressions, 79,420,712 candidates [7.0 min]     7,000,000 impressions, 81,750,200 candidates [7.2 min]     7,200,000 impressions, 84,082,771 candidates [7.4 min]     7,400,000 impressions, 86,434,752 candidates [7.6 min]     7,600,000 impressions, 88,769,931 candidates [7.8 min]     7,800,000 impressions, 91,132,429 candidates [8.0 min]     8,000,000 impressions, 93,513,256 candidates [8.2 min]     8,200,000 impressions, 95,869,428 candidates [8.4 min]     8,400,000 impressions, 98,211,913 candidates [8.6 min]     8,600,000 impressions, 100,543,971 candidates [8.8 min]     8,800,000 impressions, 102,869,879 candidates [9.0 min]     9,000,000 impressions, 105,218,185 candidates [9.2 min]     9,200,000 impressions, 107,556,346 candidates [9.4 min]     9,400,000 impressions, 109,882,943 candidates [9.6 min]     9,600,000 impressions, 112,242,779 candidates [9.8 min]     9,800,000 impressions, 114,556,932 candidates [10.0 min]     10,000,000 impressions, 116,866,835 candidates [10.2 min]     10,200,000 impressions, 119,208,514 candidates [10.4 min]     10,400,000 impressions, 121,521,787 candidates [10.6 min]     10,600,000 impressions, 123,857,126 candidates [10.8 min]     10,800,000 impressions, 126,197,307 candidates [11.0 min]     11,000,000 impressions, 128,554,022 candidates [11.2 min]     11,200,000 impressions, 130,899,024 candidates [11.4 min]     11,400,000 impressions, 133,256,040 candidates [11.6 min]     11,600,000 impressions, 135,592,342 candidates [11.8 min]     11,800,000 impressions, 137,955,567 candidates [12.0 min]     12,000,000 impressions, 140,284,427 candidates [12.2 min]     12,200,000 impressions, 142,622,352 candidates [12.4 min]     12,400,000 impressions, 144,985,117 candidates [12.6 min]     12,600,000 impressions, 147,315,735 candidates [12.8 min]     12,800,000 impressions, 149,689,653 candidates [13.0 min]     13,000,000 impressions, 152,028,668 candidates [13.2 min]     13,200,000 impressions, 154,348,950 candidates [13.4 min]     13,342,402 impressions, 157,348,868 candidates [13.6 min]     13,354,402 impressions, 160,348,868 candidates [13.6 min]     13,366,402 impressions, 163,348,868 candidates [13.7 min]     13,378,402 impressions, 166,348,868 candidates [13.7 min]     13,390,402 impressions, 169,348,868 candidates [13.8 min]     13,400,000 impressions, 171,748,368 candidates [13.8 min]     13,412,000 impressions, 174,748,368 candidates [13.9 min]     13,424,000 impressions, 177,748,368 candidates [13.9 min]     13,436,000 impressions, 180,748,368 candidates [13.9 min]     13,448,000 impressions, 183,748,368 candidates [14.0 min]     13,460,000 impressions, 186,748,368 candidates [14.0 min]     13,472,000 impressions, 189,748,368 candidates [14.1 min]     13,484,000 impressions, 192,748,368 candidates [14.1 min]     13,496,000 impressions, 195,748,368 candidates [14.2 min]     13,508,000 impressions, 198,748,368 candidates [14.2 min]     13,520,000 impressions, 201,748,368 candidates [14.3 min]     13,532,000 impressions, 204,748,368 candidates [14.3 min]     13,536,710 impressions, 205,925,868 candidates [14.3 min]   
+{
+  "checkpoint": "data/feature_store/ebnerd/q3_runs/nrms_fresh_submit_seed13.pt",
+  "run": "nrms_fresh_submit_seed13",
+  "variant": {
+    "popularity": false,
+    "freshness": true,
+    "gate": "learned",
+    "signals": [
+      "log1p_age_hours"
+    ],
+    "popularity_windows_hours": null
+  },
+  "articles": 125541,
+  "tokens_trained": 12134,
+  "tokens_new": 7771,
+  "titles_with_new_tokens_pct": 15.84,
+  "name": "ebnerd_testset_nrms_fresh",
+  "dataset": "ebnerd",
+  "source": "data/raw/ebnerd/ebnerd_testset/ebnerd_testset",
+  "split": "test",
+  "impressions": 13536710,
+  "candidates": 205925868,
+  "candidates_unknown_article": 0,
+  "impressions_without_history": 0,
+  "device": "mps",
+  "minutes": 15.1,
+  "txt_mb": 703.1,
+  "zip_mb": 221.4,
+  "zip_contents": [
+    "predictions.txt"
+  ]
+}

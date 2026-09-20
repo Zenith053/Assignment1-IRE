@@ -1,0 +1,46 @@
+[mind] nrms_seed14 on mps
+  data ready in 2.8s: train=95,071 impressions, val=20,000 impressions, test=73,152 impressions; vocab 20,156 x 768
+  parameters: 17,042,208 (15,479,808 word embeddings + 1,562,400 attention)
+
+  epoch 1: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.4561  7 batches/s
+    step   1000/4424  loss 1.4340  7 batches/s
+    step   1500/4424  loss 1.4219  7 batches/s
+    step   2000/4424  loss 1.4131  7 batches/s
+    step   2500/4424  loss 1.4070  7 batches/s
+    step   3000/4424  loss 1.4011  7 batches/s
+    step   3500/4424  loss 1.3968  7 batches/s
+    step   4000/4424  loss 1.3923  7 batches/s
+    step   4424/4424  loss 1.3874  7 batches/s
+  epoch 1: train loss 1.3874  val AUC 0.5913  (best so far)  [639s]
+
+  epoch 2: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.3364  7 batches/s
+    step   1000/4424  loss 1.3324  7 batches/s
+    step   1500/4424  loss 1.3273  7 batches/s
+    step   2000/4424  loss 1.3247  7 batches/s
+    step   2500/4424  loss 1.3211  7 batches/s
+    step   3000/4424  loss 1.3172  7 batches/s
+    step   3500/4424  loss 1.3165  7 batches/s
+    step   4000/4424  loss 1.3143  7 batches/s
+    step   4424/4424  loss 1.3119  7 batches/s
+  epoch 2: train loss 1.3119  val AUC 0.6206  (best so far)  [638s]
+
+  epoch 3: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.2742  7 batches/s
+    step   1000/4424  loss 1.2738  7 batches/s
+    step   1500/4424  loss 1.2751  7 batches/s
+    step   2000/4424  loss 1.2754  7 batches/s
+    step   2500/4424  loss 1.2760  7 batches/s
+    step   3000/4424  loss 1.2747  7 batches/s
+    step   3500/4424  loss 1.2748  7 batches/s
+    step   4000/4424  loss 1.2736  7 batches/s
+    step   4424/4424  loss 1.2720  7 batches/s
+  epoch 3: train loss 1.2720  val AUC 0.6248  (best so far)  [638s]
+
+  test (73,152 impressions, best epoch 3, scored in 11s)
+    auc      0.6217  [0.6196, 0.6238]
+    mrr      0.2959  [0.2937, 0.2981]
+    ndcg@5   0.3209  [0.3183, 0.3233]
+    ndcg@10  0.3822  [0.3799, 0.3846]
+  -> /Users/parth/Documents/ire-team/reports/q3/mind_nrms_seed14.json

@@ -1,0 +1,11 @@
+[ebnerd] building feature context (BM25 index, embeddings, rolling popularity, session context)
+  loaded 20,738/20,738 provided vectors (dim 300), 0 missing
+  context ready in 3.6s (session features available)
+  sampled impressions: train=10,000, val=10,000, test=10,000
+
+[Universe A] building feature frames (inview candidates)
+  train  110,911 candidates over 10,000 impressions (10032 clicks)
+  val    110,184 candidates over 10,000 impressions (10043 clicks)
+  test   120,096 candidates over 10,000 impressions (10033 clicks)
+
+[Universe A] training GBDT (LightGBM LambdaRank)

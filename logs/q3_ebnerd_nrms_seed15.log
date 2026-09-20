@@ -1,0 +1,74 @@
+[ebnerd] nrms_seed15 on cuda
+  data ready in 8.6s: train=192,884 impressions, val=20,000 impressions, test=244,647 impressions; vocab 12,135 x 768
+  parameters: 10,882,080 (9,319,680 word embeddings + 1,562,400 attention)
+
+  epoch 1: 193,617 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/6051  loss 1.5417  26 batches/s
+    step   1000/6051  loss 1.5112  26 batches/s
+    step   1500/6051  loss 1.4957  26 batches/s
+    step   2000/6051  loss 1.4837  26 batches/s
+    step   2500/6051  loss 1.4732  26 batches/s
+    step   3000/6051  loss 1.4666  26 batches/s
+    step   3500/6051  loss 1.4606  26 batches/s
+    step   4000/6051  loss 1.4560  26 batches/s
+    step   4500/6051  loss 1.4514  26 batches/s
+    step   5000/6051  loss 1.4478  26 batches/s
+    step   5500/6051  loss 1.4442  26 batches/s
+    step   6000/6051  loss 1.4416  26 batches/s
+    step   6051/6051  loss 1.4413  26 batches/s
+  epoch 1: train loss 1.4413  val AUC 0.5726  (best so far)  [237s]
+
+  epoch 2: 193,617 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/6051  loss 1.4050  23 batches/s
+    step   1000/6051  loss 1.4034  23 batches/s
+    step   1500/6051  loss 1.4006  24 batches/s
+    step   2000/6051  loss 1.3975  24 batches/s
+    step   2500/6051  loss 1.3940  24 batches/s
+    step   3000/6051  loss 1.3923  24 batches/s
+    step   3500/6051  loss 1.3905  24 batches/s
+    step   4000/6051  loss 1.3889  24 batches/s
+    step   4500/6051  loss 1.3870  24 batches/s
+    step   5000/6051  loss 1.3850  24 batches/s
+    step   5500/6051  loss 1.3843  24 batches/s
+    step   6000/6051  loss 1.3832  24 batches/s
+    step   6051/6051  loss 1.3832  24 batches/s
+  epoch 2: train loss 1.3832  val AUC 0.5779  (best so far)  [248s]
+
+  epoch 3: 193,617 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/6051  loss 1.3636  25 batches/s
+    step   1000/6051  loss 1.3629  25 batches/s
+    step   1500/6051  loss 1.3585  25 batches/s
+    step   2000/6051  loss 1.3584  25 batches/s
+    step   2500/6051  loss 1.3571  25 batches/s
+    step   3000/6051  loss 1.3547  25 batches/s
+    step   3500/6051  loss 1.3549  25 batches/s
+    step   4000/6051  loss 1.3542  25 batches/s
+    step   4500/6051  loss 1.3532  25 batches/s
+    step   5000/6051  loss 1.3528  25 batches/s
+    step   5500/6051  loss 1.3525  25 batches/s
+    step   6000/6051  loss 1.3511  25 batches/s
+    step   6051/6051  loss 1.3510  25 batches/s
+  epoch 3: train loss 1.3510  val AUC 0.5843  (best so far)  [243s]
+
+  epoch 4: 193,617 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/6051  loss 1.3300  25 batches/s
+    step   1000/6051  loss 1.3320  25 batches/s
+    step   1500/6051  loss 1.3315  25 batches/s
+    step   2000/6051  loss 1.3316  25 batches/s
+    step   2500/6051  loss 1.3315  25 batches/s
+    step   3000/6051  loss 1.3320  25 batches/s
+    step   3500/6051  loss 1.3319  25 batches/s
+    step   4000/6051  loss 1.3313  25 batches/s
+    step   4500/6051  loss 1.3318  25 batches/s
+    step   5000/6051  loss 1.3320  25 batches/s
+    step   5500/6051  loss 1.3320  25 batches/s
+    step   6000/6051  loss 1.3310  25 batches/s
+    step   6051/6051  loss 1.3310  25 batches/s
+  epoch 4: train loss 1.3310  val AUC 0.5848  (best so far)  [242s]
+
+  test (244,647 impressions, best epoch 4, scored in 32s)
+    auc      0.5498  [0.5486, 0.5510]
+    mrr      0.3477  [0.3466, 0.3488]
+    ndcg@5   0.3869  [0.3856, 0.3882]
+    ndcg@10  0.4647  [0.4637, 0.4658]
+  -> /kaggle/working/ire-team/reports/q3/ebnerd_nrms_seed15.json

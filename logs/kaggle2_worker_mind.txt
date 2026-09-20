@@ -1,0 +1,13 @@
+skip  mind nrms_pop seed 13 (report exists)
+skip  mind nrms seed 14 (report exists)
+skip  mind nrms_pop seed 14 (report exists)
+skip  mind nrms seed 15 (report exists)
+skip  mind nrms_pop seed 15 (report exists)
+skip  mind nrms_pop_sum seed 13 (report exists)
+start mind nrms_pop_sum seed 14  08:58
+  test (73,152 impressions, best epoch 3, scored in 12s)
+    auc      0.6190  [0.6170, 0.6211]
+start mind nrms_pop_sum seed 15  09:11
+  test (73,152 impressions, best epoch 3, scored in 13s)
+    auc      0.6314  [0.6294, 0.6334]
+queue done 09:24

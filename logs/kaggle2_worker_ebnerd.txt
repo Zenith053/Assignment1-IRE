@@ -1,0 +1,9 @@
+skip  ebnerd nrms_popfresh seed 13 (report exists)
+skip  ebnerd nrms seed 14 (report exists)
+skip  ebnerd nrms_popfresh seed 14 (report exists)
+skip  ebnerd nrms seed 15 (report exists)
+skip  ebnerd nrms_popfresh seed 15 (report exists)
+skip  ebnerd nrms_pop seed 13 (report exists)
+skip  ebnerd nrms_fresh seed 13 (report exists)
+skip  ebnerd nrms_popfresh_sum seed 13 (report exists)
+queue done 08:58

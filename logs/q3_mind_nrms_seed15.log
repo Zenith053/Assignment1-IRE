@@ -1,0 +1,46 @@
+[mind] nrms_seed15 on cuda
+  data ready in 9.4s: train=95,071 impressions, val=20,000 impressions, test=73,152 impressions; vocab 20,156 x 768
+  parameters: 17,042,208 (15,479,808 word embeddings + 1,562,400 attention)
+
+  epoch 1: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.4550  20 batches/s
+    step   1000/4424  loss 1.4333  20 batches/s
+    step   1500/4424  loss 1.4190  20 batches/s
+    step   2000/4424  loss 1.4118  19 batches/s
+    step   2500/4424  loss 1.4070  19 batches/s
+    step   3000/4424  loss 1.4020  19 batches/s
+    step   3500/4424  loss 1.3965  19 batches/s
+    step   4000/4424  loss 1.3912  19 batches/s
+    step   4424/4424  loss 1.3861  19 batches/s
+  epoch 1: train loss 1.3861  val AUC 0.5930  (best so far)  [237s]
+
+  epoch 2: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.3220  18 batches/s
+    step   1000/4424  loss 1.3178  18 batches/s
+    step   1500/4424  loss 1.3206  18 batches/s
+    step   2000/4424  loss 1.3173  18 batches/s
+    step   2500/4424  loss 1.3177  18 batches/s
+    step   3000/4424  loss 1.3160  18 batches/s
+    step   3500/4424  loss 1.3147  18 batches/s
+    step   4000/4424  loss 1.3127  18 batches/s
+    step   4424/4424  loss 1.3106  18 batches/s
+  epoch 2: train loss 1.3106  val AUC 0.6184  (best so far)  [245s]
+
+  epoch 3: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.2802  18 batches/s
+    step   1000/4424  loss 1.2750  18 batches/s
+    step   1500/4424  loss 1.2727  18 batches/s
+    step   2000/4424  loss 1.2742  18 batches/s
+    step   2500/4424  loss 1.2724  18 batches/s
+    step   3000/4424  loss 1.2741  18 batches/s
+    step   3500/4424  loss 1.2736  18 batches/s
+    step   4000/4424  loss 1.2730  18 batches/s
+    step   4424/4424  loss 1.2740  18 batches/s
+  epoch 3: train loss 1.2740  val AUC 0.6293  (best so far)  [245s]
+
+  test (73,152 impressions, best epoch 3, scored in 12s)
+    auc      0.6261  [0.6242, 0.6280]
+    mrr      0.3004  [0.2982, 0.3026]
+    ndcg@5   0.3248  [0.3222, 0.3274]
+    ndcg@10  0.3868  [0.3843, 0.3892]
+  -> /kaggle/working/ire-team/reports/q3/mind_nrms_seed15.json

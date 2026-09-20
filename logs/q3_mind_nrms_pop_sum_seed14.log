@@ -1,0 +1,47 @@
+[mind] nrms_pop_sum_seed14 on cuda
+  candidate signals: ['log1p_clicks_1h', 'log1p_clicks_24h', 'log1p_clicks_168h']
+  data ready in 21.3s: train=95,071 impressions, val=20,000 impressions, test=73,152 impressions; vocab 20,156 x 768
+  parameters: 17,042,529 (15,479,808 word embeddings + 1,562,721 attention)
+
+  epoch 1: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.5271  21 batches/s
+    step   1000/4424  loss 1.4691  21 batches/s
+    step   1500/4424  loss 1.4444  21 batches/s
+    step   2000/4424  loss 1.4303  21 batches/s
+    step   2500/4424  loss 1.4206  20 batches/s
+    step   3000/4424  loss 1.4120  20 batches/s
+    step   3500/4424  loss 1.4055  20 batches/s
+    step   4000/4424  loss 1.3993  20 batches/s
+    step   4424/4424  loss 1.3931  20 batches/s
+  epoch 1: train loss 1.3931  val AUC 0.6026  (best so far)  [225s]
+
+  epoch 2: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.3314  19 batches/s
+    step   1000/4424  loss 1.3271  19 batches/s
+    step   1500/4424  loss 1.3203  19 batches/s
+    step   2000/4424  loss 1.3172  19 batches/s
+    step   2500/4424  loss 1.3142  19 batches/s
+    step   3000/4424  loss 1.3100  19 batches/s
+    step   3500/4424  loss 1.3091  19 batches/s
+    step   4000/4424  loss 1.3069  19 batches/s
+    step   4424/4424  loss 1.3047  19 batches/s
+  epoch 2: train loss 1.3047  val AUC 0.6276  (best so far)  [233s]
+
+  epoch 3: 141,558 training rows (0 clicks skipped: no non-click to contrast)
+    step    500/4424  loss 1.2689  19 batches/s
+    step   1000/4424  loss 1.2674  19 batches/s
+    step   1500/4424  loss 1.2685  19 batches/s
+    step   2000/4424  loss 1.2691  19 batches/s
+    step   2500/4424  loss 1.2697  19 batches/s
+    step   3000/4424  loss 1.2689  19 batches/s
+    step   3500/4424  loss 1.2687  19 batches/s
+    step   4000/4424  loss 1.2677  19 batches/s
+    step   4424/4424  loss 1.2663  19 batches/s
+  epoch 3: train loss 1.2663  val AUC 0.6313  (best so far)  [234s]
+
+  test (73,152 impressions, best epoch 3, scored in 12s)
+    auc      0.6190  [0.6170, 0.6211]
+    mrr      0.2925  [0.2903, 0.2946]
+    ndcg@5   0.3172  [0.3147, 0.3197]
+    ndcg@10  0.3792  [0.3770, 0.3815]
+  -> /kaggle/working/ire-team/reports/q3/mind_nrms_pop_sum_seed14.json
