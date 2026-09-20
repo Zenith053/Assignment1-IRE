@@ -23,3 +23,9 @@ logs/
 
 # macOS Finder metadata
 .DS_Store
+
+# LaTeX build byproducts (the .tex and .pdf are committed).
+reports/design_note/*.log
+reports/design_note/*.aux
+reports/design_note/*.out
+reports/design_note/*.toc

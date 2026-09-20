@@ -106,6 +106,9 @@ def main(argv: list[str] | None = None) -> int:
                             "its feature frame is retrieve_k rows per impression")
     parser.add_argument("--diagnose-single-feature", action="store_true",
                        help="sanity-check GBDT plumbing with a semantic-only / bm25-only model")
+    parser.add_argument("--leaky", action="store_true",
+                       help="Q9: also train a GBDT with the dataset's serving-time-unavailable article "
+                            "columns added, and report both arms")
     parser.add_argument("--skip-retrieval", action="store_true",
                        help="skip Universe B (Q2.1's retrieve-then-rank); Universe A only")
     parser.add_argument("--out", type=Path, default=None)
@@ -145,6 +148,31 @@ def main(argv: list[str] | None = None) -> int:
     )
     print(f"  best val AUC during training: {best_val_auc:.4f}")
 
+    # ---------------- Q9: the same GBDT with serving-time-unavailable features ----------------
+    leaky = None
+    if args.leaky:
+        leaky_cols = [c for c in cfg.serving_time_unavailable if c in ("total_inviews", "total_pageviews", "total_read_time")]
+        if not leaky_cols:
+            print("\n[Q9] no article-level serving-time-unavailable columns declared; skipping")
+        else:
+            import pyarrow.parquet as pq
+            raw = pq.read_table(cfg.raw["articles"], columns=["article_id"] + leaky_cols).to_pandas()
+            lookup = {str(a): row for a, row in zip(raw["article_id"], raw[leaky_cols].to_numpy(dtype=np.float64))}
+            zero = np.zeros(len(leaky_cols))
+
+            def leaky_frame(split_name):
+                cand = frames[split_name]["cand"]
+                extra = np.stack([lookup.get(str(a), zero) for a in cand.flat_ids])
+                return np.hstack([frames[split_name]["X"], np.log1p(np.maximum(extra, 0.0))])
+
+            print(f"\n[Q9] training GBDT with {leaky_cols} added (log1p): these are lifetime totals, "
+                 f"known only after the fact")
+            Xl = {s: leaky_frame(s) for s in ("train", "val", "test")}
+            booster_leaky = gbdt.train(Xl["train"], frames["train"]["y"], frames["train"]["group"],
+                                       Xl["val"], frames["val"]["y"], frames["val"]["group"],
+                                       feature_names=frames["train"]["names"] + [f"leaky_{c}" for c in leaky_cols])
+            leaky = {"columns": leaky_cols, "X_test": Xl["test"], "booster": booster_leaky}
+
     test = frames["test"]
     test_cand: CandidateSet = test["cand"]
     labels_test = test_cand.labels_by_imp
@@ -160,6 +188,8 @@ def main(argv: list[str] | None = None) -> int:
         "gbdt": gbdt.predict_per_impression(booster, test["X"], test_cand.offsets),
         "mlp": mlp.predict_per_impression(model, scaler, test["X"], test_cand.offsets),
     }
+    if leaky is not None:
+        scorers_test["gbdt_leaky"] = gbdt.predict_per_impression(leaky["booster"], leaky["X_test"], test_cand.offsets)
 
     print("\n[Universe A] test-split metrics (before vs after re-ranking)")
     per_scorer_metrics = {}
@@ -212,6 +242,28 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {after_name:<5} {metric:<8} delta={res['mean_diff']:+.4f} "
                  f"[{res['ci_low']:+.4f}, {res['ci_high']:+.4f}]  n={res['n_paired']}  {flag}")
 
+    q9_out = None
+    if leaky is not None:
+        honest = per_scorer_metrics["gbdt"]
+        cheat = per_scorer_metrics["gbdt_leaky"]
+        raw_h = per_impression_metrics(labels_test, scorers_test["gbdt"])
+        raw_l = per_impression_metrics(labels_test, scorers_test["gbdt_leaky"])
+        paired_leaky = {m: M.paired_bootstrap_ci(raw_l[m], raw_h[m], n_boot=10_000) for m in raw_l}
+        print(f"\n[Q9] with vs without serving-time-unavailable features ({', '.join(leaky['columns'])})")
+        for m in ("auc", "mrr", "ndcg@5", "ndcg@10"):
+            r = paired_leaky[m]
+            print(f"  {m:<8} honest {honest[m]['value']:.4f}  leaky {cheat[m]['value']:.4f}  "
+                 f"inflation {r['mean_diff']:+.4f} [{r['ci_low']:+.4f}, {r['ci_high']:+.4f}]"
+                 f"{'  SIGNIFICANT' if r['excludes_zero'] else ''}")
+        q9_out = {
+            "columns": leaky["columns"],
+            "honest": {m: honest[m] for m in ("auc", "mrr", "ndcg@5", "ndcg@10")},
+            "leaky": {m: cheat[m] for m in ("auc", "mrr", "ndcg@5", "ndcg@10")},
+            "inflation_paired_ci": paired_leaky,
+            "top_leaky_importances": [{"feature": n, "gain": float(g)}
+                                      for n, g in gbdt.feature_importance(leaky["booster"])[:5]],
+        }
+
     importances = gbdt.feature_importance(booster)
     print("\n[Universe A] top-10 GBDT feature importances (gain, normalised)")
     for name, imp_val in importances[:10]:
@@ -226,6 +278,8 @@ def main(argv: list[str] | None = None) -> int:
         "gbdt_feature_importance": [{"feature": n, "gain": float(g)} for n, g in importances],
         "mlp_best_val_auc": best_val_auc,
     }
+    if q9_out is not None:
+        result["q9_serving_time_ablation"] = q9_out
 
     # ---------------- Universe B: retrieve top-K, then re-rank ----------------
     if not args.skip_retrieval:

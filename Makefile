@@ -1,7 +1,7 @@
 PY := .venv/bin/python
 CONFIGS := config/mind.yaml config/ebnerd.yaml
 
-.PHONY: all data download clean split features retrieval eval submission sweep test ebnerd-testset q3 q3-train q3-tables q4 q4-check q4-memory q4-latency q4-cost q4-scale q4-report
+.PHONY: all data download clean split features retrieval eval submission sweep test ebnerd-testset q3 q3-train q3-tables q4 q4-check q4-memory q4-latency q4-cost q4-scale q4-report q1 q2 q5 q6
 
 # One-command rebuild from raw files (Q1.5).
 all: data retrieval eval submission
@@ -39,6 +39,29 @@ sweep:
 	  $(PY) tools/sweep_pooling_k.py --config $$cfg \
 	    --out reports/sweep_pooling_k_$${ds}_val.json || exit 1; \
 	done
+
+# Q1: behavioural features live in the feature store + feature builders; this target
+# rebuilds the store and runs the boundary (no-future-click) and feature unit tests.
+q1: features
+	.venv/bin/pytest tests/test_no_leakage.py tests/test_rerank_features.py -q
+
+# Q2: GBDT/MLP re-rankers, both universes; EB-NeRD also runs Q9's with/without
+# serving-time-unavailable arm (MIND declares no such columns). ~5 min total.
+q2:
+	$(PY) src/rerank/evaluate_reranker.py --config config/mind.yaml --sample 10000 --retrieve-sample 3000
+	$(PY) src/rerank/evaluate_reranker.py --config config/ebnerd.yaml --sample 10000 --retrieve-sample 3000 --leaky
+
+# Q5: extended evaluation of the two-stage pipeline (all metrics, slices, CIs),
+# plus the A1 single-stage harness both datasets report against.
+q5:
+	@for cfg in $(CONFIGS); do $(PY) src/eval/evaluate_twostage.py --config $$cfg --sample 3500 || exit 1; done
+	$(PY) src/eval/harness.py --config config/ebnerd.yaml --split test --out reports/a2/eval_ebnerd_small_test.json
+
+# Q6: the design note (LaTeX + figures + PDF) from the stored results.
+q6:
+	$(PY) src/submission/codabench_analysis.py
+	$(PY) src/baseline/freshness_curve.py
+	$(PY) src/report/build_design_note.py
 
 # Q3: NRMS baseline, popularity/freshness-aware NRMS, ablation (A2).
 # q3-train is ~11 h on an M4 (resumable; skips finished runs); q3-tables ~3 min.

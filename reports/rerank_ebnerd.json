@@ -157,6 +157,36 @@
         "n": 10000,
         "n_undefined": 0
       }
+    },
+    "gbdt_leaky": {
+      "auc": {
+        "value": 0.760453710191527,
+        "ci_low": 0.7555601129844156,
+        "ci_high": 0.7657115905822045,
+        "n": 10000,
+        "n_undefined": 0
+      },
+      "mrr": {
+        "value": 0.531507026626418,
+        "ci_low": 0.5245742143952903,
+        "ci_high": 0.5389798132758806,
+        "n": 10000,
+        "n_undefined": 0
+      },
+      "ndcg@5": {
+        "value": 0.5953612372949559,
+        "ci_low": 0.5887825636935001,
+        "ci_high": 0.6024282437689067,
+        "n": 10000,
+        "n_undefined": 0
+      },
+      "ndcg@10": {
+        "value": 0.6288404069585958,
+        "ci_low": 0.6230556522567526,
+        "ci_high": 0.6349772519386965,
+        "n": 10000,
+        "n_undefined": 0
+      }
     }
   },
   "paired_vs_before": {
@@ -344,6 +374,125 @@
     }
   ],
   "mlp_best_val_auc": 0.6000823660316383,
+  "q9_serving_time_ablation": {
+    "columns": [
+      "total_inviews",
+      "total_pageviews",
+      "total_read_time"
+    ],
+    "honest": {
+      "auc": {
+        "value": 0.7499384850874263,
+        "ci_low": 0.7445596976560259,
+        "ci_high": 0.7550865501914815,
+        "n": 10000,
+        "n_undefined": 0
+      },
+      "mrr": {
+        "value": 0.5226077075198973,
+        "ci_low": 0.5162464571089913,
+        "ci_high": 0.529564493074806,
+        "n": 10000,
+        "n_undefined": 0
+      },
+      "ndcg@5": {
+        "value": 0.5831101991068057,
+        "ci_low": 0.5769126296257306,
+        "ci_high": 0.5900097745141033,
+        "n": 10000,
+        "n_undefined": 0
+      },
+      "ndcg@10": {
+        "value": 0.6208186868153245,
+        "ci_low": 0.6155671988168713,
+        "ci_high": 0.6265826276699612,
+        "n": 10000,
+        "n_undefined": 0
+      }
+    },
+    "leaky": {
+      "auc": {
+        "value": 0.760453710191527,
+        "ci_low": 0.7555601129844156,
+        "ci_high": 0.7657115905822045,
+        "n": 10000,
+        "n_undefined": 0
+      },
+      "mrr": {
+        "value": 0.531507026626418,
+        "ci_low": 0.5245742143952903,
+        "ci_high": 0.5389798132758806,
+        "n": 10000,
+        "n_undefined": 0
+      },
+      "ndcg@5": {
+        "value": 0.5953612372949559,
+        "ci_low": 0.5887825636935001,
+        "ci_high": 0.6024282437689067,
+        "n": 10000,
+        "n_undefined": 0
+      },
+      "ndcg@10": {
+        "value": 0.6288404069585958,
+        "ci_low": 0.6230556522567526,
+        "ci_high": 0.6349772519386965,
+        "n": 10000,
+        "n_undefined": 0
+      }
+    },
+    "inflation_paired_ci": {
+      "auc": {
+        "mean_diff": 0.010515225104100665,
+        "ci_low": 0.007377231016145779,
+        "ci_high": 0.013646284839271845,
+        "n_paired": 10000,
+        "excludes_zero": true
+      },
+      "mrr": {
+        "mean_diff": 0.008899319106520741,
+        "ci_low": 0.003822555669682998,
+        "ci_high": 0.014101215838766324,
+        "n_paired": 10000,
+        "excludes_zero": true
+      },
+      "ndcg@5": {
+        "mean_diff": 0.012251038188150282,
+        "ci_low": 0.007682374803922643,
+        "ci_high": 0.01694567898859404,
+        "n_paired": 10000,
+        "excludes_zero": true
+      },
+      "ndcg@10": {
+        "mean_diff": 0.008021720143271216,
+        "ci_low": 0.003982608593380138,
+        "ci_high": 0.012055318907893109,
+        "n_paired": 10000,
+        "excludes_zero": true
+      }
+    },
+    "top_leaky_importances": [
+      {
+        "feature": "rolling_clicks_24h",
+        "gain": 0.2176100096276433
+      },
+      {
+        "feature": "freshness_hours",
+        "gain": 0.12878987136445785
+      },
+      {
+        "feature": "rolling_clicks_168h",
+        "gain": 0.07874923549416306
+      },
+      {
+        "feature": "hour_of_day",
+        "gain": 0.07589598258081447
+      },
+      {
+        "feature": "category_match_rate",
+        "gain": 0.05770237084845437
+      }
+    ]
+  },
   "universe_b": {
     "retrieve_k": 200,
     "n_impressions": 3000,
