@@ -1,0 +1,93 @@
+{
+  "popularity_collapse_ebnerd": {
+    "model": "nrms_popfresh seed 13",
+    "test_impressions": 244647,
+    "real_clicks_up_to_impression": {
+      "auc": 0.7245653690437116,
+      "candidates_with_24h_clicks_pct": 94.82540111753663
+    },
+    "clicks_before_test_period_only": {
+      "auc": 0.4810058501811849,
+      "candidates_with_24h_clicks_pct": 3.28388202975682
+    },
+    "no_clicks": {
+      "auc": 0.48537378711772106,
+      "candidates_with_24h_clicks_pct": 0.0
+    }
+  },
+  "click_free_blends": {
+    "mind": {
+      "nrms": 0.6231516479210992,
+      "a1_semantic": 0.6422760528120729,
+      "rank_avg_0.3nrms_0.7semantic": 0.6547232976881541,
+      "rank_avg_0.5nrms_0.5semantic": 0.6530520916893657,
+      "rank_avg_0.7nrms_0.3semantic": 0.6410892036438327
+    },
+    "ebnerd": {
+      "nrms_fresh": 0.6458890252288495,
+      "exposure_24h": 0.636247887684028,
+      "rank_avg_0.3fresh_0.7exposure": 0.6533799411912902,
+      "rank_avg_0.5fresh_0.5exposure": 0.6608793205787893,
+      "rank_avg_0.7fresh_0.3exposure": 0.6559255438330975
+    }
+  },
+  "note": "blend weights read off the test split: exploratory upper bounds, not submitted",
+  "submissions": {
+    "submission_ebnerd_testset_nrms_fresh": {
+      "checkpoint": "data/feature_store/ebnerd/q3_runs/nrms_fresh_submit_seed13.pt",
+      "run": "nrms_fresh_submit_seed13",
+      "variant": {
+        "popularity": false,
+        "freshness": true,
+        "gate": "learned",
+        "signals": [
+          "log1p_age_hours"
+        ],
+        "popularity_windows_hours": null
+      },
+      "articles": 125541,
+      "tokens_trained": 12134,
+      "tokens_new": 7771,
+      "titles_with_new_tokens_pct": 15.84,
+      "name": "ebnerd_testset_nrms_fresh",
+      "dataset": "ebnerd",
+      "source": "data/raw/ebnerd/ebnerd_testset/ebnerd_testset",
+      "split": "test",
+      "impressions": 13536710,
+      "candidates": 205925868,
+      "candidates_unknown_article": 0,
+      "impressions_without_history": 0,
+      "device": "mps",
+      "minutes": 15.1,
+      "txt_mb": 703.1,
+      "zip_mb": 221.4,
+      "zip_contents": [
+        "predictions.txt"
+      ]
+    },
+    "submission_mind_large_test_nrms": {
+      "checkpoint": "data/feature_store/mind/q3_runs/nrms_seed13.pt",
+      "run": "nrms_seed13",
+      "variant": {},
+      "articles": 120961,
+      "tokens_trained": 20155,
+      "tokens_new": 2449,
+      "titles_with_new_tokens_pct": 2.89,
+      "name": "mind_large_test_nrms",
+      "dataset": "mind",
+      "source": "data/raw/mind/MINDlarge_test",
+      "split": "test",
+      "impressions": 2370727,
+      "candidates": 93115001,
+      "candidates_unknown_article": 0,
+      "impressions_without_history": 29108,
+      "device": "mps",
+      "minutes": 19.0,
+      "txt_mb": 291.3,
+      "zip_mb": 107.3,
+      "zip_contents": [
+        "prediction.txt"
+      ]
+    }
+  }
+}

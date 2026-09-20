@@ -1,0 +1,53 @@
+{
+  "test_impressions": 244647,
+  "candidates": 2928942,
+  "bins": [
+    {
+      "age": "<30m",
+      "share_of_candidates": 0.06899658648071556,
+      "click_rate": 0.07092489868225071
+    },
+    {
+      "age": "30m-1h",
+      "share_of_candidates": 0.08423860902674071,
+      "click_rate": 0.0862400194544644
+    },
+    {
+      "age": "1-2h",
+      "share_of_candidates": 0.1460558112792947,
+      "click_rate": 0.1093576506174773
+    },
+    {
+      "age": "2-4h",
+      "share_of_candidates": 0.16881556548405532,
+      "click_rate": 0.12022829360239942
+    },
+    {
+      "age": "4-8h",
+      "share_of_candidates": 0.12279860782494156,
+      "click_rate": 0.11349014374287542
+    },
+    {
+      "age": "8-24h",
+      "share_of_candidates": 0.14127865966618663,
+      "click_rate": 0.10418635224518302
+    },
+    {
+      "age": "1-3d",
+      "share_of_candidates": 0.07453476374745556,
+      "click_rate": 0.04470747750884072
+    },
+    {
+      "age": "3-30d",
+      "share_of_candidates": 0.060292761003802736,
+      "click_rate": 0.029038359174150877
+    },
+    {
+      "age": ">30d",
+      "share_of_candidates": 0.13298863548680717,
+      "click_rate": 0.012741453496133663
+    }
+  ],
+  "auc_newer_is_better": 0.5009402286044792,
+  "auc_closest_to_4h": 0.6628681103416669
+}
