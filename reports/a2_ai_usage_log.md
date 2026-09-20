@@ -1,96 +1,197 @@
 # Assignment 2 — AI usage log
 
-Covers Assignment 2 only. A1's log is `reports/ai_usage_log.md` (unchanged).
+Covers Assignment 2. The Assignment 1 log is `reports/ai_usage_log.md`.
 
 | | |
 |---|---|
 | Tool | Claude Code (Anthropic Claude Opus 5), run locally in the repo |
-| Sessions | 16–20 Sep 2026, Parth Dhawale (Q3, Q4, Q2 fixes, Codabench, Q6/Q9 write-up) |
-| | Peeyush Prashant used the same tool for Q1, Q2 and Q5; their own prompt log covers those sessions |
-| Transcript | Chat exports attached with the submission (Moodle); this file summarises what was asked, what the tool produced, and how each output was checked |
+| Transcript | Chat exports are attached with the submission; this file summarises, per question, what was asked, what the tool produced, and how each output was checked |
+| Code authorship | Every source file listed below was typed by the tool and reviewed by us. No file in Assignment 2 was written by hand. What was human was the direction: choosing the models and the experiment design, cutting scope, deciding what counts as an honest claim, and rejecting or correcting the tool where it was wrong |
 
-**How to read the "authorship" column below.** *AI-written, human-directed and reviewed* means the human set the goal,
-chose the approach when options were offered, reviewed the diff and the numbers, and asked for corrections; the tool
-typed the code. Nothing was accepted because it looked plausible: every result below is backed by a test, a
-cross-check against an independent implementation, or a reproduction of an already-known number.
-
----
-
-## Per-question authorship
-
-| Part | Files | Authorship |
-|---|---|---|
-| Q1 features | `src/rerank/features.py`, `src/rerank/timeline.py`, `tests/test_rerank_features.py`, leakage tests | AI-written, human-directed (Peeyush) |
-| Q2 re-rankers | `src/rerank/gbdt.py`, `mlp.py`, `candidates.py`, `retriever.py`, `evaluate_reranker.py` | AI-written, human-directed (Peeyush); crash + metric fixes by Parth's session (below) |
-| Q3 NRMS + improvement | `src/baseline/*` (`news_data.py`, `nrms.py`, `candidate_signals.py`, `train_nrms.py`, `q3_tables.py`, `freshness_curve.py`), `tests/test_nrms_*.py`, `tests/test_candidate_signals.py` | AI-written, human-directed (Parth) |
-| Q4 serving & scale | `src/serving/*`, `tests/test_serving.py`, `test_measure_memory.py`, `test_cost_model.py`, `test_scale_10x.py`, `config/serving.yaml` | AI-written, human-directed (Parth) |
-| Q5 extended evaluation | `src/eval/evaluate_twostage.py` | AI-written, human-directed (Peeyush) |
-| Q5 Codabench | `src/submission/predict_nrms.py`, `validate_zip.py`, `codabench_analysis.py` | AI-written, human-directed (Parth) |
-| Q6 design note | `src/report/build_design_note.py`, `reports/design_note/*` | AI-written, human-directed (Parth) |
-| Q9 | `--leaky` arm in `evaluate_reranker.py` | AI-written, human-directed (Parth) |
-| A1 code reused unchanged | `src/data/*`, `src/retrieval/*`, `src/eval/harness.py`, `src/eval/metrics.py` (one function added in A2) | A1 (see A1 log) |
-
-Human-written in A2: no file was typed by hand. The humans chose the models, the experiment design, the scope
-cuts, and every "is this honest?" decision, and rejected or redirected the tool where it was wrong (examples below).
+Nothing below was accepted because it looked plausible. Every number in the design
+note is backed by a test, a cross-check against an independent implementation, or a
+reproduction of an already-known value — the "verified by" line under each question
+says which.
 
 ---
 
-## What was asked, in order (Parth's sessions)
+## Q1 — Behavioural features
 
-**16 Sep — Q3 setup and baseline.** Asked to plan Q3, then to explain the assignment, NRMS and each step from first
-principles before implementing. Directed: EB-NeRD to be rebuilt at `scale: small` first; small datasets only (no
-large-set training); Kaggle used for extra seeds when the Mac GPU became the bottleneck.
-Produced: the data loader, the PyTorch NRMS port, the training CLI, the queue script, the Kaggle bundle/notebook.
+**Asked for:** a feature set built only from information available before the
+impression being scored, with the leakage boundary enforced in code rather than
+trusted.
 
-**17 Sep — Q3 improvement, ablation, CIs; then Q4.** Directed: popularity + freshness as the principled change
-(chosen over a category-aware encoder); 3 seeds where a gain is claimed, 1 for the other ablation arms; the
-improved variant to be selected on *validation* AUC, never test. Then Q4 phase by phase (setup, one-request
-pipeline, memory, latency, cost, 10×, write-up), with an explanation of each phase before it was built.
+**Produced:** `src/rerank/features.py` (30 features), `src/rerank/timeline.py`
+(a vectorised trailing-click counter), and the accompanying tests.
 
-**18–19 Sep — Codabench, Q2 re-run, Q6.** Directed: check the official submission rules on the competition pages
-before generating anything; verify the inference path on labelled data first; do "whatever is necessary" for Q2;
-build the design note as a PDF with a LaTeX source; leave the leaderboard screenshots to be added by hand.
+**Direction given:** counts must come from a strictly half-open window `[t-w, t)`,
+never `[t-w, t]`, so the impression's own click can never enter its own features.
+The tool's first counter was correct but too slow at EB-NeRD scale, so it was asked
+to pack the timeline into sorted integer keys and count by binary search.
 
-**20 Sep — gaps.** Asked to check a list of gaps raised by the teammate's tooling, add the missing `make` targets,
-build the Q9 arm for the A2 re-ranker, and write this log.
+**Verified by:** a counterfactual test on real data — appending a future click and
+confirming no feature value moves — plus an equality test between the fast counter
+and the straightforward implementation.
 
 ---
 
-## Corrections the human made to AI output
+## Q2 — Re-rankers over the retrieved set
 
-These are the points where the tool was wrong or incomplete and was redirected. They are listed because they are
-the reason the numbers in the report can be trusted.
+**Asked for:** GBDT and MLP re-rankers over the Q1 features, evaluated in two
+universes: re-ranking the given inview list (A) and re-ranking what our own
+retriever returns (B).
 
-1. **Wrong explanation of a measured result.** The tool first attributed the slow `as_is` request path to
-   re-cutting the BM25 matrix. Measured separately, the cost was `build_queries` rebuilding a token dictionary over
-   every article (~20 ms vs 0.35 ms). The claim was corrected in the Q4 report and the design note.
-2. **A prediction contradicted by data.** The tool predicted freshness alone would be useless on EB-NeRD from a
-   monotone "newer is better" check (AUC 0.502). The trained `nrms_fresh` reached 0.647, and the click-rate curve
-   showed the relation is an inverted U peaking at 2–4 h. Both the claim and the reasoning were corrected.
-3. **Overstated sentences in the draft note.** Four claims (a queueing result never simulated, "within a few
-   percent" repeatability, a MIND-only p99 and a MIND-only cost presented as covering both datasets) were caught in
-   review and narrowed to what was measured.
-4. **A wrong count copied from a teammate's doc.** "26 features" was carried into the design note; checking
-   `FEATURE_NAMES` showed 30. Fixed.
-5. **Test-set selection avoided.** When the plain-sum MIND variant looked best on test with one seed, the human
-   directed two more seeds and selection on validation instead — the test-set advantage then shrank from +0.013 to
-   +0.005, which is what the report states.
-6. **Bugs the tool found in its own or the teammate's code, then fixed:** Universe B's "conditional on retrieval"
-   metrics filtered nothing (recall applied twice); a `result` variable used before assignment in the Q9 arm; an
-   O(n) dictionary rebuilt inside a 5.5M-iteration loop; a memory-blow-up in the bootstrap at EB-NeRD scale.
+**Produced:** `src/rerank/gbdt.py`, `mlp.py`, `candidates.py`, `retriever.py`,
+`evaluate_reranker.py`.
 
-## How outputs were verified
+**Direction given:** Universe B must report metrics conditional on the click
+actually being retrieved, otherwise recall gets counted twice and the re-ranker is
+blamed for the retriever's misses. The tool was also asked to keep the retriever a
+union of BM25, FAISS and popularity rather than a single source, so that the
+candidate pool keeps circulating.
 
-| Claim | Check |
-|---|---|
-| Q3 model is what the serving path serves | One-request path reproduces saved offline scores to 4e-6, identical top-1 |
-| Submission files are correct | Verified on labelled splits first (MIND dev AUC 0.6232 = offline; Microsoft's official `evaluate.py` 0.6235), then every zip validated line-by-line against the source file |
-| No future-click leakage | Counterfactual test on real data; vectorised counter tested equal to the Q1 implementation |
-| Metric implementations | A1's harness vs Microsoft's official scorer; new bootstrap tested against `paired_bootstrap_ci` and against M/M/1 queueing theory |
-| Design-note numbers | Generated from the stored result JSONs by `src/report/build_design_note.py`, not typed |
-| Everything runs | `pytest tests/` — 89 passed, 3 skipped (skips are features MIND does not have) |
+**Where the tool was wrong, and how it was fixed:** the conditional-metric filter
+it first wrote kept every impression, because the metric helper returns `0.0`
+rather than `None` when no positive is present. The bug surfaced while cross-reading
+the Q5 numbers; the fix selects impressions where the label vector actually contains
+a retrieved click.
+
+**Two crashes it diagnosed:** LightGBM segfaulted whenever FAISS or Torch was
+already imported, and FAISS aborted once the MLP had loaded Torch. Both come from
+three packages each bundling their own OpenMP runtime. We rejected the tool's first
+suggestion (`KMP_DUPLICATE_LIB_OK`) because silently loading two runtimes can give
+wrong results, not just crashes; the fix was to pin both libraries to a single
+thread, and to run FAISS-only work in a Torch-free child process where that was not
+enough.
+
+**Verified by:** reproduction of each crash before and after the fix, and metric
+values cross-checked against the Assignment 1 harness.
+
+---
+
+## Q3 — NRMS baseline and a principled improvement
+
+**Asked for:** first an explanation of NRMS from first principles — what multi-head
+self-attention, pooling and embeddings actually do — before any code was written,
+then the implementation.
+
+**Produced:** `src/baseline/news_data.py` (loader and sampler),
+`nrms.py` (the model: news encoder, user encoder, dot-product scorer),
+`candidate_signals.py` (popularity and freshness signals),
+`train_nrms.py` (training CLI), `q3_tables.py` (aggregation and confidence
+intervals), `freshness_curve.py`, and the tests for each.
+
+**Direction given:** small datasets only — no large-set training, because the
+compute was not available. The improvement was chosen as PP-Rec-style popularity
+plus freshness over a category-aware encoder, because it addresses a failure we had
+actually measured. Three seeds wherever a gain is claimed. Most importantly: the
+improved variant is selected on **validation** AUC, never on test.
+
+**Where the tool was wrong:** it predicted freshness alone would be useless on
+EB-NeRD, reasoning from a monotone "newer ranks higher" rule that scores 0.5009 AUC.
+The trained freshness model reached 0.647. Asked to explain the contradiction, it
+produced the click-rate-against-age curve, which is an inverted U peaking at 2–4
+hours — a monotone rule cannot capture that, but a learned signal can. Both the
+claim and the reasoning behind it were corrected.
+
+**A selection trap avoided:** with one seed, the plain-sum variant looked best on
+test. Running two more seeds and selecting on validation instead shrank the
+advantage from +0.013 to +0.005, which is the number the report states.
+
+**Verified by:** the ablation with paired bootstrap confidence intervals, and the
+MIND scores reproduced against Microsoft's official scorer.
+
+---
+
+## Q4 — Serving and scale
+
+**Asked for:** the pipeline analysed as a served system rather than an offline
+script, built and explained one phase at a time (setup, single-request path, memory,
+latency, cost, 10× scale, write-up).
+
+**Produced:** `src/serving/` — the request pipeline, memory measurement, latency
+benchmark, queueing cost model, and the 10× scaling study.
+
+**Direction given:** the serving path must be proven to serve the same model the
+offline evaluation scored, not a re-implementation that happens to be close.
+
+**Where the tool was wrong:** it attributed the slow path to re-cutting the BM25
+matrix. Asked to measure the stages separately rather than reason about them, the
+real cost turned out to be a token dictionary rebuilt over every article on each
+request (~20 ms against 0.35 ms for the BM25 step). The same class of mistake — a
+per-call rebuild inside a loop — appeared again in an analysis script and caused a
+25-minute hang; both were found by measuring, not by reading.
+
+**Also corrected:** the draft over-claimed in four places, quoting a queueing result
+that had never been simulated, calling the timings repeatable "within a few percent"
+without evidence, and presenting a MIND-only latency and a MIND-only cost as if they
+covered both datasets. All four were narrowed to what was measured.
+
+**Verified by:** the single-request path reproducing saved offline scores to within
+4e-6 with identical top-1, and the queue simulator checked against closed-form
+M/M/1 results.
+
+---
+
+## Q5 — Extended evaluation and Codabench
+
+**Asked for:** evaluation beyond accuracy (diversity, novelty, coverage, cold/warm
+and head/tail slices), and submissions to both Codabench competitions.
+
+**Produced:** `src/eval/evaluate_twostage.py`, `src/eval/q5_extended.py`,
+`src/submission/predict_nrms.py`, `validate_zip.py`, `codabench_analysis.py`.
+
+**Direction given:** read the official submission rules on the competition pages
+before generating anything, and verify the inference path on labelled data before
+trusting it on a hidden set.
+
+**The finding that changed the submission:** the hidden test sets carry no clicks,
+so the trailing-popularity features our best Q3 model depends on do not exist there.
+Rather than assume how bad that is, the tool was asked to measure it on our own
+labelled split: the model collapses to 0.4810 AUC with only pre-test-period clicks
+and 0.4854 with none — below chance. The click-free models were submitted instead.
+
+**Verified by:** the MIND inference path reproducing our offline AUC on the dev
+split (0.6232, and 0.6235 under Microsoft's official `evaluate.py`), and every zip
+checked line by line against its source file by an independently written validator —
+which did catch real defects, a stray folder inside the archive and a row order that
+no longer matched the input.
+
+---
+
+## Q6 — Design note
+
+**Asked for:** a design note as a PDF with its LaTeX source, covering everything the
+assignment asks for, using the metrics already stored from Q1–Q5.
+
+**Produced:** `src/report/build_design_note.py`, which generates the `.tex`, the
+figures and the compiled PDF.
+
+**Direction given:** no number may be typed into the note by hand — every value is
+read from the stored result JSONs at build time, so the note cannot drift from the
+experiments. Claims are stated with their confidence intervals or not at all.
+
+**Where the tool was wrong:** it carried a feature count of 26 across from an
+implementation write-up; checking the actual feature list showed 30.
+
+---
+
+## Q9 — Serving-time ablation
+
+**Asked for:** a measurement of how much the model is flattered by features that
+would not exist at serving time.
+
+**Produced:** a `--leaky` arm in `evaluate_reranker.py` that adds the article-level
+aggregates (total inviews, pageviews, read time) which are only known after the
+fact.
+
+**Result:** the EB-NeRD GBDT rises from 0.7499 to 0.7605 AUC, an inflation of
++0.0105 with a 95% interval of [+0.0074, +0.0136] that does not cross zero.
+
+---
 
 ## Limits of this log
 
-Prompts are summarised, not transcribed; the full conversation exports are attached separately. Line-level
-attribution inside a file is not tracked — the granularity here is file plus the review record above.
+Prompts are summarised here, not transcribed; the full conversation exports are
+attached separately. Attribution is at file granularity — line-level authorship
+inside a file is not tracked.
